@@ -19,7 +19,7 @@ export function handle_ws_open(ws: Bun.ServerWebSocket<WebSocketData>): boolean 
   if(!DEVLOG){
     if (ips.ip_connected(ws.data.address)) {
       const msg = {
-        t: 1,
+        t: 666,
         alert_text: `Address ${ws.data.address} already connected to server.\nNo duplication allowed at the moment.`,
       };
       ws.send(mm.obju8a(msg))
@@ -30,7 +30,7 @@ export function handle_ws_open(ws: Bun.ServerWebSocket<WebSocketData>): boolean 
 
   users.set(ws.data.uuid, { ws })
   ips.connect(ws.data.address)
-  ws.subscribe(ws.data.uuid) // personal messages
+  ws.subscribe(`${ws.data.uuid}`) // personal messages
   ws.subscribe("game") // for broadcast, common gameplay messages
   
   const msg = {

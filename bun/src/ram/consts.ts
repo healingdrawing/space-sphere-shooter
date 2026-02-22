@@ -1,4 +1,5 @@
 import type { WebSocketData } from ".."
+import { SSSGameRoom } from "../gameroom/sss/room"
 import { spip } from "../utils/safe"
 
 /** process.env.XXXX should work also, since bun says process available by default. But project focused on Bun. */
@@ -46,4 +47,6 @@ interface USER{
   ws:Bun.ServerWebSocket<WebSocketData>
 }
 /** map of the users. The unique key is uuid generated in time of websocket connection initiation/upgrade */
-export const users = new Map<string, USER>()
+export const users = new Map<number, USER>()
+
+export const gameroom = new SSSGameRoom()

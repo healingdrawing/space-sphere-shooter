@@ -1,7 +1,7 @@
 import type { WebSocketData } from ".."
 import { errlog, rawlog } from "../debug/debug"
 import { ips } from "../manage/ips"
-import { users, USERS_MAX_NUMBER } from "../ram/consts"
+import { gameroom, users, USERS_MAX_NUMBER } from "../ram/consts"
 
 export function http_response(body:string | null, _req:Request, status:number){
   const headers = {
@@ -35,7 +35,7 @@ export function handle_ws_request(req: Request, server: Bun.Server, address: str
     try {
       server.upgrade(req, {
         data: {
-          uuid: Bun.randomUUIDv7(),
+          uuid: gameroom.add_client(),
           address,
           hex: "", //originally empty. Allowed to set once. Attempt to set again - ban.
           key: 0,

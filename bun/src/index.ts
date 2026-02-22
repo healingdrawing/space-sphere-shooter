@@ -10,7 +10,7 @@ import { handle_ws_open } from "./manage/open"
 /** to manage properties using ws.data. */
 export interface WebSocketData {
   /** unique identifier for ws connection, created once. Do not modify it */
-  uuid: string
+  uuid: number
   address: string | undefined
   
   /** game identity color. Hex color #RRGGBB(lower/upper case) user once set before connect to server. */

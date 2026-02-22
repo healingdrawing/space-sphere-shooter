@@ -1,4 +1,5 @@
 import { store, ws_atom } from "../../atoms";
+import { use_key } from "../../handlers/utils";
 import { ram } from "../../ram";
 import { mm, MT } from "../../tunnel";
 import { init_ws } from "../../ws";
@@ -84,10 +85,15 @@ function create_home_box(){
         store.set(ws_atom, ws);
         console.log('ws.onopen fires');
 
-        tmdc_game_box.dev_gap()
-        
-        ws.send(mm.keyu8a(ram.key, mm.obju8a({t:999, h:color_box.color}))) //todo fix later
-        //warning this is initial message so ram.key is zero, so no need to reset to zero
+        tmdc_game_box.dev_gap(ws)
+
+        const key = use_key()
+        const dummy = {t:999, h:color_box.color}
+        // add message type
+        const with_mt = mm.keyu8a(MT.EXIT, mm.obju8a(dummy))
+        // add key. Now mt is second byte
+        ws.send(mm.keyu8a(key, with_mt)); //todo fix later
+        //warning this is initial message so ram.key is zero, so no need check ram.key
       };
     }
   }

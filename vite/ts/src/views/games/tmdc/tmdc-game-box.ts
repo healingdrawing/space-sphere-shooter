@@ -1,6 +1,6 @@
 import { store, ws_atom } from "../../../atoms"
 import { use_key } from "../../../handlers/utils";
-import { mm, MT } from "../../../tunnel"
+import { KEYMAP, mm, MT } from "../../../tunnel"
 import { add_ground } from "./add-ground";
 import { add_playable_items } from "./add-playable-items";
 import { home_box } from "../../home/home-box";
@@ -244,8 +244,22 @@ function create_tmdc_game_box() {
 
   return { view, initGameView, stopGameView, select_cell, unselect_cell, move_item_to, rip_cell, game_over, dev_gap };
 
+  function send_client_action(ws:WebSocket, action:number){
+    const key = use_key()
+      if(!key){
+        console.error("in some reasons there was no key at the request moment, so message was not sent. Reload browser window, to try connect again.")
+        return
+      }
+      console.log("clicked button. KeyCode:", action);//todo remove
+      const dummy = { t: 555, c:0 }
+      // add message type
+      const with_mt = mm.keyu8a(action, mm.obju8a(dummy))
+      // add key. Now mt is second byte
+      ws.send(mm.keyu8a(key, with_mt)); //todo fix later
+  }
+
   /** test keymap */
-  function dev_gap() {
+  function dev_gap(ws:WebSocket) {
     home_box.view.style.display = 'none';
      const gameView = view;
      gameView.style.display = 'block';
@@ -256,12 +270,16 @@ function create_tmdc_game_box() {
      const onKeyDown = (e: KeyboardEvent) => {
        if (pressed.has(e.code)) return;
        pressed.add(e.code);
-       console.log('DOWN', e.code);
+       const action = KEYMAP[e.code]
+       console.log('DOWN', e.code, 'KEYMAP[e.code]:', action);
+       send_client_action(ws, action)
      };
    
      const onKeyUp = (e: KeyboardEvent) => {
        pressed.delete(e.code);
-       console.log('UP', e.code);
+       const action = KEYMAP[e.code]
+       console.log('UP', e.code, 'KEYMAP[e.code]:', action);
+       send_client_action(ws, action)
      };
    
      const onPointerDown = (e: PointerEvent) => {

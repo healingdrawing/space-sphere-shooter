@@ -3,8 +3,13 @@ import { mm } from "./message"
 import { CCR } from './close'
 import { MT } from '../enums/mt'
 import type { WebSocketData } from ".."
-import { games_handler } from "./games"
 import { hex_handler } from "./hex"
+import {
+  handle_back_shot, handle_ccw_move, handle_cw_move, handle_down_move,
+  handle_down_shot, handle_exit, handle_front_move, handle_front_shot,
+  handle_left_move, handle_left_shot, handle_right_move, handle_right_shot,
+  handle_stop_move, handle_target_move, handle_top_move, handle_top_shot
+} from './game'
 
 /**
  * handle all incoming websocket messages
@@ -36,14 +41,75 @@ export function handle_ws_message(
   }
 
   ws.send(m) //todo remove . test keymap gap
-
-  // switch (mt) {
-  //   case MT.G: games_handler(ws, msg); break //todo implement for all MT enum values
-    
-  //   default:{
-  //     ws.close(CCR.BROKENTYPE.code, CCR.BROKENTYPE.reason)
-  //     if(DEVLOG) rawlog("wrong message type received", mt)
-  //   }
-  // }
+  
+  switch (mt) {
+    case MT.EXIT:
+      handle_exit(ws, msg);
+      break;
+  
+    case MT.FRONTSHOT:
+      handle_front_shot(ws, msg);
+      break;
+  
+    case MT.LEFTSHOT:
+      handle_left_shot(ws, msg);
+      break;
+  
+    case MT.RIGHTSHOT:
+      handle_right_shot(ws, msg);
+      break;
+  
+    case MT.BACKSHOT:
+      handle_back_shot(ws, msg);
+      break;
+  
+    case MT.TOPSHOT:
+      handle_top_shot(ws, msg);
+      break;
+  
+    case MT.DOWNSHOT:
+      handle_down_shot(ws, msg);
+      break;
+  
+    case MT.FRONTMOVE:
+      handle_front_move(ws, msg);
+      break;
+  
+    case MT.STOPMOVE:
+      handle_stop_move(ws, msg);
+      break;
+  
+    case MT.LEFTMOVE:
+      handle_left_move(ws, msg);
+      break;
+  
+    case MT.RIGHTMOVE:
+      handle_right_move(ws, msg);
+      break;
+  
+    case MT.TOPMOVE:
+      handle_top_move(ws, msg);
+      break;
+  
+    case MT.DOWNMOVE:
+      handle_down_move(ws, msg);
+      break;
+  
+    case MT.CWMOVE:
+      handle_cw_move(ws, msg);
+      break;
+  
+    case MT.CCWMOVE:
+      handle_ccw_move(ws, msg);
+      break;
+  
+    case MT.TARGETMOVE:
+      handle_target_move(ws, msg);
+      break;
+  
+    default:
+      ws.close(CCR.BROKENTYPE.code, CCR.BROKENTYPE.reason);
+      if (DEVLOG) rawlog("wrong message type received", mt);
+  }
 
 }

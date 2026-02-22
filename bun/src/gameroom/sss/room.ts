@@ -1,23 +1,20 @@
 import { DEVLOG, devlog, errlog, rawlog } from "../../debug/debug";
 import { mm } from "../../manage/message";
-import { destroy_game_room, gamerooms, send_delayed_messages, type GameRoom, type GameRoomResponseMessage } from "../base";
-import { TMDCheckersBoard } from "./gameboard/board";
+import { send_delayed_messages, type GameRoomResponseMessage, type GameRoom } from "../base";
+import { SSSBoard } from "./gameboard/board";
 import type { TMDC_BOARD_ACTION } from "./gameboard/types";
 import { GameRoomDelayedAction } from "./gameboard/enums";
 import { rip_cell_message, select_cell_message, click_cell_client_messages, exit_game_messages } from "./messages";
 
-export class TMDCheckersRoom implements GameRoom {
-  /** gameroom uuid generated in init process */
-  id: string;
-  /** versus mode of the game */
+export class SSSGameRoom implements GameRoom {
+  /** incrementable index as uuid of players. Just ++ every time. Ok for now */
+  private _idinc = 0
+  /** generate new uuid:number in game room and return */
+  new_uuid = () => ++this._idinc
   
-  /** todo player uuids of the game room. Used in room.destroy() iterator*/
-  players: Set<string> = new Set()
-
-  min_players = 2 // for this game, to exit game when ws.close() fires
-  
+  players: Set<number> = new Set()
   /** gameboard, where gameplay calculated using handle message */
-  board:TMDCheckersBoard
+  board:SSSBoard
 
   private no_damage_exit_timer: NodeJS.Timeout | null = null;
   private no_step_exit_timer: NodeJS.Timeout | null = null;
@@ -80,8 +77,7 @@ export class TMDCheckersRoom implements GameRoom {
         }
         case GameRoomDelayedAction.EXIT_GAME:{
           setTimeout(() => {
-            // const { role } = data //todo remove
-            destroy_game_room( this)
+            
           }, ms)
           break
         }
@@ -89,7 +85,7 @@ export class TMDCheckersRoom implements GameRoom {
     }
   }
 
-  handle_game_message(msg: Uint8Array , role: number): GameRoomResponseMessage[] {
+  handle_game_message(msg: Uint8Array , uuid: number): GameRoomResponseMessage[] {
     const result:GameRoomResponseMessage[] = []
     /** command:
      * > 0 - cell physical index(array index + 1) ,
@@ -108,7 +104,7 @@ export class TMDCheckersRoom implements GameRoom {
         return []
       }
       /** click on cell of the board, then inform client */
-      const cmd = b.click_cell(c,role)
+      const cmd = b.click_cell(c,0) //todo fix
       result.push(...click_cell_client_messages(cmd[0]))
       this.recursive_actions_executor(cmd[1])
       
@@ -119,7 +115,7 @@ export class TMDCheckersRoom implements GameRoom {
       if(b.has_scheduled_exit) return result
       b.has_scheduled_exit = true
 
-      const cmd = b.player_exit_game(role, this.players.size)
+      const cmd = b.player_exit_game(0, this.players.size)//todo fix
       rawlog("cmd: "+mm.logobj(cmd))
       result.push(...exit_game_messages(cmd[0]))
       this.recursive_actions_executor(cmd[1])
@@ -128,23 +124,17 @@ export class TMDCheckersRoom implements GameRoom {
     return result
   }
 
-  /** add player role,uuid pair, to resubscribe back to chat when game room destroyed */
-  add_client(uuid:string ){
+  /** return uuid */
+  add_client(){
     const p = this.players
+    const uuid = this.new_uuid()
     p.add(uuid)
-    return p.size
+    return uuid
   }
-  remove_client(uuid:string){
+  remove_client(uuid:number){
     const p = this.players
     p.delete(uuid)
     return p.size
-  }
-
-  destroy(): void {
-    //todo consider return false when delete fails, to emergency case later.
-    clearTimeout(this.no_damage_exit_timer!) //warning unsafe speed
-    clearTimeout(this.no_step_exit_timer!)
-    if (!gamerooms.delete(this.id)) errlog("room.destroy issue", "gamerooms.delete(this.id) return false")
   }
 
   /** execute periodical checks to no activity in gameboard to exit */
@@ -155,8 +145,7 @@ export class TMDCheckersRoom implements GameRoom {
 
   /** warning at the moment vsmode must be VSMODE.VS (player vs player), bot and demo for later */
   constructor(){
-    this.id = Bun.randomUUIDv7()
-    this.board = new TMDCheckersBoard()
+    this.board = new SSSBoard()
     if(!DEVLOG) this.start_checks() // to mute checks in debug mode. Depends on .env
   }
 }

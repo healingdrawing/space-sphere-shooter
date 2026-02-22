@@ -5,7 +5,7 @@ import type { TMDC_BOARD_ACTION, TMDC_BOARD_MESSAGE } from "./types";
 import { GameRoomDelayedAction } from "./enums";
 import { mm } from "../../../manage/message";
 
-export class TMDCheckersBoard {
+export class SSSBoard {
   /* to control idle exit game from outside board */
   time_to_check_damage_happen:boolean = false
   private _damage_happen: boolean = false;

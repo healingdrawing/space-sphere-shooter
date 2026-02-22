@@ -1,5 +1,5 @@
 import { all_handler } from './handlers/all'
-import { mm } from './tunnel';
+import { KEYMAP, mm, MT_NAME } from './tunnel';
 import { ram } from './ram'
 
 export const init_ws = (url: string) => {
@@ -11,10 +11,11 @@ export const init_ws = (url: string) => {
       console.log("key arrived. text:",bar, " ram.key:", ram.key) //todo remove
       return
     }
-    const text:string = mm.decode(bar);
-    console.log('Converted text:', text, 'first byte: ', bar[0]) //todo remove
+    const mt = bar[1]//todo refactor properly
+    const text:string = mm.decode(bar.subarray(2));
+    console.log('Converted text:', text, ' first byte: ', bar[0], ' mt:',MT_NAME[mt as keyof typeof MT_NAME]) //todo remove
   
-    all_handler(text)
+    all_handler(text, mt)
   }
 
   const socket = new WebSocket(url)
