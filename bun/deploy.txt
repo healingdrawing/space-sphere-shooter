@@ -1,0 +1,6 @@
+Plans to deploy on koyeb as dockerized.
+
+The onrender.com deploy raise brainfuck and in some reasons --minify flag ruined the process for hybrid project when hydrated client code sent from server side. So , no.
+Also onrender.com free plan has about 30 seconds silent delay after autofreeze without activity, what is not nice.
+
+But this implementation is separated from client at all.
