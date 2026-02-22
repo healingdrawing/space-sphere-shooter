@@ -1,4 +1,4 @@
-# online-ws-game-with-chat
+# online-ws-game
 Multiplayer online browser game. TypeScript client. TypeScript server.  
 
 ## Development environment
