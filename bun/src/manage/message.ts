@@ -81,18 +81,18 @@ export const mm = (() => {
     },
 
     /** (client side) when fails return -1. The type must be first. F.e. '{"t":1,"data":"something"}' */
-    extract_text_message_type(x: string) {
-      if (x.length < 7) return -1
-      if (!MT_STRINGS.includes(x[5]!)) return -1 // Check encoded message type sent from server
-      if (x[4] !== ':') return -1 // Check ':' before message type value
-      if (x[6] !== ',') return -1 // Check ',' after message type value
-      // todo remove later. Not sure it is obligatory. It is tiny bit too strict
-      if (x[0] !== "{" || x[1] !== "\"" || x[2] !== "t" || x[3] !== "\""){
-        console.error("strict check '{\"t\"' failed inside extract_text_message_type(x:string)")
-        return -1 // Check '{"t"'
-      }
-      return Number(x[5])
-    },
+    // extract_text_message_type(x: string) {
+    //   if (x.length < 7) return -1
+    //   if (!MT_STRINGS.includes(x[5]!)) return -1 // Check encoded message type sent from server
+    //   if (x[4] !== ':') return -1 // Check ':' before message type value
+    //   if (x[6] !== ',') return -1 // Check ',' after message type value
+    //   // todo remove later. Not sure it is obligatory. It is tiny bit too strict
+    //   if (x[0] !== "{" || x[1] !== "\"" || x[2] !== "t" || x[3] !== "\""){
+    //     console.error("strict check '{\"t\"' failed inside extract_text_message_type(x:string)")
+    //     return -1 // Check '{"t"'
+    //   }
+    //   return Number(x[5])
+    // },//warning remove artefact
 
     /** (server side) when fails return -1. The type must be first. F.e. '{"t":1,"data":"something"}' - example of string before encode to Uint8Array */
     extract_buffer_message_type(x: Buffer) {

@@ -1,5 +1,6 @@
 import { s, type WebSocketData } from "..";
 import { DEVLOG, rawlog } from "../debug/debug";
+import type { MT } from "../enums/mt";
 import { mm } from "../manage/message";
 
 /**
@@ -38,7 +39,7 @@ export function send_delayed_messages(
 
 // Base interface - every game room must have
 export interface GameRoom {
-  players: Set<number>;
+  players: Uint8Array;
 
   /** todo manage logic for game message then return where each object of array has
    *  {
@@ -50,9 +51,11 @@ export interface GameRoom {
    * roles: array of roles to send message to
    * 
    * } structure.
+   * @param mt - message type(cut second byte from Uint8Array)
+   * @param msg - incoming data after cut first byte(key), and second byte(mt)
    * @param uuid - the player identifier. Incrementable number
    * */
-  handle_game_message(msg: Uint8Array, uuid: number): GameRoomResponseMessage[];
+  handle_game_message(mt:MT, msg: Uint8Array, uuid: number, ws:Bun.ServerWebSocket<WebSocketData>): GameRoomResponseMessage[];
 }
 
 /** check the room to exit_game if not enough players */
