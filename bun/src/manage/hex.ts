@@ -13,7 +13,7 @@ export function hex_handler(
 ) {
   rawlog("hex message arrived") //todo remove
 
-  if(ws.data.hex){
+  if(ws.data.rgb){
     ws.close(CCR.HIJACKING.code, CCR.HIJACKING.reason) //set only once or hijacking
     return
   }

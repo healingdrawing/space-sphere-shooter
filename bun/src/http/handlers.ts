@@ -30,34 +30,31 @@ export function check_ip_banned(address: string | undefined, req: Request): Resp
 
 /** request to upgrade to websocket */
 export function handle_ws_request(req: Request, server: Bun.Server, address: string | undefined): boolean {
-  const url = new URL(req.url)
-  if (url.pathname == "/ws") {
-    try {
-      server.upgrade(req, {
-        data: {
-          uuid: gameroom.add_client(),
-          address,
-          hex: "", //originally empty. Allowed to set once. Attempt to set again - ban.
-          key: 0,
-        } as WebSocketData
-      })
-      rawlog("upgrade to ws: success")
-      return true
-    } catch (e) {
-      errlog("upgrade to ws error", e)
-    }
+
+  try {
+    server.upgrade(req, {
+      data: {
+        uuid: gameroom.add_client(),
+        address,
+        nick:"",
+        rgb: {r:0, g:0, b:0},
+        key: 0,
+      } as WebSocketData
+    })
+    rawlog("upgrade to ws: success")
+    return true
+  } catch (e) {
+    errlog("upgrade to ws error", e)
   }
+  
   return false
 }
 
+export const no_free_spots = () => users.size >= USERS_MAX_NUMBER
+
 /** request to /check url. Check the connection status for the client */
-export function handle_check_request(req: Request): Response | undefined {
-  const url = new URL(req.url)
-  if (url.pathname == "/check") {
-    if (users.size >= USERS_MAX_NUMBER) return http_response("No free spots. Try to connect later.", req, 200)
-    return http_response("Try to connect.", req, 200)
-  }
-  return undefined
+export function handle_check_request(req: Request){
+  return http_response("Try to connect.", req, 200)
 }
 
 /** Not Found 404 short hand */

@@ -28,6 +28,9 @@ function create_home_box(){
   view.className = 'view';
   view.innerHTML = `
     <h1>Welcome</h1>
+    <div>
+      <input id="nick" placeholder="nickname" value="unknown">
+    </div>
     <span>Set identity game color</span>
     <div id="color-picker"></div>
 
@@ -35,6 +38,9 @@ function create_home_box(){
     <button id="check-connection">Check Connection</button>
     <button id="connect-websocket">Connect to WebSocket</button>
   `;
+
+  /** raw return nick name of user from html input //todo sanitaze */
+  const nick = () => (view.querySelector('#nick') as HTMLInputElement).value || "incorrect nick"
 
   let assets_not_ready = false //warning default false for dev needs. must be true
   async function download_assets(){
@@ -88,7 +94,7 @@ function create_home_box(){
         tmdc_game_box.dev_gap(ws)
 
         const key = use_key()
-        const dummy = {t:999, h:color_box.color}
+        const dummy = {rgb:color_box.color, nick:home_box.nick()}
         // add message type
         const with_mt = mm.keyu8a(MT.EXIT, mm.obju8a(dummy))
         // add key. Now mt is second byte
@@ -103,7 +109,7 @@ function create_home_box(){
   view.querySelector('#check-connection')!.addEventListener('pointerup', check_the_connection);
   view.querySelector('#connect-websocket')!.addEventListener('pointerup', connect_to_server);
 
-  return {view, color_box}
+  return {view, color_box, nick}
 }
 
 export const home_box = create_home_box()

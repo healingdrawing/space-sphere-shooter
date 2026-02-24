@@ -13,7 +13,7 @@ export const init_ws = (url: string) => {
     }
     const mt = bar[1]//todo refactor properly
     const text:string = mm.decode(bar.subarray(2));
-    console.log('Converted text:', text, ' first byte: ', bar[0], ' mt:',MT_NAME[mt as keyof typeof MT_NAME]) //todo remove
+    console.log('Converted text:', text, ' key: ', bar[0], ' mt:',MT_NAME[mt as keyof typeof MT_NAME]) //todo remove
   
     all_handler(text, mt)
   }

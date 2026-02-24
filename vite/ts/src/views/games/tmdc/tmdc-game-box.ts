@@ -18,7 +18,7 @@ function create_tmdc_game_box() {
   view.className = 'view';
   view.style.display = 'none';
 
-  const game_title = `<h2 class="text-center">Teenage Mutant Dragon Checkers</h2>`;
+  const game_title = `<h2 class="text-center">Space Sphere Shooter</h2>`;
   view.innerHTML = game_title
   view.append(container);
 

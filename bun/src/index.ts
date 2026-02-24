@@ -4,7 +4,7 @@ import { rawlog_consts } from "./ram/logger"
 import { HOST, PORT } from "./ram/consts"
 import { handle_ws_message } from "./manage/all"
 import { handle_ws_close } from './manage/close'
-import { check_ip_banned, handle_check_request, handle_not_found, handle_options_request, handle_ws_request } from "./http/handlers"
+import { check_ip_banned, handle_check_request, handle_not_found, handle_options_request, handle_ws_request, http_response, no_free_spots } from "./http/handlers"
 import { handle_ws_open } from "./manage/open"
 
 /** to manage properties using ws.data. */
@@ -12,9 +12,10 @@ export interface WebSocketData {
   /** unique identifier for ws connection, created once. Do not modify it */
   uuid: number
   address: string | undefined
-  
-  /** game identity color. Hex color #RRGGBB(lower/upper case) user once set before connect to server. */
-  hex: string
+  /** nickname, maybe for visuals on ship etc */ //todo check it used, or remove
+  nick:string,
+  /** game identity color. RGB 0-255 user once set before connect to server. */
+  rgb: {r:number, g:number, b:number}
   /** one shot key(one digit), used once to allow client send one incoming game message.
    * The new one generated after previous one approved on server side,
    * then sent to client.
@@ -38,9 +39,12 @@ export const s = Bun.serve<WebSocketData, undefined>({
     
     const url = new URL(req.url)
     rawlog('url.pathname:', url.pathname) //todo remove
-    
-    if (handle_ws_request(req, s, address)) return
-    return handle_check_request(req) || handle_not_found(req)
+
+    if(no_free_spots()) return http_response("No free spots. Try to connect later.", req, 200)
+
+    if (url.pathname == "/ws"){ if (handle_ws_request(req, s, address)) return}
+    else if (url.pathname == "/check") return handle_check_request(req)
+    return handle_not_found(req)
   },
   websocket:{
     maxPayloadLength: 1024 * LIMIT_KB, // usefull, works, tested

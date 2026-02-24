@@ -1,6 +1,6 @@
 export function color_picker() {
   /** hex color #000000 default */
-  let color = "#000000"
+  let color = {r:0, g:0, b:0}
   
   let widget = document.createElement('div')
   widget.style.cssText = "border:3px solid gray;display: flex;flex-direction: column;align-items: center;" //warning implement properly, it is just for test
@@ -43,10 +43,10 @@ export function color_picker() {
 
     const rgb = hslToRgb(hue, 1, lightness);
     // const color_string = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
-    color = rgbToHex(rgb.r, rgb.g, rgb.b)
+    color = rgb
     console.log("rgb:",rgb)
     console.log("game_color:",color)
-    demobox.style.backgroundColor = color;
+    demobox.style.backgroundColor = rgbToHex(rgb.r, rgb.g, rgb.b);
     
 
   });
@@ -77,3 +77,17 @@ function rgbToHex(r:number, g:number, b:number) {
   };
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`; // Use r, g, b directly
 }
+
+// function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+//   hex = hex.replace(/^#/, '');
+//   if (hex.length === 3) {
+//       hex = hex.split('').map(char => char + char).join('');
+//   }
+//   if (hex.length !== 6) {
+//       return null;
+//   }
+//   const r = parseInt(hex.substring(0, 2), 16);
+//   const g = parseInt(hex.substring(2, 4), 16);
+//   const b = parseInt(hex.substring(4, 6), 16);
+//   return { r, g, b };
+// }

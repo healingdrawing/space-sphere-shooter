@@ -54,7 +54,7 @@ export function handle_ws_message(
     case MT.CWMOVE:
     case MT.CCWMOVE:
     case MT.TARGETMOVE:
-      // send msg without first byte, since it is mt.
+      // use msg without first byte, since it is mt.
       gameroom.handle_game_message(mt, msg.subarray(1), ws.data.uuid, ws)
       break
     default:

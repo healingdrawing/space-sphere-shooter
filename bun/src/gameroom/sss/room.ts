@@ -10,6 +10,7 @@ import { MT } from "../../enums/mt";
 import { handle_back_shot, handle_ccw_move, handle_cw_move, handle_down_move, handle_down_shot, handle_exit, handle_front_move, handle_front_shot, handle_left_move, handle_left_shot, handle_right_move, handle_right_shot, handle_stop_move, handle_target_move, handle_top_move, handle_top_shot } from "./handlers/game";
 import { CCR } from "../../manage/close";
 import type { WebSocketData } from "../..";
+import { parse_guns, parse_limits } from "./ship/limits";
 
 export class SSSGameRoom implements GameRoom {
   /** incrementable index as uuid of players. Just ++ every time. Ok for now */
@@ -46,6 +47,82 @@ export class SSSGameRoom implements GameRoom {
     }
   }
 
+  /** return uuid */
+  add_client(){
+    const uuid = this.new_uuid()
+    if (!this.ships_auto_update_timer) this.ships_auto_update() //should fire only, when first active connection
+    return uuid
+  }
+  remove_client(uuid:number){
+    this.players[uuid] = 0 //clean the slot, and free the "uuid"(that is index in array)
+    this.check_room_is_empty()
+  }
+
+  join_game( uuid:number, nick:string, rgb:{r:number,g:number,b:number}, ){
+    const i = uuid
+    const c = rgb
+    const b = this.board
+    const {front_guns, side_guns, vert_guns, engines} = parse_guns(nick)
+    const {mass, max_lvelo, max_avelo, maccel, daccel, fr, br, sr, vr, max_en, max_hp} = parse_limits(nick)
+
+    b.set_ship_idx(i, i)
+
+    b.set_R(i, c.r)
+    b.set_G(i, c.g)
+    b.set_B(i, c.b)
+
+    b.set_mass(i, mass)
+    b.set_max_lvelo(i, max_lvelo)
+    b.set_max_avelo(i, max_avelo)
+    b.set_maccel(i, maccel)
+    b.set_daccel(i, daccel)
+
+    b.set_front_guns(i, front_guns)
+    b.set_side_guns(i, side_guns)
+    b.set_vert_guns(i, vert_guns)
+
+    b.set_engines(i, engines)
+
+    b.set_fr(i, fr)
+    b.set_br(i, br)
+    b.set_sr(i, sr)
+    b.set_vr(i, vr)
+
+    b.set_max_en(i, max_en)
+    b.set_en(i, 0)
+    b.set_en_ts(i, 0)
+
+    b.set_max_hp(i, max_hp)
+    b.set_hp(i, max_hp)
+    // b.set_hp_ts(i, 0) //warning at the moment do not plan recover
+
+    //todo randomise without collision damage some way
+    b.set_cx(i, 0)
+    b.set_cy(i, 0)
+    b.set_cz(i, 0)
+    
+    b.set_fvx(i, 1)
+    b.set_fvy(i, 0)
+    b.set_fvz(i, 0)
+
+    b.set_tvx(i, 0)
+    b.set_tvy(i, 1)
+    b.set_tvz(i, 0)
+
+    b.set_vvx(i, 0)
+    b.set_vvy(i, 0)
+    b.set_vvz(i, 0)
+    b.set_vts(i, 0)
+
+    b.set_avx(i, 0)
+    b.set_avy(i, 0)
+    b.set_avz(i, 0)
+    b.set_ats(i, 0)
+
+    //todo consider sent this new ship to old connected clients, then send old connected ships to new client. Use scheduled messages, one message one ship, not more.
+
+  }
+
   /** update:
    * ship positions, with pause 200ms(not super precised, but should be enough)
    */
@@ -61,17 +138,6 @@ export class SSSGameRoom implements GameRoom {
 
   update_ship_positions(now:number){
     this.board.update_ship_positions(now)
-  }
-
-  /** return uuid */
-  add_client(){
-    const uuid = this.new_uuid()
-    if (!this.ships_auto_update_timer) this.ships_auto_update() //should fire only, when first active connection
-    return uuid
-  }
-  remove_client(uuid:number){
-    this.players[uuid] = 0 //clean the slot, and free the "uuid"(that is index in array)
-    this.check_room_is_empty()
   }
 
   // recursive_actions_executor( actions:TMDC_BOARD_ACTION[] ){
