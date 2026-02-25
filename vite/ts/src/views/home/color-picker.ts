@@ -1,5 +1,5 @@
 export function color_picker() {
-  /** hex color #000000 default */
+  /** rgb 0-255 color. 0 0 0 default */
   let color = {r:0, g:0, b:0}
   
   let widget = document.createElement('div')

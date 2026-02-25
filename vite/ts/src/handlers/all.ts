@@ -1,16 +1,29 @@
-import { mm, MT } from "../tunnel";
-import { big_box } from "../views/bigbox";
-import { broadcast_handler } from "./broadcast_handler";
+import { MT } from "../tunnel";
+import { join_handler } from "./game/join-handler";
 import { system_handler } from "./system_handler";
 
 /** handle all messages(by type t:MT). Upper level manager/router */
 export function all_handler(text: string, mt:number){
-  
-  
-    switch (mt) {
-      // case MT.G: games_handler(text); break //todo implement for all MT enum values
-      // case MT.S: system_handler(text); break
-      // case MT.B: broadcast_handler(text); break
-      default: console.error("all_handler() switch default: wrong message type received", mt)
-    }
+  switch (mt) {
+    case MT.JOIN: join_handler(text); break
+    // case MT.EXIT: exit_handler(text); break
+    // case MT.FRONTSHOT: frontshot_handler(text); break
+    // case MT.LEFTSHOT: leftshot_handler(text); break
+    // case MT.RIGHTSHOT: rightshot_handler(text); break
+    // case MT.BACKSHOT: backshot_handler(text); break
+    // case MT.TOPSHOT: topshot_handler(text); break
+    // case MT.DOWNSHOT: downshot_handler(text); break
+    // case MT.FRONTMOVE: frontmove_handler(text); break
+    // case MT.STOPMOVE: stopmove_handler(text); break
+    // case MT.LEFTMOVE: leftmove_handler(text); break
+    // case MT.RIGHTMOVE: rightmove_handler(text); break
+    // case MT.TOPMOVE: topmove_handler(text); break
+    // case MT.DOWNMOVE: downmove_handler(text); break
+    // case MT.CWMOVE: cwmove_handler(text); break
+    // case MT.CCWMOVE: ccwmove_handler(text); break
+    // case MT.TARGETMOVE: targetmove_handler(text); break
+    case MT.S: system_handler(text); break
+
+    default: console.error("all_handler() switch default: wrong message type received", mt)
+  }
 }

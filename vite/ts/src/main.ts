@@ -6,6 +6,6 @@ import { big_box } from './views/bigbox'
 const app = document.querySelector('#app')!
 
 // Append views to app
-app.append(big_box.home_box.view, big_box.tmdc_game_box.view)
+app.append(big_box.home_box.view, big_box.game_box.view)
 
 console.log("BABYLON:",BABYLON.Engine.Version) // warning must be

@@ -1,9 +1,7 @@
 import { store, ws_atom } from "../../atoms";
 import { use_key } from "../../handlers/utils";
-import { ram } from "../../ram";
 import { mm, MT } from "../../tunnel";
 import { init_ws } from "../../ws";
-import { tmdc_game_box } from "../games/tmdc/tmdc-game-box";
 import { color_picker } from "./color-picker";
 
 const host = import.meta.env.VITE_SERVER_HOST;
@@ -90,8 +88,6 @@ function create_home_box(){
       ws.onopen = () => {
         store.set(ws_atom, ws);
         console.log('ws.onopen fires');
-
-        tmdc_game_box.dev_gap(ws)
 
         const key = use_key()
         const dummy = {rgb:color_box.color, nick:home_box.nick()}
