@@ -39,6 +39,7 @@ export function send_delayed_messages(
   }
 }
 
+/** inform clients about exit/disconnection. To remove ship from playground */
 export function broadcast_exit_message(uuid:number){
   s.publish('game',mm.keyu8a(MT.EXIT, mm.obju8a({uuid:uuid})))
 }
