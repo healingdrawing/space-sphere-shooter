@@ -148,7 +148,7 @@ export class SSSBoard {
   read_ship(i: number):Ship{
     const b = this.base(i);
     return {
-      ship_idx:     this.ships[b + S.SHIP_IDX]!,
+      idx:     this.ships[b + S.SHIP_IDX]!,
       r:             this.ships[b + S.R]!,
       g:             this.ships[b + S.G]!,
       b:             this.ships[b + S.B]!,
@@ -194,7 +194,7 @@ export class SSSBoard {
   /** Write new ship */
   write_ship(i: number, data:Ship ) {
     const b = this.base(i);
-    this.ships[b + S.SHIP_IDX] = data.ship_idx;
+    this.ships[b + S.SHIP_IDX] = data.idx;
     this.ships[b + S.R] = data.r;
     this.ships[b + S.G] = data.g;
     this.ships[b + S.B] = data.b;

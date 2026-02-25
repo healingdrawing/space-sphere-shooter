@@ -70,7 +70,7 @@ export class SSSGameRoom implements GameRoom {
     if(DEVLOG) devlog("front_guns, side_guns, vert_guns, engines",`${front_guns}, ${side_guns}, ${vert_guns}, ${engines}`) //todo remove
 
     const ship: Ship = {
-      ship_idx: i,
+      idx: i,
       r: c.r, g: c.g, b: c.b,
       mass: mass,
       max_lvelo: max_lvelo, max_avelo: max_avelo, maccel: maccel, daccel: daccel,

@@ -1,7 +1,7 @@
 /** to manage ship props */
 export interface Ship {
   /** user index. It is client uuid, and in same time the limited array index */
-  ship_idx:     number;
+  idx:     number;
   /** color r */
   r:            number;
   /** color g */

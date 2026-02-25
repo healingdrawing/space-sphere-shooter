@@ -1,6 +1,6 @@
 import { store, ws_atom } from "../../atoms"
 import { use_key } from "../../handlers/utils";
-import { KEYMAP, mm, MT } from "../../tunnel"
+import { KEYMAP, mm, MT, type Ship } from "../../tunnel"
 import { add_ship } from "./add-ship";
 import { home_box } from "../home/home-box";
 
@@ -23,6 +23,7 @@ function create_game_box() {
 
   let engine: BABYLON.Engine | null = null;
   let scene: BABYLON.Scene | null = null;
+  let ship_mesh: BABYLON.Mesh | null = null;
   let animationId: number | null = null;
   
   const colors = {
@@ -47,12 +48,12 @@ function create_game_box() {
         return
       }
       console.log("clicked exit button");//todo remove
-      ws.send(mm.keyu8a(key, mm.obju8a({ t: 888, c:0 }))); //todo fix later
+      send_client_action(ws, MT.EXIT)
     })
     view.insertBefore(b, view.firstChild);
   }
  
-  function initGameView() {
+  function initGameView(ship:Ship) {
     console.log("dummy init game view executed")
     const ws = store.get(ws_atom)
     if (!ws){
@@ -71,13 +72,35 @@ function create_game_box() {
     container.appendChild(canvas);
 
     engine = new BABYLON.Engine(canvas, true);
+    
     scene = new BABYLON.Scene(engine);
+    scene.clearColor = new BABYLON.Color4(0, 0, 0, 1); // Set background to black
 
-    // Camera: perspective, 45 deg tilt
-    const camera = new BABYLON.ArcRotateCamera('camera', Math.PI / 2, Math.PI / 4, 12, new BABYLON.Vector3(0, 0, 0), scene);
-    camera.attachControl(canvas, true);
+    const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 100000 }, scene);
+    const skyboxMaterial = new BABYLON.StandardMaterial("skyBoxMaterial", scene);
+    skyboxMaterial.backFaceCulling = false; // Ensure the back faces are rendered
+    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("./textures/1", scene);
+    skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+    skybox.material = skyboxMaterial;
+    skybox.infiniteDistance = true; // Prevent the skybox from scaling with the camera
 
-    new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
+    ship_mesh = add_ship(ship, scene)
+    ship_mesh.showBoundingBox = true; //todo test
+    
+    const camera = new BABYLON.FollowCamera("followCamera", new BABYLON.Vector3(0, 0, 0), scene);
+    camera.radius = ship.br * 14;      // start with 4× back radius
+    camera.heightOffset = ship.br * 1.5;  // lift above
+    camera.rotationOffset = 180;  // look from behind
+    camera.cameraAcceleration = 20;
+    camera.maxCameraSpeed = 100;
+    camera.lockedTarget = ship_mesh;   // follow this mesh. it will be tricky
+    camera.minZ = 0.1; // Minimum distance
+    camera.maxZ = 100000; // Maximum distance (increase as needed)
+
+    
+
+    const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 1), scene);
+    light.intensity = 0.5;//todo test
 
     function animate() {
       if (!engine || !scene) return;
@@ -108,7 +131,7 @@ function create_game_box() {
         return
       }
       console.log("clicked button. KeyCode:", action);//todo remove
-      const dummy = { t: 555, c:0 }
+      const dummy = { code: action }
       // add message type
       const with_mt = mm.keyu8a(action, mm.obju8a(dummy))
       // add key. Now mt is second byte
@@ -129,7 +152,7 @@ function create_game_box() {
        pressed.add(e.code);
        const action = KEYMAP[e.code]
        console.log('DOWN', e.code, 'KEYMAP[e.code]:', action);
-       send_client_action(ws, action)
+       // send_client_action(ws, action)
      };
    
      const onKeyUp = (e: KeyboardEvent) => {

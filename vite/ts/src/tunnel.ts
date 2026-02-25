@@ -8,3 +8,6 @@ export { mm }
 
 import { spip } from '../../../bun/src/utils/safe'
 export { spip }
+
+import { type Ship } from '../../../bun/src/gameroom/sss/types'
+export { type Ship }
