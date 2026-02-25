@@ -5,6 +5,7 @@ import { MT } from '../enums/mt'
 import type { WebSocketData } from ".."
 import { hex_handler } from "./hex"
 import { gameroom } from "../ram/consts"
+import { send_delayed_messages } from "../gameroom/base"
 
 /**
  * handle all incoming websocket messages
@@ -35,8 +36,6 @@ export function handle_ws_message(
     ws.close(CCR.BROKENTYPE.code, CCR.BROKENTYPE.reason); return
   }
 
-  ws.send(m) //todo remove . test keymap gap
-  
   switch (mt) {
     case MT.EXIT:
     case MT.FRONTSHOT:
@@ -55,11 +54,12 @@ export function handle_ws_message(
     case MT.CCWMOVE:
     case MT.TARGETMOVE:
       // use msg without first byte, since it is mt.
-      gameroom.handle_game_message(mt, msg.subarray(1), ws.data.uuid, ws)
+      const msgs = gameroom.handle_game_message(mt, msg.subarray(1), ws.data.uuid, ws)
+      send_delayed_messages(msgs)
       break
     default:
       ws.close(CCR.BROKENTYPE.code, CCR.BROKENTYPE.reason);
-      if (DEVLOG) rawlog("wrong message type received", mt);
+      if (DEVLOG) rawlog("handle_ws_message() wrong message type received", mt);
   }
 
 }

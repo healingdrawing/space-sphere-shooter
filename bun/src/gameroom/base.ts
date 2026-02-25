@@ -8,6 +8,8 @@ import { mm } from "../manage/message";
  * No valibot validation planned since server should send correct
  * */
 export type GameRoomResponseMessage = {
+  /** type of message, to add before object styled message body */
+  mt: MT;
   /** free form object, since can be unique for each game */
   msg: object;
   /** delay milliseconds to send message to client. F.e. to initiate animation */
@@ -24,13 +26,14 @@ export function send_delayed_messages(
 ) {
   const len = messages.length;
   for (let i = 0; i < len; i++) {
-    const { msg, ms, uuids: roles } = messages[i]!;
-    const encoded = mm.obju8a(msg);
-    const rlen = roles.length;
+    const { mt, msg, ms, uuids } = messages[i]!;
+    const encoded = mm.keyu8a(mt, mm.obju8a(msg));
+    const jlen = uuids.length;
     setTimeout(() => {
-      for (let j = 0; j < rlen; j++) {
-        if(DEVLOG) rawlog(mm.logobj(msg) +` published to: ${'game'}:${roles[j]} delay:${ms}`) //todo remove
-        s.publish(`${'game'}:${roles[j]}`, encoded);//todo fix later
+      for (let j = 0; j < jlen; j++) {
+        const c = uuids[j]?uuids[j]:'game'
+        if(DEVLOG) rawlog(mm.logobj(msg) +` published to: ${c} delay:${ms}`) //todo remove
+        s.publish(`${c}`, encoded);//todo fix later
       }
     }, ms);
   }

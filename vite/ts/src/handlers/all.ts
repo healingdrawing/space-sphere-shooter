@@ -11,6 +11,6 @@ export function all_handler(text: string, mt:number){
       // case MT.G: games_handler(text); break //todo implement for all MT enum values
       // case MT.S: system_handler(text); break
       // case MT.B: broadcast_handler(text); break
-      default: console.error("wrong message type received", mt)
+      default: console.error("all_handler() switch default: wrong message type received", mt)
     }
 }

@@ -18,11 +18,7 @@ export function handle_ws_open(ws: Bun.ServerWebSocket<WebSocketData>): boolean 
   //warning turned of check when DEVLOG true. Check prohibits more than one client on ip. F.e. one browser and two tabs/game views opened.
   if(!DEVLOG){
     if (ips.ip_connected(ws.data.address)) {
-      const msg = {
-        t: 666,
-        alert_text: `Address ${ws.data.address} already connected to server.\nNo duplication allowed at the moment.`,
-      };
-      ws.send(mm.obju8a(msg))
+      ws.send(alert_text_system_message(`Address ${ws.data.address} already connected to server.\nNo duplication allowed at the moment.`))
       ws.close(CCR.DUPLICATION.code, CCR.DUPLICATION.reason)
       return true
     }
@@ -33,10 +29,7 @@ export function handle_ws_open(ws: Bun.ServerWebSocket<WebSocketData>): boolean 
   ws.subscribe(`${ws.data.uuid}`) // personal messages
   ws.subscribe("game") // for broadcast, common gameplay messages
   
-  const msg = {
-    t:17, //todo fix later, now MT is muddy
-    text: "join the game"
-  }
-  ws.send(mm.obju8a(msg))
+  const msg = { text: "join the game" }
+  ws.send(mm.keyu8a(MT.S, mm.obju8a(msg)))
   return false
 }

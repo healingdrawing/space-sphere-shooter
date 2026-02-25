@@ -223,7 +223,7 @@ export class SSSGameRoom implements GameRoom {
     
       default:
         ws.close(CCR.BROKENTYPE.code, CCR.BROKENTYPE.reason);
-        if (DEVLOG) rawlog("wrong message type received", mt);
+        if (DEVLOG) rawlog("handle_game_message() wrong message type received", mt);
     }
 
     return result

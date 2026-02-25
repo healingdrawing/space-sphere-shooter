@@ -1,57 +1,57 @@
 /** message types of websocket. */
 export enum MT {
   /** ***DO NOT USE IT!*** zero killer, to prevent boolean false when short syntax used. if(MT.FAKE) instead of if(MT.FAKE !== undefined). In zero case results are different */
-  FAKE = 0 ,
+  FAKE,
 
   /** Used when player enters or exits the game (enter game / exit game / disconnect) - Key: NumpadSubtract/KeyO */
-  EXIT = 1,
+  EXIT,
 
   /** Front shot (main weapon) - Key: NUM0/KeyF */
-  FRONTSHOT = 2,
+  FRONTSHOT,
 
   /** Left side shot - Key: Arrow Left/KeyN */
-  LEFTSHOT = 3,
+  LEFTSHOT,
 
   /** Right side shot - Key: Arrow Right/KeyL */
-  RIGHTSHOT = 4,
+  RIGHTSHOT,
 
   /** Back shot - Key: NUM Enter/KeyK */
-  BACKSHOT = 5,
+  BACKSHOT,
 
   /** Top shot - Key: Arrow Up/KeyJ */
-  TOPSHOT = 6,
+  TOPSHOT,
 
   /** Down shot - Key: Arrow Down/KeyM */
-  DOWNSHOT = 7,
+  DOWNSHOT,
 
   /** Forward impulse move - Key: NUM1/KeyZ */
-  FRONTMOVE = 8,
+  FRONTMOVE,
 
   /** Stop movement - Key: NUM2/KeyA */
-  STOPMOVE = 9,
+  STOPMOVE,
 
   /** Left rotation / slide - Key: NUM4/KeyQ */
-  LEFTMOVE = 10,
+  LEFTMOVE,
 
   /** Right rotation / slide - Key: NUM6/KeyC */
-  RIGHTMOVE = 11,
+  RIGHTMOVE,
 
   /** Top rotation / pitch up - Key: NUM8/KeyE */
-  TOPMOVE = 12,
+  TOPMOVE,
 
   /** Down rotation / pitch down - Key: NUM5/KeyS */
-  DOWNMOVE = 13,
+  DOWNMOVE,
 
   /** Clockwise rotation - Key: NUM9/KeyD */
-  CWMOVE = 14,
+  CWMOVE,
 
   /** Counter-clockwise rotation - Key: NUM7/KeyW */
-  CCWMOVE = 15,
+  CCWMOVE,
 
   /** Target move (move toward target/selection) - Key: NUM3/KeyX */
-  TARGETMOVE = 16,
+  TARGETMOVE,
 
-  // S, /** System message. Use for new incoming player case. F.e. new player joined , send to him ships of another enemies. Like scheduled small messages to setup the environment */
+  S, /** System message. Use for new incoming player case. F.e. new player joined , send to him ships of another enemies. Like scheduled small messages to setup the environment */
 
   // B, /** Broadcast message. Use to inform all connected clients. F.e. new player joined. To setup one new player for all connected clients. */
 }
@@ -82,6 +82,7 @@ export const MT_NAME: Record<MT, string> = {
   [MT.CWMOVE]: "CWMOVE",
   [MT.CCWMOVE]: "CCWMOVE",
   [MT.TARGETMOVE]: "TARGETMOVE",
+  [MT.S]: "S",
 }
 
 export const KEYMAP: Record<string, MT> = {
