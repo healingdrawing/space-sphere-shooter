@@ -3,7 +3,6 @@ import { mm } from "./message"
 import { CCR } from './close'
 import { MT } from '../enums/mt'
 import type { WebSocketData } from ".."
-import { hex_handler } from "./hex"
 import { gameroom } from "../ram/consts"
 import { send_delayed_messages } from "../gameroom/base"
 

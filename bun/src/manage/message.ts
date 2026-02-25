@@ -1,4 +1,4 @@
-import { MT_STRINGS, MT_VALUES } from '../enums/mt'
+import { MT_VALUES } from '../enums/mt'
 
 /** message manager. To encode, decode, strigify, parse, check type */
 export const mm = (() => {
@@ -80,30 +80,16 @@ export const mm = (() => {
       return out;
     },
 
-    /** (client side) when fails return -1. The type must be first. F.e. '{"t":1,"data":"something"}' */
-    // extract_text_message_type(x: string) {
-    //   if (x.length < 7) return -1
-    //   if (!MT_STRINGS.includes(x[5]!)) return -1 // Check encoded message type sent from server
-    //   if (x[4] !== ':') return -1 // Check ':' before message type value
-    //   if (x[6] !== ',') return -1 // Check ',' after message type value
-    //   // todo remove later. Not sure it is obligatory. It is tiny bit too strict
-    //   if (x[0] !== "{" || x[1] !== "\"" || x[2] !== "t" || x[3] !== "\""){
-    //     console.error("strict check '{\"t\"' failed inside extract_text_message_type(x:string)")
-    //     return -1 // Check '{"t"'
-    //   }
-    //   return Number(x[5])
-    // },//warning remove artefact
-
-    /** (server side) when fails return -1. The type must be first. F.e. '{"t":1,"data":"something"}' - example of string before encode to Uint8Array */
+    /** when fails return -1. Also returns (x[0] || -2). The type must be first byte. F.e. '1{"data":"something"}' - example of string before encode to Uint8Array with prefix of MT */
     extract_buffer_message_type(x: Buffer) {
       console.log("buffer mt:",x)
       if (!(x instanceof Uint8Array) || x.length < 2){
-        console.log("if (!(x instanceof Uint8Array) || x.length < 2). x.length:", x.length)
+        console.error("if (!(x instanceof Uint8Array) || x.length < 2). x.length:", x.length)
         return -1
       }
       const mt = (x[0] || -2)
       if (!MT_VALUES.includes(mt)){
-        console.log("if (!MT_VALUES.includes(mt)):",!MT_VALUES.includes(mt), " mt:",mt)
+        console.error("if (!MT_VALUES.includes(mt)):",!MT_VALUES.includes(mt), " mt:",mt)
         return -1
       }; // Check encoded message type sent from client. //todo simplify this ugly creature.
       return mt //warning unsafe speed

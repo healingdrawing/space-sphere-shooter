@@ -55,7 +55,7 @@ export interface GameRoom {
    * 
    * ms:delay_in_milliseconds_to_send_to_client,
    * 
-   * roles: array of roles to send message to
+   * uuids: array of message receivers
    * 
    * } structure.
    * @param mt - message type(cut second byte from Uint8Array)

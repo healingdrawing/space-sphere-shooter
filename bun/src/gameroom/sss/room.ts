@@ -1,10 +1,7 @@
 import { DEVLOG, devlog, errlog, rawlog } from "../../debug/debug";
-import { mm } from "../../manage/message";
-import { send_delayed_messages, type GameRoomResponseMessage, type GameRoom, broadcast_exit_message } from "../base";
+import { type GameRoomResponseMessage, type GameRoom, broadcast_exit_message } from "../base";
 import { SSSBoard } from "./gameboard/board";
-import type { TMDC_BOARD_ACTION } from "./gameboard/types";
-import { GameRoomDelayedAction } from "./gameboard/enums";
-import { rip_cell_message, select_cell_message, click_cell_client_messages, exit_game_messages } from "./messages";
+
 import { USERS_MAX_NUMBER } from "../../ram/consts";
 import { MT } from "../../enums/mt";
 import { handle_back_shot, handle_ccw_move, handle_cw_move, handle_down_move, handle_down_shot, handle_join, handle_exit, handle_front_move, handle_front_shot, handle_left_move, handle_left_shot, handle_right_move, handle_right_shot, handle_stop_move, handle_target_move, handle_top_move, handle_top_shot } from "./handlers/game";
@@ -54,6 +51,7 @@ export class SSSGameRoom implements GameRoom {
     if (!this.ships_auto_update_timer) this.ships_auto_update() //should fire only, when first active connection
     return uuid
   }
+  /** clean room, gameboard, broadcast client exit */
   remove_client(uuid:number){
     this.players[uuid] = 0 //clean the slot, and free the "uuid"(that is index in array)
     //warning non mandatory reset_ship call. Can set ship_idx=0 to speedup, with artefacts

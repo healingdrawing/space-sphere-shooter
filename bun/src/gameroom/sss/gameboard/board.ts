@@ -16,6 +16,7 @@ export class SSSBoard {
   get = (i: number, off: number) => this.ships[this.base(i) + off];
   set = (i: number, off: number, v: number) => this.ships[this.base(i) + off] = v;
 
+  // warning //todo refactor later to straight way, without getters/setters, to speedup
   get_ship_idx = (i: number) => this.get(i, S.SHIP_IDX);
   get_R = (i: number) => this.get(i, S.R);
   get_G = (i: number) => this.get(i, S.G);

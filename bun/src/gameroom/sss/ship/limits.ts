@@ -1,10 +1,5 @@
 import { DEVLOG, devlog } from "../../../debug/debug";
 
-const vowel_regex = /[aeiou]/i
-const consonant_regex =  /[b-df-hj-np-tv-z]/i
-const digit_regex = /\d/
-const other_regex = /[^aeiou0-9b-df-hj-np-tv-z]/i
-
 /** returns x3 guns number(finally angle of shot to direction), limited by 90(degrees), and engines number(maybe use for visuals only) */
 export const parse_guns = (nick: string) => {
   let digits = 0, vowels = 0, cons = 0, other = 0;

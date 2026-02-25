@@ -17,7 +17,7 @@ export enum GameRoomDelayedAction {
 
 /** SOFF . The ship parameter offsets in uint8array range */
 export enum SOFF {
-  /**  user index (1..sizeplus) it will be uuid, but integer number from 1 up to max users number inclusive. After remove slot will be reused internally again.*/
+  /**  user index (1..sizeplus) it is uuid, but integer number from 1 up to max users number inclusive. After remove(exit), the slot will be reused internally again.*/
   SHIP_IDX,
 
   /** rgb component */
