@@ -1,6 +1,6 @@
 import { s, type WebSocketData } from "..";
 import { DEVLOG, rawlog } from "../debug/debug";
-import type { MT } from "../enums/mt";
+import { MT } from "../enums/mt";
 import { mm } from "../manage/message";
 
 /**
@@ -33,10 +33,14 @@ export function send_delayed_messages(
       for (let j = 0; j < jlen; j++) {
         const c = uuids[j]?uuids[j]:'game'
         if(DEVLOG) rawlog(mm.logobj(msg) +` published to: ${c} delay:${ms}`) //todo remove
-        s.publish(`${c}`, encoded);//todo fix later
+        s.publish(`${c}`, encoded)
       }
     }, ms);
   }
+}
+
+export function broadcast_exit_message(uuid:number){
+  s.publish('game',mm.keyu8a(MT.EXIT, mm.obju8a({uuid:uuid})))
 }
 
 // Base interface - every game room must have
@@ -58,13 +62,4 @@ export interface GameRoom {
    * @param uuid - the player identifier. Incrementable number
    * */
   handle_game_message(mt:MT, msg: Uint8Array, uuid: number, ws:Bun.ServerWebSocket<WebSocketData>): GameRoomResponseMessage[];
-}
-
-/** check the room to exit_game if not enough players */
-export function check_room_on_ws_close(
-  user_uuid:number,
-){
-  
-console.log("remove this artefact, if not used")  
-
 }

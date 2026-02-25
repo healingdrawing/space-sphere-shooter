@@ -3,6 +3,9 @@ export enum MT {
   /** ***DO NOT USE IT!*** zero killer, to prevent boolean false when short syntax used. if(MT.FAKE) instead of if(MT.FAKE !== undefined). In zero case results are different */
   FAKE,
 
+  /** Used when player enters the game */
+  JOIN,
+
   /** Used when player enters or exits the game (enter game / exit game / disconnect) - Key: NumpadSubtract/KeyO */
   EXIT,
 
@@ -66,6 +69,7 @@ export const MT_VALUES = Object.values(MT)
 
 export const MT_NAME: Record<MT, string> = {
   [MT.FAKE]: "FAKE",
+  [MT.JOIN]: "JOIN",
   [MT.EXIT]: "EXIT",
   [MT.FRONTSHOT]: "FRONTSHOT",
   [MT.LEFTSHOT]: "LEFTSHOT",

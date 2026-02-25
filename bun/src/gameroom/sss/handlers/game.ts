@@ -3,6 +3,7 @@ import { handle_ccw_move } from "./handle-ccw-move"
 import { handle_cw_move } from "./handle-cw-move"
 import { handle_down_move } from "./handle-down-move"
 import { handle_down_shot } from "./handle-down-shot"
+import { handle_join } from "./handle-join"
 import { handle_exit } from "./handle-exit"
 import { handle_front_move } from "./handle-front-move"
 import { handle_front_shot } from "./handle-front-shot"
@@ -21,6 +22,7 @@ export {
   handle_cw_move,
   handle_down_move,
   handle_down_shot,
+  handle_join,
   handle_exit,
   handle_front_move,
   handle_front_shot,

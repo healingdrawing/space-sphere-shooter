@@ -37,6 +37,7 @@ export function handle_ws_message(
   }
 
   switch (mt) {
+    case MT.JOIN:
     case MT.EXIT:
     case MT.FRONTSHOT:
     case MT.LEFTSHOT:

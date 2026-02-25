@@ -1,7 +1,6 @@
 import type { WebSocketData } from ".."
 import { ERRLOG, errlog } from "../debug/debug"
-import { check_room_on_ws_close } from "../gameroom/base"
-import { users } from "../ram/consts"
+import { gameroom, users } from "../ram/consts"
 import { ips } from "./ips"
 
 /** custom close reasons. ws.close() */
@@ -38,10 +37,10 @@ export function handle_ws_close(
   
   const d = ws.data
   const user_uuid = d.uuid
-  check_room_on_ws_close( user_uuid )
-  const address = d.address
-
+  gameroom.remove_client( user_uuid )
   users.delete(user_uuid)
+  
+  const address = d.address
   if (address){
     /* Bun's built-in: //bug: patch here uses two codes 1006 1009. Offdocs/MSDN standard said that 1009 used for too big message, but Bun returns 1006(so it is just raise the ws close, but with not 1009 code , but with 1006 what is incorrect). Issue on Bun discord server, and github did do nothing. No response. https://www.rfc-editor.org/rfc/rfc6455.html#section-7.4.1:~:text=was%20actually%20present.-,1006,-1006%20is%20a
     Even more problems detected. Since free deployment account has limits, and absense of activity triggers the ws close event, this event looks like the too big message.

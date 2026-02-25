@@ -1,0 +1,49 @@
+import type { WebSocketData } from "../../..";
+import { errlog, rawlog } from "../../../debug/debug";
+import { MT } from "../../../enums/mt";
+import { CCR } from "../../../manage/close";
+import { mm } from "../../../manage/message";
+import { gameroom } from "../../../ram/consts";
+import type { GameRoomResponseMessage } from "../../base";
+
+export function handle_join(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array)
+:GameRoomResponseMessage[]
+{
+  const result:GameRoomResponseMessage[] = []
+  
+  const {rgb,nick} = mm.u8aobj(msg) as { rgb?: {r:number,g:number,b:number}; nick?: string };
+  rawlog(rgb,nick)
+
+  if(rgb && nick){ //proper join request
+    ws.data.nick = nick.substring(0,15) //warning //todo not sanitized
+    const uuid = ws.data.uuid
+    const ship = gameroom.join_game(uuid, nick, rgb)
+    //todo convert to float32array, encode as {s:arr},add type JOIN, return as message object
+    
+    result.push({
+      mt: MT.JOIN,
+      msg: ship,
+      ms: 0,
+      uuids: [0]
+    })
+    // collect all other ships and send to new client
+    const b = gameroom.board
+    const p = gameroom.players
+    const size = p.length
+    for(let i = 1;i < size;i++){
+      if (i !== uuid && p[i]){
+        result.push({
+          mt: MT.JOIN,
+          msg: b.read_ship(i),
+          ms:0,
+          uuids: [uuid]
+        })
+      }
+    }
+  } else {
+    errlog("incorrect join request. Hijacking")
+    ws.close(CCR.HIJACKING.code, CCR.HIJACKING.reason)
+  }
+
+  return result
+}

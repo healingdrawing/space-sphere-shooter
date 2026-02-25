@@ -96,7 +96,7 @@ function create_home_box(){
         const key = use_key()
         const dummy = {rgb:color_box.color, nick:home_box.nick()}
         // add message type
-        const with_mt = mm.keyu8a(MT.EXIT, mm.obju8a(dummy))
+        const with_mt = mm.keyu8a(MT.JOIN, mm.obju8a(dummy))
         // add key. Now mt is second byte
         ws.send(mm.keyu8a(key, with_mt)); //todo fix later
         //warning this is initial message so ram.key is zero, so no need check ram.key

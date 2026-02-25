@@ -1,13 +1,13 @@
 import { DEVLOG, devlog, errlog, rawlog } from "../../debug/debug";
 import { mm } from "../../manage/message";
-import { send_delayed_messages, type GameRoomResponseMessage, type GameRoom } from "../base";
+import { send_delayed_messages, type GameRoomResponseMessage, type GameRoom, broadcast_exit_message } from "../base";
 import { SSSBoard } from "./gameboard/board";
 import type { TMDC_BOARD_ACTION } from "./gameboard/types";
 import { GameRoomDelayedAction } from "./gameboard/enums";
 import { rip_cell_message, select_cell_message, click_cell_client_messages, exit_game_messages } from "./messages";
 import { USERS_MAX_NUMBER } from "../../ram/consts";
 import { MT } from "../../enums/mt";
-import { handle_back_shot, handle_ccw_move, handle_cw_move, handle_down_move, handle_down_shot, handle_exit, handle_front_move, handle_front_shot, handle_left_move, handle_left_shot, handle_right_move, handle_right_shot, handle_stop_move, handle_target_move, handle_top_move, handle_top_shot } from "./handlers/game";
+import { handle_back_shot, handle_ccw_move, handle_cw_move, handle_down_move, handle_down_shot, handle_join, handle_exit, handle_front_move, handle_front_shot, handle_left_move, handle_left_shot, handle_right_move, handle_right_shot, handle_stop_move, handle_target_move, handle_top_move, handle_top_shot } from "./handlers/game";
 import { CCR } from "../../manage/close";
 import type { WebSocketData } from "../..";
 import { parse_guns, parse_limits } from "./ship/limits";
@@ -56,7 +56,11 @@ export class SSSGameRoom implements GameRoom {
   }
   remove_client(uuid:number){
     this.players[uuid] = 0 //clean the slot, and free the "uuid"(that is index in array)
+    //warning non mandatory reset_ship call. Can set ship_idx=0 to speedup, with artefacts
+    this.board.reset_ship(uuid)
     this.check_room_is_empty()
+    //inform other clients to remove ship
+    broadcast_exit_message(uuid)
   }
 
   join_game( uuid:number, nick:string, rgb:{r:number,g:number,b:number}, ){
@@ -159,7 +163,9 @@ export class SSSGameRoom implements GameRoom {
     const result:GameRoomResponseMessage[] = []
     
     switch (mt) {
-      case MT.EXIT: return handle_exit(ws, msg);
+      case MT.JOIN: return handle_join(ws, msg);
+
+      case MT.EXIT: return handle_exit(ws, msg)
     
       case MT.FRONTSHOT:
         handle_front_shot(ws, msg);
