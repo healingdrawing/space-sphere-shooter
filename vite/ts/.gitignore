@@ -1,3 +1,6 @@
+# ingnore big jpg of background skybox
+textures
+
 # Logs
 logs
 *.log
