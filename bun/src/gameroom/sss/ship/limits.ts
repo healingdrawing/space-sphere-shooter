@@ -1,50 +1,49 @@
+import { DEVLOG, devlog } from "../../../debug/debug";
+
 const vowel_regex = /[aeiou]/i
 const consonant_regex =  /[b-df-hj-np-tv-z]/i
 const digit_regex = /\d/
 const other_regex = /[^aeiou0-9b-df-hj-np-tv-z]/i
 
 /** returns x3 guns number(finally angle of shot to direction), limited by 90(degrees), and engines number(maybe use for visuals only) */
-export const parse_guns = (nick:string) => {
-  // sss-ship-properties.minder file 0-front 1-side 2-vert 3-engines(affects only visuals)
-  return{
-    front_guns:Math.min((nick.match(digit_regex)?.length || 0), 90),
-    side_guns:Math.min((nick.match(vowel_regex)?.length || 0), 90),
-    vert_guns:Math.min((nick.match(consonant_regex)?.length || 0), 90),
-    engines:Math.min((nick.match(other_regex)?.length || 0), 90)
-  }
-}
+export const parse_guns = (nick: string) => {
+  let digits = 0, vowels = 0, cons = 0, other = 0;
+  const lower = nick.toLowerCase();
+  const len = lower.length;
 
-const sum_limits = (nick:string):{
-  sum_digits:number,
-  sum_vowels:number,
-  sum_consonants:number,
-  sum_others:number
-} => {
-  let sum_digits = 0
-  let sum_vowels = 0
-  let sum_consonants = 0
-  let sum_others = 0
-  let digits = nick.match(digit_regex)
-  let vowels = nick.match(vowel_regex)
-  let consonants = nick.match(consonant_regex)
-  let others = nick.match(other_regex)
-  if (digits) sum_digits = sum_char_codes(digits)
-  if (vowels) sum_vowels = sum_char_codes(vowels)
-  if (consonants) sum_consonants = sum_char_codes(consonants)
-  if (others) sum_others = sum_char_codes(others)
-    
-  return {sum_digits, sum_vowels, sum_consonants, sum_others}
-}
+  for (let i = 0; i < len; i++) {
+    const c = lower.charCodeAt(i);
 
-function sum_char_codes(arr:RegExpMatchArray){
-  let sum = 0
-  let larr = arr.length
-  for (let i=0;i < larr;i++){
-    const c = arr[i]
-    if(c) sum += c.charCodeAt(0)
+    if (c >= 48 && c <= 57) digits++;
+    else if (c === 97 || c === 101 || c === 105 || c === 111 || c === 117) vowels++;
+    else if (c >= 98 && c <= 122) cons++;
+    else other++;
   }
-  return sum
-}
+
+  return {
+    front_guns: Math.min(digits, 90),
+    side_guns: Math.min(vowels, 90),
+    vert_guns: Math.min(cons, 90),
+    engines: Math.min(other, 90)
+  };
+};
+
+const sum_limits = (nick: string) => {
+  let sd = 0, sv = 0, sc = 0, so = 0;
+  const lower = nick.toLowerCase();
+  const len = lower.length;
+
+  for (let i = 0; i < len; i++) {
+    const c = lower.charCodeAt(i);
+
+    if (c >= 48 && c <= 57) sd += c;
+    else if (c === 97 || c === 101 || c === 105 || c === 111 || c === 117) sv += c;
+    else if (c >= 98 && c <= 122) sc += c;
+    else so += c;
+  }
+
+  return { sum_digits: sd, sum_vowels: sv, sum_consonants: sc, sum_others: so };
+};
 
 export const parse_limits = (nick:string):{
   mass: number, max_lvelo:number, max_avelo:number, maccel: number, daccel: number,
@@ -52,6 +51,9 @@ export const parse_limits = (nick:string):{
   max_en: number, max_hp: number,
 } => {
   const {sum_digits, sum_vowels, sum_consonants, sum_others} = sum_limits(nick)
+
+  if(DEVLOG) devlog("sum_digits, sum_vowels, sum_consonants, sum_others",`${sum_digits}, ${sum_vowels}, ${sum_consonants}, ${sum_others}`) //todo remove
+  
   const sum_nick = sum_digits + sum_vowels + sum_consonants + sum_others //sum of nick char values
 
   const mass = 1000 + sum_nick // [kg] also will be radius of core sphere [mm]

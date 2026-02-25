@@ -11,6 +11,7 @@ import { handle_back_shot, handle_ccw_move, handle_cw_move, handle_down_move, ha
 import { CCR } from "../../manage/close";
 import type { WebSocketData } from "../..";
 import { parse_guns, parse_limits } from "./ship/limits";
+import type { Ship } from "./types";
 
 export class SSSGameRoom implements GameRoom {
   /** incrementable index as uuid of players. Just ++ every time. Ok for now */
@@ -64,62 +65,34 @@ export class SSSGameRoom implements GameRoom {
     const b = this.board
     const {front_guns, side_guns, vert_guns, engines} = parse_guns(nick)
     const {mass, max_lvelo, max_avelo, maccel, daccel, fr, br, sr, vr, max_en, max_hp} = parse_limits(nick)
+    if(DEVLOG) devlog("front_guns, side_guns, vert_guns, engines",`${front_guns}, ${side_guns}, ${vert_guns}, ${engines}`) //todo remove
 
-    b.set_ship_idx(i, i)
+    const ship: Ship = {
+      ship_idx: i,
+      r: c.r, g: c.g, b: c.b,
+      mass: mass,
+      max_lvelo: max_lvelo, max_avelo: max_avelo, maccel: maccel, daccel: daccel,
+      front_guns: front_guns, side_guns: side_guns, vert_guns: vert_guns,
+      engines: engines,
+      fr: fr, br: br, sr: sr, vr: vr,
+      max_en: max_en, en: 0, en_ts: 0,
+      max_hp: max_hp, hp: max_hp, hp_ts: 0, //warning at the moment do not plan recover
 
-    b.set_R(i, c.r)
-    b.set_G(i, c.g)
-    b.set_B(i, c.b)
+      //todo randomise without collision damage some way
+      cx: 0, cy: 0, cz: 0,
+      fvx: 1, fvy: 0, fvz: 0,
+      tvx: 0, tvy: 1, tvz: 0,
+      vvx: 0, vvy: 0, vvz: 0, v_ts: 0,
+      avx: 0, avy: 0, avz: 0, a_ts: 0,
+    };
+    b.write_ship(i, ship)
 
-    b.set_mass(i, mass)
-    b.set_max_lvelo(i, max_lvelo)
-    b.set_max_avelo(i, max_avelo)
-    b.set_maccel(i, maccel)
-    b.set_daccel(i, daccel)
-
-    b.set_front_guns(i, front_guns)
-    b.set_side_guns(i, side_guns)
-    b.set_vert_guns(i, vert_guns)
-
-    b.set_engines(i, engines)
-
-    b.set_fr(i, fr)
-    b.set_br(i, br)
-    b.set_sr(i, sr)
-    b.set_vr(i, vr)
-
-    b.set_max_en(i, max_en)
-    b.set_en(i, 0)
-    b.set_en_ts(i, 0)
-
-    b.set_max_hp(i, max_hp)
-    b.set_hp(i, max_hp)
-    // b.set_hp_ts(i, 0) //warning at the moment do not plan recover
-
-    //todo randomise without collision damage some way
-    b.set_cx(i, 0)
-    b.set_cy(i, 0)
-    b.set_cz(i, 0)
     
-    b.set_fvx(i, 1)
-    b.set_fvy(i, 0)
-    b.set_fvz(i, 0)
+    if(DEVLOG) b.log_ship(i) //todo remove
+    
+    // return new ship to send to all clients //todo remove
+    return ship
 
-    b.set_tvx(i, 0)
-    b.set_tvy(i, 1)
-    b.set_tvz(i, 0)
-
-    b.set_vvx(i, 0)
-    b.set_vvy(i, 0)
-    b.set_vvz(i, 0)
-    b.set_vts(i, 0)
-
-    b.set_avx(i, 0)
-    b.set_avy(i, 0)
-    b.set_avz(i, 0)
-    b.set_ats(i, 0)
-
-    //todo consider sent this new ship to old connected clients, then send old connected ships to new client. Use scheduled messages, one message one ship, not more.
 
   }
 
@@ -186,9 +159,7 @@ export class SSSGameRoom implements GameRoom {
     const result:GameRoomResponseMessage[] = []
     
     switch (mt) {
-      case MT.EXIT:
-        handle_exit(ws, msg);
-        break;
+      case MT.EXIT: return handle_exit(ws, msg);
     
       case MT.FRONTSHOT:
         handle_front_shot(ws, msg);

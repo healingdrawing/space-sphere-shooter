@@ -12,11 +12,10 @@ export type GameRoomResponseMessage = {
   msg: object;
   /** delay milliseconds to send message to client. F.e. to initiate animation */
   ms: number;
-  /** target clients(ws.data.role) to send message to.
+  /** target clients(ws.data.uuid) to send message to or [0] to all.
    * In case of game room the zero 0 used as indicator to send to all players.
-   * //todo implement the zero role when batch of messages generated in gameplay.
    * */
-  roles: number[];
+  uuids: number[];
 };
 
 /** to use with messages returned by handle_game_message gameroom method  */
@@ -25,7 +24,7 @@ export function send_delayed_messages(
 ) {
   const len = messages.length;
   for (let i = 0; i < len; i++) {
-    const { msg, ms, roles } = messages[i]!;
+    const { msg, ms, uuids: roles } = messages[i]!;
     const encoded = mm.obju8a(msg);
     const rlen = roles.length;
     setTimeout(() => {

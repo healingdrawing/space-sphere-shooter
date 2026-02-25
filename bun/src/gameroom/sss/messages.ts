@@ -10,7 +10,7 @@ export function select_cell_message(c: number, role: number): GameRoomResponseMe
   const ms = 0;
   const roles = [role]; // [0] to both/all players //todo to click initiator only 
   if (DEVLOG) devlog("select_cell_message executed", "msg: " + mm.logobj(msg) + " ms: " + ms + " roles: " + roles); //todo remove
-  return { msg, ms, roles };
+  return { msg, ms, uuids: roles };
 }
 //warning remove. first polish indices above, 0-63 to 1-64. then touch this
 /**
@@ -24,7 +24,7 @@ function step_to_cell_message(c: number, o: number, duration: number): GameRoomR
   const roles = [0]; // [0] to both/all players
 
   if (DEVLOG) devlog("step_to_cell_messages executed", "msg: " + mm.logobj(msg) + " ms: " + ms + " roles: " + roles); //todo remove
-  return { msg, ms, roles };
+  return { msg, ms, uuids: roles };
 }
 /** command to rip item/cell on client side. Tricky
  * {t:MT.G,c:0, o}
@@ -36,7 +36,7 @@ export function rip_cell_message(o: number): GameRoomResponseMessage {
   const roles = [0]; // [0] to both/all players
 
   if (DEVLOG) devlog("room.ts rip_cell_messages executed", mm.logobj(msg), ms, roles); //todo remove
-  return { msg, ms, roles };
+  return { msg, ms, uuids: roles };
 }
 /**
  * @returns  messages for role specified client.
@@ -73,7 +73,7 @@ export function exit_game_messages(msgs: TMDC_BOARD_MESSAGE[]): GameRoomResponse
     const ms = 0;
     const roles = [m.to_role];
     if (DEVLOG) devlog("room.ts exit_game_messages executed", mm.logobj(msg), ms, roles); //todo remove
-    result.push({ msg, ms, roles });
+    result.push({ msg, ms, uuids: roles });
   }
 
   return result;

@@ -55,12 +55,12 @@ export enum SOFF {
   MAX_EN,
   /** energy */
   EN,
-  /** energy last use timestamp */
+  /** energy last use timestamp [ms]*/
   EN_TS,
 
   MAX_HP,
   HP,
-  /** hp last damage timestamp(just for case, not plan now) */
+  /** hp last damage timestamp [ms] (just for case, not plan now) */
   HP_TS,
 
   CX, CY, CZ,           // center coo
@@ -70,11 +70,11 @@ export enum SOFF {
 
   VVX, VVY, VVZ,        // linear velocity [m/s]
   /** velocity timestamp [ms] */
-  VTS,
+  V_TS,
 
   AVX, AVY, AVZ,        // angular velocity (deg/s)
   /** angular timestamp [ms] */
-  ATS,
+  A_TS,
 };
 
 /** the number of elements in enum SOFF */

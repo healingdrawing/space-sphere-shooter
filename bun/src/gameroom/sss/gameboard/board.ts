@@ -1,10 +1,6 @@
-import { DEVLOG, devlog, errlog, rawlog } from "../../../debug/debug";
-import { type TMDC_CellBackup } from "../types";
-import { TMDC_CellState, TMDC_Owner, TMDC_DragonType, TMDC_DragonHP, TMDC_DragonMP, TMDC_DragonRange } from "../enums";
-import type { TMDC_BOARD_ACTION, TMDC_BOARD_MESSAGE } from "./types";
-import { GameRoomDelayedAction } from "./enums";
-import { mm } from "../../../manage/message";
+import { errlog } from "../../../debug/debug";
 import { USERS_MAX_NUMBER } from "../../../ram/consts";
+import type { Ship } from "../types";
 import { SOFF as S, SOFFSIZE } from "./enums";
 
 export class SSSBoard {
@@ -29,9 +25,9 @@ export class SSSBoard {
   get_max_avelo = (i: number) => this.get(i, S.MAX_AVELO);
   get_maccel = (i: number) => this.get(i, S.MACCEL);
   get_daccel = (i: number) => this.get(i, S.DACCEL);
+  get_front_guns = (i: number) => this.get(i, S.FRONT_GUNS);
   get_side_guns = (i: number) => this.get(i, S.SIDE_GUNS);
   get_vert_guns = (i: number) => this.get(i, S.VERT_GUNS);
-  get_front_guns = (i: number) => this.get(i, S.FRONT_GUNS);
   get_engines = (i: number) => this.get(i, S.ENGINES);
   get_fr = (i: number) => this.get(i, S.FR);
   get_br = (i: number) => this.get(i, S.BR);
@@ -55,11 +51,11 @@ export class SSSBoard {
   get_vvx = (i: number) => this.get(i, S.VVX);
   get_vvy = (i: number) => this.get(i, S.VVY);
   get_vvz = (i: number) => this.get(i, S.VVZ);
-  get_vts = (i: number) => this.get(i, S.VTS);
+  get_vts = (i: number) => this.get(i, S.V_TS);
   get_avx = (i: number) => this.get(i, S.AVX);
   get_avy = (i: number) => this.get(i, S.AVY);
   get_avz = (i: number) => this.get(i, S.AVZ);
-  get_ats = (i: number) => this.get(i, S.ATS);
+  get_ats = (i: number) => this.get(i, S.A_TS);
 
   set_ship_idx = (i: number, v: number) => this.set(i, S.SHIP_IDX, v);
   set_R = (i: number, v: number) => this.set(i, S.R, v);
@@ -70,9 +66,9 @@ export class SSSBoard {
   set_max_avelo = (i: number, v: number) => this.set(i, S.MAX_AVELO, v);
   set_maccel = (i: number, v: number) => this.set(i, S.MACCEL, v);
   set_daccel = (i: number, v: number) => this.set(i, S.DACCEL, v);
+  set_front_guns = (i: number, v: number) => this.set(i, S.FRONT_GUNS, v);
   set_side_guns = (i: number, v: number) => this.set(i, S.SIDE_GUNS, v);
   set_vert_guns = (i: number, v: number) => this.set(i, S.VERT_GUNS, v);
-  set_front_guns = (i: number, v: number) => this.set(i, S.FRONT_GUNS, v);
   set_engines = (i: number, v: number) => this.set(i, S.ENGINES, v);
   set_fr = (i: number, v: number) => this.set(i, S.FR, v);
   set_br = (i: number, v: number) => this.set(i, S.BR, v);
@@ -96,27 +92,106 @@ export class SSSBoard {
   set_vvx = (i: number, v: number) => this.set(i, S.VVX, v);
   set_vvy = (i: number, v: number) => this.set(i, S.VVY, v);
   set_vvz = (i: number, v: number) => this.set(i, S.VVZ, v);
-  set_vts = (i: number, v: number) => this.set(i, S.VTS, v);
+  set_vts = (i: number, v: number) => this.set(i, S.V_TS, v);
   set_avx = (i: number, v: number) => this.set(i, S.AVX, v);
   set_avy = (i: number, v: number) => this.set(i, S.AVY, v);
   set_avz = (i: number, v: number) => this.set(i, S.AVZ, v);
-  set_ats = (i: number, v: number) => this.set(i, S.ATS, v);
+  set_ats = (i: number, v: number) => this.set(i, S.A_TS, v);
+
+  log_ship(i: number) {
+    const b = this.base(i);
+    console.log(`\n=== Ship ${i} ===`);
+    console.log(`ship_idx:     ${this.ships[b + S.SHIP_IDX]}`);
+    console.log(`r:            ${this.ships[b + S.R]}`);
+    console.log(`g:            ${this.ships[b + S.G]}`);
+    console.log(`b:            ${this.ships[b + S.B]}`);
+    console.log(`mass:         ${this.ships[b + S.MASS]}`);
+    console.log(`max_lvelo:         ${this.ships[b + S.MAX_LVELO]}`);
+    console.log(`max_avelo:         ${this.ships[b + S.MAX_AVELO]}`);
+    console.log(`maccel:         ${this.ships[b + S.MACCEL]}`);
+    console.log(`daccel:         ${this.ships[b + S.DACCEL]}`);
+    console.log(`front_guns:   ${this.ships[b + S.FRONT_GUNS]}`);
+    console.log(`side_guns:    ${this.ships[b + S.SIDE_GUNS]}`);
+    console.log(`vert_guns:    ${this.ships[b + S.VERT_GUNS]}`);
+    console.log(`engines:    ${this.ships[b + S.ENGINES]}`);
+    console.log(`fr:           ${this.ships[b + S.FR]}`);
+    console.log(`br:           ${this.ships[b + S.BR]}`);
+    console.log(`sr:           ${this.ships[b + S.SR]}`);
+    console.log(`vr:           ${this.ships[b + S.VR]}`);
+    console.log(`max_en:       ${this.ships[b + S.MAX_EN]}`);
+    console.log(`en:           ${this.ships[b + S.EN]}`);
+    console.log(`en_ts:        ${this.ships[b + S.EN_TS]}`);
+    console.log(`max_hp:       ${this.ships[b + S.MAX_HP]}`);
+    console.log(`hp:           ${this.ships[b + S.HP]}`);
+    console.log(`hp_ts:        ${this.ships[b + S.HP_TS]}`);
+    console.log(`cx:           ${this.ships[b + S.CX]}`);
+    console.log(`cy:           ${this.ships[b + S.CY]}`);
+    console.log(`cz:           ${this.ships[b + S.CZ]}`);
+    console.log(`fvx:          ${this.ships[b + S.FVX]}`);
+    console.log(`fvy:          ${this.ships[b + S.FVY]}`);
+    console.log(`fvz:          ${this.ships[b + S.FVZ]}`);
+    console.log(`tvx:          ${this.ships[b + S.TVX]}`);
+    console.log(`tvy:          ${this.ships[b + S.TVY]}`);
+    console.log(`tvz:          ${this.ships[b + S.TVZ]}`);
+    console.log(`vvx:          ${this.ships[b + S.VVX]}`);
+    console.log(`vvy:          ${this.ships[b + S.VVY]}`);
+    console.log(`vvz:          ${this.ships[b + S.VVZ]}`);
+    console.log(`v_ts:         ${this.ships[b + S.V_TS]}`);
+    console.log(`avx:          ${this.ships[b + S.AVX]}`);
+    console.log(`avy:          ${this.ships[b + S.AVY]}`);
+    console.log(`avz:          ${this.ships[b + S.AVZ]}`);
+    console.log(`a_ts:         ${this.ships[b + S.A_TS]}`);
+    console.log("===================\n");
+  }
+
+  read_ship(i: number):Ship{
+    const b = this.base(i);
+    return {
+      ship_idx:     this.ships[b + S.SHIP_IDX]!,
+      r:             this.ships[b + S.R]!,
+      g:             this.ships[b + S.G]!,
+      b:             this.ships[b + S.B]!,
+      mass:          this.ships[b + S.MASS]!,
+      max_lvelo:          this.ships[b + S.MAX_LVELO]!,
+      max_avelo:          this.ships[b + S.MAX_AVELO]!,
+      maccel:          this.ships[b + S.MACCEL]!,
+      daccel:          this.ships[b + S.DACCEL]!,
+      front_guns: this.ships[b + S.FRONT_GUNS]!,
+      side_guns:      this.ships[b + S.SIDE_GUNS]!,
+      vert_guns:  this.ships[b + S.VERT_GUNS]!,
+      engines:  this.ships[b + S.ENGINES]!,
+      fr:            this.ships[b + S.FR]!,
+      br:            this.ships[b + S.BR]!,
+      sr:            this.ships[b + S.SR]!,
+      vr:            this.ships[b + S.VR]!,
+      max_en:     this.ships[b + S.MAX_EN]!,
+      en:        this.ships[b + S.EN]!,
+      en_ts:          this.ships[b + S.EN_TS]!,
+      max_hp:         this.ships[b + S.MAX_HP]!,
+      hp:            this.ships[b + S.HP]!,
+      hp_ts:          this.ships[b + S.HP_TS]!,
+      cx:            this.ships[b + S.CX]!,
+      cy:            this.ships[b + S.CY]!,
+      cz:            this.ships[b + S.CZ]!,
+      fvx:           this.ships[b + S.FVX]!,
+      fvy:           this.ships[b + S.FVY]!,
+      fvz:           this.ships[b + S.FVZ]!,
+      tvx:           this.ships[b + S.TVX]!,
+      tvy:           this.ships[b + S.TVY]!,
+      tvz:           this.ships[b + S.TVZ]!,
+      vvx:           this.ships[b + S.VVX]!,
+      vvy:           this.ships[b + S.VVY]!,
+      vvz:           this.ships[b + S.VVZ]!,
+      v_ts:           this.ships[b + S.V_TS]!,
+      avx:           this.ships[b + S.AVX]!,
+      avy:           this.ships[b + S.AVY]!,
+      avz:           this.ships[b + S.AVZ]!,
+      a_ts:           this.ships[b + S.A_TS]!,
+    };
+  }
 
   /** Write new ship */
-  write_ship(i: number, data: {
-    ship_idx: number;
-    r: number; g: number; b: number;
-    mass: number; max_lvelo:number; max_avelo:number; maccel:number; daccel:number;
-    side_guns: number; vert_guns: number; front_guns: number; engines:number;
-    fr: number; br: number; sr: number; vr: number;
-    max_en: number; en: number; en_ts: number;
-    max_hp: number; hp: number; hp_ts: number;
-    cx: number; cy: number; cz: number;
-    fvx: number; fvy: number; fvz: number;
-    tvx: number; tvy: number; tvz: number;
-    vvx: number; vvy: number; vvz: number; vts: number;
-    avx: number; avy: number; avz: number; ats: number;
-  }) {
+  write_ship(i: number, data:Ship ) {
     const b = this.base(i);
     this.ships[b + S.SHIP_IDX] = data.ship_idx;
     this.ships[b + S.R] = data.r;
@@ -127,9 +202,9 @@ export class SSSBoard {
     this.ships[b + S.MAX_AVELO] = data.max_avelo;
     this.ships[b + S.MACCEL] = data.maccel;
     this.ships[b + S.DACCEL] = data.daccel;
+    this.ships[b + S.FRONT_GUNS] = data.front_guns;
     this.ships[b + S.SIDE_GUNS] = data.side_guns;
     this.ships[b + S.VERT_GUNS] = data.vert_guns;
-    this.ships[b + S.FRONT_GUNS] = data.front_guns;
     this.ships[b + S.ENGINES] = data.engines;
     this.ships[b + S.FR] = data.fr;
     this.ships[b + S.BR] = data.br;
@@ -153,11 +228,11 @@ export class SSSBoard {
     this.ships[b + S.VVX] = data.vvx;
     this.ships[b + S.VVY] = data.vvy;
     this.ships[b + S.VVZ] = data.vvz;
-    this.ships[b + S.VTS] = data.vts;
+    this.ships[b + S.V_TS] = data.v_ts;
     this.ships[b + S.AVX] = data.avx;
     this.ships[b + S.AVY] = data.avy;
     this.ships[b + S.AVZ] = data.avz;
-    this.ships[b + S.ATS] = data.ats;
+    this.ships[b + S.A_TS] = data.a_ts;
   }
 
   /** Reset one ship slot when player exit or destroyed */
@@ -179,7 +254,7 @@ export class SSSBoard {
         const b = base(i);
         if (!ships[b + S.HP]) continue; // skip dead
     
-        const vts = ships[b + S.VTS]!;
+        const vts = ships[b + S.V_TS]!;
         const dt = now - vts;
     
         ships[b + S.CX]! += ships[b + S.VVX]! * dt;

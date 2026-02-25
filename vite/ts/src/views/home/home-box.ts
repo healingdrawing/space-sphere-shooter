@@ -29,7 +29,7 @@ function create_home_box(){
   view.innerHTML = `
     <h1>Welcome</h1>
     <div>
-      <input id="nick" placeholder="nickname" value="unknown">
+      <input id="nick" placeholder="nickname" value="ixoxi33!3!3!##">
     </div>
     <span>Set identity game color</span>
     <div id="color-picker"></div>
