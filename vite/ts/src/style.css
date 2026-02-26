@@ -100,3 +100,7 @@ button:focus-visible {
 #chat-view {
   min-height: 100vh;
 }
+
+#game-view{
+  border: solid 1px red;
+}

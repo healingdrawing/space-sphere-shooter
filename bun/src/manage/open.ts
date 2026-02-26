@@ -1,7 +1,8 @@
 import type { WebSocketData } from ".."
 import { DEVLOG } from "../debug/debug"
 import { MT } from "../enums/mt"
-import { users, USERS_MAX_NUMBER } from "../ram/consts"
+import { USERS_MAX_NUMBER } from "../ram/consts"
+import { users } from "../ram/storage"
 import { CCR } from "./close"
 import { ips } from "./ips"
 import { mm } from "./message"
@@ -29,7 +30,7 @@ export function handle_ws_open(ws: Bun.ServerWebSocket<WebSocketData>): boolean 
   ws.subscribe(`${ws.data.uuid}`) // personal messages
   ws.subscribe("game") // for broadcast, common gameplay messages
   
-  const msg = { text: "join the game" }
+  const msg = { umn: USERS_MAX_NUMBER }
   ws.send(mm.keyu8a(MT.S, mm.obju8a(msg)))
   return false
 }

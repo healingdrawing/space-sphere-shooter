@@ -3,7 +3,7 @@ import { errlog, rawlog } from "../../../debug/debug";
 import { MT } from "../../../enums/mt";
 import { CCR } from "../../../manage/close";
 import { mm } from "../../../manage/message";
-import { gameroom } from "../../../ram/consts";
+import { gameroom } from "../../../ram/storage";
 import type { GameRoomResponseMessage } from "../../base";
 
 export function handle_join(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array)
@@ -20,11 +20,12 @@ export function handle_join(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Ar
     const ship = gameroom.join_game(uuid, nick, rgb)
     //todo convert to float32array, encode as {s:arr},add type JOIN, return as message object
     
+    // send order to join game. init add new(controllable) ship etc
     result.push({
       mt: MT.JOIN,
       msg: ship,
       ms: 0,
-      uuids: [0]
+      uuids: [uuid]
     })
     // collect all other ships and send to new client
     const b = gameroom.board
@@ -33,13 +34,20 @@ export function handle_join(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Ar
     for(let i = 1;i < size;i++){
       if (i !== uuid && p[i]){
         result.push({
-          mt: MT.JOIN,
+          mt: MT.SHIP,
           msg: b.read_ship(i),
-          ms:0,
+          ms:20,
           uuids: [uuid]
         })
       }
     }
+    // send new ship to old clients(//WARNING manage on client side the uuid client, because this case ship is already arrived)
+    result.push({
+      mt: MT.SHIP,
+      msg: ship,
+      ms: 40,
+      uuids: [0]
+    })
   } else {
     errlog("incorrect join request. Hijacking")
     ws.close(CCR.HIJACKING.code, CCR.HIJACKING.reason)

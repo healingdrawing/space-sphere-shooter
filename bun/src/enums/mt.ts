@@ -6,8 +6,11 @@ export enum MT {
   /** Used when player enters the game */
   JOIN,
 
-  /** Used when player enters or exits the game (enter game / exit game / disconnect) - Key: NumpadSubtract/KeyO */
+  /** Used when player exits the game (exit game / disconnect) - Key: NumpadSubtract/KeyO */
   EXIT,
+
+  /** new ship arrived. another player connected */
+  SHIP,
 
   /** Front shot (main weapon) - Key: NUM0/KeyF */
   FRONTSHOT,
@@ -71,6 +74,7 @@ export const MT_NAME: Record<MT, string> = {
   [MT.FAKE]: "FAKE",
   [MT.JOIN]: "JOIN",
   [MT.EXIT]: "EXIT",
+  [MT.SHIP]: "SHIP",
   [MT.FRONTSHOT]: "FRONTSHOT",
   [MT.LEFTSHOT]: "LEFTSHOT",
   [MT.RIGHTSHOT]: "RIGHTSHOT",

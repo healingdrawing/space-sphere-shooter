@@ -3,7 +3,7 @@ import { mm } from "./message"
 import { CCR } from './close'
 import { MT } from '../enums/mt'
 import type { WebSocketData } from ".."
-import { gameroom } from "../ram/consts"
+import { gameroom } from "../ram/storage"
 import { send_delayed_messages } from "../gameroom/base"
 
 /**

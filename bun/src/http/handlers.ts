@@ -1,7 +1,8 @@
 import type { WebSocketData } from ".."
 import { errlog, rawlog } from "../debug/debug"
 import { ips } from "../manage/ips"
-import { gameroom, users, USERS_MAX_NUMBER } from "../ram/consts"
+import { USERS_MAX_NUMBER } from "../ram/consts"
+import { gameroom, users } from "../ram/storage"
 
 export function http_response(body:string | null, _req:Request, status:number){
   const headers = {

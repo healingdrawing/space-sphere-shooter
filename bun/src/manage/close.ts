@@ -1,6 +1,6 @@
 import type { WebSocketData } from ".."
 import { ERRLOG, errlog } from "../debug/debug"
-import { gameroom, users } from "../ram/consts"
+import { gameroom, users } from "../ram/storage"
 import { ips } from "./ips"
 
 /** custom close reasons. ws.close() */

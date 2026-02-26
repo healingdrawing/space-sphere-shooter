@@ -1,5 +1,5 @@
 import { all_handler } from './handlers/all'
-import { KEYMAP, mm, MT_NAME } from './tunnel';
+import { mm, MT_NAME } from './tunnel';
 import { ram } from './ram'
 
 export const init_ws = (url: string) => {
