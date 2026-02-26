@@ -81,14 +81,14 @@ function create_game_box() {
     animate();
   }
 
-  /** show gameover visuals o during ms, then switch to chat.
-   * @param o variant of visuals
-   * @param ms [milliseconds]
-   * */
   function game_over(){
     console.warn("gameover visuals not implemented") //todo implement
+    if (engine) {
+      engine.stopRenderLoop();
+      engine.dispose();
+    }
     setTimeout(() => {
-      // page reload to home page with closing websocket etc
+      window.location.reload();
     }, 3000)
   }
   

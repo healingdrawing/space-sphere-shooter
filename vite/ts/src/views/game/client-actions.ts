@@ -4,16 +4,16 @@ import { home_box } from "../home/home-box";
 
 export const send_client_action = (ws:WebSocket, action:MT) => {
   const key = use_key()
-    if(!key){
-      console.error("in some reasons there was no key at the request moment, so message was not sent. Reload browser window, to try connect again.")
-      return
-    }
-    console.log("clicked button. KeyCode:", action);//todo remove
-    const dummy = { code: action }
-    // add message type
-    const with_mt = mm.keyu8a(action, mm.obju8a(dummy))
-    // add key. Now mt is second byte
-    ws.send(mm.keyu8a(key, with_mt)); //todo fix later
+  if(!key){
+    console.error("in some reasons there was no key at the request moment, so message was not sent. Reload browser window, to try connect again.")
+    return
+  }
+  console.log("clicked button. KeyCode:", action);//todo remove
+  const dummy = { code: action }
+  // add message type
+  const with_mt = mm.keyu8a(action, mm.obju8a(dummy))
+  // add key. Now mt is second byte
+  ws.send(mm.keyu8a(key, with_mt)); //todo fix later
 }
 
 

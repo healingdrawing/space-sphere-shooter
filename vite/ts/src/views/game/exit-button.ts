@@ -9,13 +9,6 @@ export const add_exit_button_to_game_view = (ws:WebSocket, view: HTMLDivElement)
   b.addEventListener('pointerup', () => {
     b.disabled = true
     b.style.pointerEvents = 'none'
-
-    const key = use_key()
-    if(!key){
-      console.error("in some reasons there was no key at the exit request moment, so message was not sent. Reload browser window, to try connect again.")
-      return
-    }
-    console.log("clicked exit button");//todo remove
     send_client_action(ws, MT.EXIT)
   })
   view.insertBefore(b, view.firstChild);

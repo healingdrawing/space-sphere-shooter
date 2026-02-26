@@ -1,6 +1,7 @@
 import { all_handler } from './handlers/all'
 import { mm, MT_NAME } from './tunnel';
 import { ram } from './ram'
+import { game_box } from './views/game/game-box';
 
 export const init_ws = (url: string) => {
   
@@ -8,7 +9,7 @@ export const init_ws = (url: string) => {
     // check key arrived
     if(bar.length === 1){
       ram.key = bar[0]
-      console.log("key arrived. text:",bar, " ram.key:", ram.key) //todo remove
+      console.warn("KEY ARRIVED. text:",bar, " ram.key:", ram.key) //todo remove
       return
     }
     const mt = bar[0]//todo refactor properly. here it is no a key, and not keysigned, since sent by server. so mt is first byte
@@ -30,7 +31,8 @@ export const init_ws = (url: string) => {
   }
 
   socket.onclose = () => {
-    console.log('WebSocket disconnected')
+    console.warn('WebSocket disconnected')
+    game_box.game_over()
   }
   
   socket.onmessage = (event) => {

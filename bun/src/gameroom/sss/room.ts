@@ -163,7 +163,7 @@ export class SSSGameRoom implements GameRoom {
     switch (mt) {
       case MT.JOIN: return handle_join(ws, msg);
 
-      case MT.EXIT: return handle_exit(ws, msg)
+      case MT.EXIT: handle_exit(ws, msg); break
     
       case MT.FRONTSHOT:
         handle_front_shot(ws, msg);

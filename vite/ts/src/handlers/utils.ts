@@ -4,5 +4,6 @@ import { ram } from "../ram"
 export function use_key(){
   const key = ram.key
   ram.key = 0
+  console.warn("KEY USED:",key)
   return key
 }
