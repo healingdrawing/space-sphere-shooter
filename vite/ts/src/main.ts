@@ -3,6 +3,7 @@ import './style.css'
 import './vs-modal.css'
 import { big_box } from './views/bigbox'
 
+
 const app = document.querySelector('#app')!
 
 // Append views to app

@@ -76,10 +76,11 @@ function create_home_box(){
     }
   }
   
-  function connect_to_server(e: Event) {
+  async function connect_to_server(e: Event) {
     if (assets_not_ready){
       alert("First download the assets. Mandatory to gameplay.")
     }else {
+      
       const btn = e.target as HTMLButtonElement
       btn.disabled = true
       btn.style.pointerEvents = 'none'

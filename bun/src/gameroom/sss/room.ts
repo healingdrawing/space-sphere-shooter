@@ -189,13 +189,8 @@ export class SSSGameRoom implements GameRoom {
         handle_down_shot(ws, msg);
         break;
     
-      case MT.FRONTMOVE:
-        handle_front_move(ws, msg);
-        break;
-    
-      case MT.STOPMOVE:
-        handle_stop_move(ws, msg);
-        break;
+      case MT.FRONTMOVE: return handle_front_move(ws, msg);
+      case MT.STOPMOVE: return handle_stop_move(ws, msg);
     
       case MT.LEFTMOVE:
         handle_left_move(ws, msg);

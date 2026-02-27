@@ -256,7 +256,7 @@ export class SSSBoard {
         if (!ships[b + S.HP]) continue; // skip dead
     
         const vts = ships[b + S.V_TS]!;
-        const dt = now - vts;
+        const dt = (now - vts)/1000;
     
         ships[b + S.CX]! += ships[b + S.VVX]! * dt;
         ships[b + S.CY]! += ships[b + S.VVY]! * dt;

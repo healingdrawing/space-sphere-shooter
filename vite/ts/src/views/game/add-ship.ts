@@ -21,7 +21,7 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ships:(BABYLON.Mesh |
     depth:  (ship.fr + ship.br)   // front + back radius
   }, scene);
 
-  ship_mesh.showBoundingBox = true; //todo remove. test
+  // ship_mesh.showBoundingBox = true; //todo remove. test
 
   // Position at center
   ship_mesh.position.set(ship.cx, ship.cy, ship.cz);
@@ -30,6 +30,8 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ships:(BABYLON.Mesh |
   const mat = new BABYLON.StandardMaterial(`ship-mat-${idx}`, scene);
   mat.diffuseColor = new BABYLON.Color3(ship.r/255, ship.g/255, ship.b/255);
   mat.emissiveColor = new BABYLON.Color3(ship.r * 0.3/255, ship.g * 0.3/255, ship.b * 0.3/255);
+  mat.alpha = 1.0; // Make sure it's fully opaque
+  mat.backFaceCulling = true; // Cull back faces
   ship_mesh.material = mat;
 
   // Orientation using front + top vectors

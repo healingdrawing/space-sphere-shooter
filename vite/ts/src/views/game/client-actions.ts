@@ -8,7 +8,7 @@ export const send_client_action = (ws:WebSocket, action:MT) => {
     console.error("in some reasons there was no key at the request moment, so message was not sent. Reload browser window, to try connect again.")
     return
   }
-  console.log("clicked button. KeyCode:", action);//todo remove
+  console.log("released button. KeyCode:", action);//todo remove
   const dummy = { code: action }
   // add message type
   const with_mt = mm.keyu8a(action, mm.obju8a(dummy))
@@ -30,15 +30,15 @@ export const manage_client_actions = (ws:WebSocket, view:HTMLDivElement) => {
      if (pressed.has(e.code)) return;
      pressed.add(e.code);
      const action = KEYMAP[e.code]
-     console.log('DOWN', e.code, 'KEYMAP[e.code]:', action);
+     console.log('DOWN', e.code, 'KEYMAP[e.code]:', action);  // todo remove
      // send_client_action(ws, action)
    };
  
    const onKeyUp = (e: KeyboardEvent) => {
      pressed.delete(e.code);
      const action = KEYMAP[e.code]
-     console.log('UP', e.code, 'KEYMAP[e.code]:', action);
-     send_client_action(ws, action)
+     console.log('UP', e.code, 'KEYMAP[e.code]:', action); // todo remove
+     if(action) send_client_action(ws, action)
    };
  
    const onPointerDown = (e: PointerEvent) => {
