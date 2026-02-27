@@ -8,6 +8,9 @@ interface RAM {
   
   /** USERS_MAX_NUMBER . Server side .env limit */
   umn: number;
+
+  /** SERVER_START_TIME_MS . Server side consts.ts */
+  sst_ms: number;
 }
 
 /** Factory function to create a RAM instance */
@@ -17,6 +20,8 @@ function create_ram(): RAM {
 
   let umn = 0
 
+  let sst_ms = 0
+
   
   return {
     get key() { return key },
@@ -24,6 +29,9 @@ function create_ram(): RAM {
 
     get umn() { return umn },
     set umn(value) { umn = value },
+
+    get sst_ms() { return sst_ms },
+    set sst_ms(value) { sst_ms = value },
   };
 }
 

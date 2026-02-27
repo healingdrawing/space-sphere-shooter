@@ -16,9 +16,9 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ships:(BABYLON.Mesh |
   }
 
   const ship_mesh = BABYLON.MeshBuilder.CreateBox(`ship-${idx}`, {
-    width:  ship.sr * 2,   // side radius * 2
-    height: ship.vr * 2,   // vertical radius * 2
-    depth:  (ship.fr + ship.br)   // front + back radius
+    width:  (ship.sr * 2)/1000,   // side radius * 2
+    height: (ship.vr * 2)/1000,   // vertical radius * 2
+    depth:  (ship.fr + ship.br)/1000   // front + back radius
   }, scene);
 
   // ship_mesh.showBoundingBox = true; //todo remove. test

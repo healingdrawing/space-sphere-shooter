@@ -9,6 +9,7 @@ import { CCR } from "../../manage/close";
 import type { WebSocketData } from "../..";
 import { parse_guns, parse_limits } from "./ship/limits";
 import type { Ship } from "./types";
+import { rts } from "../../utils/basetime";
 
 export class SSSGameRoom implements GameRoom {
   /** incrementable index as uuid of players. Just ++ every time. Ok for now */
@@ -30,20 +31,6 @@ export class SSSGameRoom implements GameRoom {
   players: Uint8Array = new Uint8Array(this.room_size)
   /** gameboard, where gameplay calculated using handle message */
   board:SSSBoard
-
-  private ships_auto_update_timer: NodeJS.Timeout | null = null;
-  /** check there are no connected players, than stop ships autoupdate */
-  private check_room_is_empty(){
-    const size = this.room_size
-    const p = this.players
-    
-    for (let i=1;i<size;i++) if(p[i]) return //check someone still connected
-    
-    if (this.ships_auto_update_timer){
-      clearTimeout(this.ships_auto_update_timer)
-      this.ships_auto_update_timer = null
-    }
-  }
 
   /** return uuid */
   add_client(){
@@ -98,21 +85,31 @@ export class SSSGameRoom implements GameRoom {
 
   }
 
+  private ships_auto_update_timer: NodeJS.Timeout | null = null;
+  /** check there are no connected players, than stop ships autoupdate */
+  private check_room_is_empty(){
+    const size = this.room_size
+    const p = this.players
+    
+    for (let i=1;i<size;i++) if(p[i]) return //check someone still connected
+    
+    if (this.ships_auto_update_timer){
+      clearTimeout(this.ships_auto_update_timer)
+      this.ships_auto_update_timer = null
+    }
+  }
+
   /** update:
    * ship positions, with pause 200ms(not super precised, but should be enough)
    */
   ships_auto_update(){
-    const now = Date.now();
-    this.update_ship_positions(now)
+    const now = rts()
+    this.board.update_ship_positions(now)
     
     let timer = this.ships_auto_update_timer
     if(!timer ) timer = setTimeout(() => {
       this.ships_auto_update()
-    }, 200);//todo consider to move 200[ms] to .env 
-  }
-
-  update_ship_positions(now:number){
-    this.board.update_ship_positions(now)
+    }, 10);//todo consider to move 200[ms] to .env 
   }
 
   // recursive_actions_executor( actions:TMDC_BOARD_ACTION[] ){

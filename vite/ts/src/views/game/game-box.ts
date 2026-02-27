@@ -7,6 +7,7 @@ import { add_exit_button_to_game_view } from "./exit-button";
 import { view_html_div } from "./html-view";
 import { remove_ship } from "./remove-ship";
 import { move_ship } from "./move-ship";
+import { crts } from "../../handlers/utils";
 
 
 function create_game_box() {
@@ -48,7 +49,7 @@ function create_game_box() {
     scene = new BABYLON.Scene(engine);
     scene.clearColor = new BABYLON.Color4(0, 0, 0, 1); // Set background to black
     
-    const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 100000 }, scene);
+    const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000 }, scene);
     const skyboxMaterial = new BABYLON.StandardMaterial("skyBoxMaterial", scene);
     skyboxMaterial.backFaceCulling = false; // Ensure the back faces are rendered
     skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("./textures/1", scene);
@@ -58,15 +59,36 @@ function create_game_box() {
 
     const ship_mesh = add_ship(ship, scene, ships)
     
-    const camera = new BABYLON.FollowCamera("followCamera", new BABYLON.Vector3(0, 0, 0), scene);
-    camera.radius = ship.br * 4;      // start with 4× back radius
-    camera.heightOffset = ship.br * 1.5;  // lift above
-    camera.rotationOffset = 180;  // look from behind
-    camera.cameraAcceleration = 30;
-    camera.maxCameraSpeed = 30;
-    camera.lockedTarget = ship_mesh;   // follow this mesh. it will be tricky
-    camera.minZ = 0.1; // Minimum distance
-    camera.maxZ = 100000; // Maximum distance (increase as needed)
+    if(!ship_mesh) return
+    const camera = new BABYLON.ArcRotateCamera(
+      "camera",
+      Math.PI,           // Alpha (angle around target)
+      Math.PI / 2.5,     // Beta (elevation)
+      ship.br / 25, // Radius
+      ship_mesh.position,
+      scene
+    );
+    
+    scene.registerBeforeRender(() => {
+      if (ship_mesh && ship) {
+        camera.target = ship_mesh.position;
+        
+        // Rotate camera to match ship's heading
+        const shipForward = new BABYLON.Vector3(ship.fvx, ship.fvy, ship.fvz)
+        const angle = Math.atan2(shipForward.x, shipForward.z);
+        camera.alpha = angle + Math.PI;
+      }
+    });
+
+    // const camera = new BABYLON.FollowCamera("followCamera", new BABYLON.Vector3(0, 0, 0), scene);
+    // camera.radius = ship.br/1000 * 4;      // start with 4× back radius
+    // camera.heightOffset = ship.br/1000 * 1.5;  // lift above
+    // camera.rotationOffset = 180;  // look from behind
+    // camera.cameraAcceleration = 2;
+    // camera.maxCameraSpeed = 10;
+    // camera.lockedTarget = ship_mesh;   // follow this mesh. it will be tricky
+    // camera.minZ = 10; // Minimum distance
+    // camera.maxZ = 100000; // Maximum distance (increase as needed)
 
     const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 1), scene);
     light.intensity = 0.5;//todo test
@@ -85,34 +107,32 @@ function create_game_box() {
     //   scene.render();
     // });
 
-    let lastTime = performance.now();
+    let lastTime = crts();
     function animate() {
       if (!engine || !scene) return;
-      const currentTime = performance.now();
-      const deltaTime = (currentTime - lastTime)/1000; // Delta in seconds
+      const currentTime = crts();
       lastTime = currentTime;
-
-      console.log("Divided deltaTime:", deltaTime);
-  
+      
+      // console.log("Divided deltaTime:", deltaTime);
+      
       for (const ship of game_box.ships) {
         if (!ship) continue
-        console.log('Moving ship:', ship.name, ship.metadata.velocity); // DEBUG
+        // console.log('Moving ship:', ship.name, ship.metadata.velocity); // DEBUG
         if (ship.metadata?.velocity) {
-          const v = ship.metadata.velocity as {x:number,y:number,z:number}
+          const v = ship.metadata.velocity as {x:number,y:number,z:number,vts:number}
+          const dt = (currentTime - v.vts)/1000; // Delta in seconds
           const vec = new BABYLON.Vector3(v.x, v.y, v.z)
-          const scaled = vec.scale(deltaTime);
+          const scaled = vec.scaleInPlace(dt);
+          ship.position.addInPlace(scaled); // Use add() instead of addInPlace()
           
-          console.log("Scaled vector:", scaled);
-          console.log("Before position:", ship.position);
+          ship.metadata.velocity = {x:v.x,y:v.y,z:v.z,vts:currentTime}
           
-          ship.position = ship.position.add(scaled); // Use add() instead of addInPlace()
-          
-          console.log("After position:", ship.position);
+          // console.log("After position:", ship.position);
         }
       }
 
-      console.log("Total meshes in scene:", scene.meshes.length);
-      scene.meshes.forEach(m => console.log("  -", m.name));
+      // console.log("Total meshes in scene:", scene.meshes.length);
+      // scene.meshes.forEach(m => console.log("  -", m.name));
 
       scene.render();
       animationId = requestAnimationFrame(animate);

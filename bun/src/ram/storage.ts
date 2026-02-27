@@ -13,3 +13,6 @@ interface USER{
 export const users = new Map<number, USER>()
 
 export const gameroom = new SSSGameRoom()
+
+/** to store variables, for update */
+export const vars = {SERVER_START_TIME_MS:Date.now()}

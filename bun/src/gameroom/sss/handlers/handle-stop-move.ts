@@ -1,8 +1,10 @@
 import type { WebSocketData } from "../../..";
-import { devlog } from "../../../debug/debug";
+import { devlog, rawlog } from "../../../debug/debug";
 import { MT } from "../../../enums/mt";
 import { gameroom } from "../../../ram/storage";
+import { rts } from "../../../utils/basetime";
 import type { GameRoomResponseMessage } from "../../base";
+import { SOFF } from "../gameboard/enums";
 
 export function handle_stop_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array): GameRoomResponseMessage[] {
   devlog("handle_stop_move() execution.")
@@ -25,18 +27,21 @@ export function handle_stop_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: Ui
   let newSpeed = speed - friction;
   if (newSpeed < 0) newSpeed = 0;
 
-  const scale = newSpeed / speed;
+  const scale = 0 // newSpeed / speed;//warning just stop for now
 
   ship.vvx *= scale;
   ship.vvy *= scale;
   ship.vvz *= scale;
 
-  const now = Date.now();
+  const now = rts()
 
   b.set_vvx(uuid, ship.vvx);
   b.set_vvy(uuid, ship.vvy);
   b.set_vvz(uuid, ship.vvz);
   b.set_vts(uuid, now);
+
+  rawlog("stop ship.vvx:",ship.vvx,"vs record ships[i].vvx:",b.ships[b.base(uuid)+SOFF.VVX]!)
+  rawlog("stop move: ship: cx, cy, cz: ",`${ship.cx} ${ship.cy} ${ship.cz}`)
 
   result.push({
     mt: MT.STOPMOVE,

@@ -7,3 +7,6 @@ export function use_key(){
   console.warn("KEY USED:",key)
   return key
 }
+
+/** client get relative timestamp => Date.now() - ram.sst_ms */
+export const crts = () => Date.now() - ram.sst_ms

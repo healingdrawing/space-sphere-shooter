@@ -6,6 +6,7 @@ import { handle_ws_message } from "./manage/all"
 import { handle_ws_close } from './manage/close'
 import { check_ip_banned, handle_check_request, handle_not_found, handle_options_request, handle_ws_request, http_response, no_free_spots } from "./http/handlers"
 import { handle_ws_open } from "./manage/open"
+import { periodically_update_server_start_time } from "./utils/basetime"
 
 /** to manage properties using ws.data. */
 export interface WebSocketData {
@@ -65,3 +66,5 @@ export const s = Bun.serve<WebSocketData, undefined>({
 rawlog_consts()
 
 dlog(true, "server listening on",`port: ${s.port}`, `host: ${s.hostname}`)
+
+periodically_update_server_start_time()

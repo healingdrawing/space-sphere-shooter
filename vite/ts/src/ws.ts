@@ -47,7 +47,7 @@ export const init_ws = (url: string) => {
         reader.onload = function () {
             if (reader.result instanceof ArrayBuffer) {
                 byte_array = new Uint8Array(reader.result);
-                console.log('Received byte array from Blob:', byte_array);
+                // console.log('Received byte array from Blob:', byte_array);
             }
             manage_byte_array(byte_array);
         };

@@ -1,9 +1,11 @@
 import type { WebSocketData } from "../../..";
-import { devlog, errlog } from "../../../debug/debug";
+import { devlog, errlog, rawlog } from "../../../debug/debug";
 import { MT } from "../../../enums/mt";
 import { gameroom } from "../../../ram/storage";
 import type { GameRoomResponseMessage } from "../../base";
 import { vec3 } from "gl-matrix";
+import { SOFF } from "../gameboard/enums";
+import { rts } from "../../../utils/basetime";
 
 export function handle_front_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
   devlog("handle_front_move() execution.")
@@ -21,7 +23,7 @@ export function handle_front_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: U
     errlog("zero front vector", front)
     return result;
   }
-  if (lenSq !== 1) vec3.normalize(front, front);
+  if (lenSq !== 1) front = vec3.normalize(front, front);// warning check
 
   const accel = ship.maccel
 
@@ -30,22 +32,27 @@ export function handle_front_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: U
   ship.vvz += front[2] * accel;
 
   // optional speed clamp
-  const speedSq = ship.vvx*ship.vvx + ship.vvy*ship.vvy + ship.vvz*ship.vvz;
-  const max_lvelo2 = ship.max_lvelo ** 2
-  if (speedSq > max_lvelo2 ) {
-    const scale = max_lvelo2  / speedSq;
-    ship.vvx *= scale;
-    ship.vvy *= scale;
-    ship.vvz *= scale;
-  }
+  // const speedSq = ship.vvx*ship.vvx + ship.vvy*ship.vvy + ship.vvz*ship.vvz;
+  // const max_lvelo2 = 4 // ship.max_lvelo * ship.max_lvelo
+  // if (speedSq > max_lvelo2 ) {
+  //   const scale = max_lvelo2**0.5  / speedSq **0.5;
+  //   rawlog("speed downscale: maxv2:", max_lvelo2," sp2:",speedSq, " scale:",scale)
+  //   ship.vvx *= scale;
+  //   ship.vvy *= scale;
+  //   ship.vvz *= scale;
+  // }
   
-  const now = performance.now()
+  const now = rts()
+  rawlog("fmove now:",now,
+    "cx:", ship.cx, " ships[i].cx", b.ships[b.base(uuid)+SOFF.CX],
+    " ship.vvx:", ship.vvx, " ship.fvx:", ship.fvx)
 
   b.set_vvx(uuid, ship.vvx)
   b.set_vvy(uuid, ship.vvy)
   b.set_vvz(uuid, ship.vvz)
-  b.set_vts(uuid, now)
-
+  // b.set_vts(uuid, now)
+  b.ships[b.base(uuid) + SOFF.V_TS] = now
+  rawlog("front ship.vvx:",ship.vvx,"vs record ships[i].vvx:",b.ships[b.base(uuid)+SOFF.VVX]!)
 
   result.push({
     mt: MT.FRONTMOVE,

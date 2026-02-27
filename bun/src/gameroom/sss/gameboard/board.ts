@@ -1,4 +1,4 @@
-import { errlog } from "../../../debug/debug";
+import { errlog, rawlog } from "../../../debug/debug";
 import { USERS_MAX_NUMBER } from "../../../ram/consts";
 import type { Ship } from "../types";
 import { SOFF as S, SOFFSIZE } from "./enums";
@@ -250,17 +250,20 @@ export class SSSBoard {
     const base = this.base
     const ships = this.ships
     try {
-  
+      
       for (let i = 1; i < this.sizeplus; i++) {
         const b = base(i);
         if (!ships[b + S.HP]) continue; // skip dead
     
         const vts = ships[b + S.V_TS]!;
         const dt = (now - vts)/1000;
-    
+        
         ships[b + S.CX]! += ships[b + S.VVX]! * dt;
         ships[b + S.CY]! += ships[b + S.VVY]! * dt;
         ships[b + S.CZ]! += ships[b + S.VVZ]! * dt;
+        ships[b + S.V_TS]! = now;
+
+        //this.log_ship(i)//todo remove
       }
 
     } catch (e) {

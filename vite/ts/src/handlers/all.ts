@@ -18,7 +18,7 @@ export function all_handler(text: string, mt:number){
     // case MT.TOPSHOT: topshot_handler(text); break
     // case MT.DOWNSHOT: downshot_handler(text); break
     case MT.FRONTMOVE: move_handler(text); break
-    case MT.STOPMOVE: move_handler(text); break
+    case MT.STOPMOVE: move_handler(text, false); break
     // case MT.LEFTMOVE: leftmove_handler(text); break
     // case MT.RIGHTMOVE: rightmove_handler(text); break
     // case MT.TOPMOVE: topmove_handler(text); break
