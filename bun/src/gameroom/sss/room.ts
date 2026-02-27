@@ -72,7 +72,10 @@ export class SSSGameRoom implements GameRoom {
       fvx: 1, fvy: 0, fvz: 0,
       tvx: 0, tvy: 1, tvz: 0,
       vvx: 0, vvy: 0, vvz: 0, v_ts: 0,
-      avx: 0, avy: 0, avz: 0, a_ts: 0,
+      
+      avf: 0, avf_ts:0,
+      avt: 0, avt_ts:0,
+      avs: 0, avs_ts:0,
     };
     b.write_ship(i, ship)
 
