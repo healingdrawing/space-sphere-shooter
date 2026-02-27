@@ -7,6 +7,7 @@ import { add_exit_button_to_game_view } from "./exit-button";
 import { view_html_div } from "./html-view";
 import { remove_ship } from "./remove-ship";
 import { move_ship } from "./move-ship";
+import { leftmove_ship } from "./leftmove-ship";
 import { crts } from "../../handlers/utils";
 
 
@@ -152,7 +153,7 @@ function create_game_box() {
   }
   
   
-  return { view, initGameView, add_ship, remove_ship, game_over, get_scene, ships, move_ship };
+  return { view, initGameView, add_ship, remove_ship, game_over, get_scene, ships, move_ship, leftmove_ship };
 }
 
 export const game_box = create_game_box();

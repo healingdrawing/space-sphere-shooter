@@ -72,9 +72,21 @@ export enum SOFF {
   /** velocity timestamp [ms] */
   V_TS,
 
-  AVX, AVY, AVZ,        // angular velocity (deg/s)
-  /** angular timestamp [ms] */
-  A_TS,
+  /** angular velocity [deg/s] FRONT */
+  AVF,
+  /** angular velocity FRONT timestamp [ms] */
+  AVF_TS,
+
+  /** angular velocity [deg/s] TOP */
+  AVT,
+  /** angular velocity TOP timestamp [ms] */
+  AVT_TS,
+  
+  /** angular velocity [deg/s] SIDE */
+  AVS,
+  /** angular velocity SIDE timestamp [ms] */
+  AVS_TS,
+
 };
 
 /** the number of elements in enum SOFF */

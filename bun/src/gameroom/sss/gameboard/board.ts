@@ -53,10 +53,13 @@ export class SSSBoard {
   get_vvy = (i: number) => this.get(i, S.VVY);
   get_vvz = (i: number) => this.get(i, S.VVZ);
   get_vts = (i: number) => this.get(i, S.V_TS);
-  get_avx = (i: number) => this.get(i, S.AVX);
-  get_avy = (i: number) => this.get(i, S.AVY);
-  get_avz = (i: number) => this.get(i, S.AVZ);
-  get_ats = (i: number) => this.get(i, S.A_TS);
+  
+  get_avf = (i: number) => this.get(i, S.AVF);
+  get_avf_ts = (i: number) => this.get(i, S.AVF_TS);
+  get_avt = (i: number) => this.get(i, S.AVT);
+  get_avt_ts = (i: number) => this.get(i, S.AVT_TS);
+  get_avs = (i: number) => this.get(i, S.AVS);
+  get_avs_ts = (i: number) => this.get(i, S.AVS_TS);
 
   set_ship_idx = (i: number, v: number) => this.set(i, S.SHIP_IDX, v);
   set_R = (i: number, v: number) => this.set(i, S.R, v);
@@ -94,10 +97,12 @@ export class SSSBoard {
   set_vvy = (i: number, v: number) => this.set(i, S.VVY, v);
   set_vvz = (i: number, v: number) => this.set(i, S.VVZ, v);
   set_vts = (i: number, v: number) => this.set(i, S.V_TS, v);
-  set_avx = (i: number, v: number) => this.set(i, S.AVX, v);
-  set_avy = (i: number, v: number) => this.set(i, S.AVY, v);
-  set_avz = (i: number, v: number) => this.set(i, S.AVZ, v);
-  set_ats = (i: number, v: number) => this.set(i, S.A_TS, v);
+  set_avf = (i: number, v:number) => this.set(i, S.AVF, v);
+  set_avf_ts = (i: number, v:number) => this.set(i, S.AVF_TS, v);
+  set_avt = (i: number, v:number) => this.set(i, S.AVT, v);
+  set_avt_ts = (i: number, v:number) => this.set(i, S.AVT_TS, v);
+  set_avs = (i: number, v:number) => this.set(i, S.AVS, v);
+  set_avs_ts = (i: number, v:number) => this.set(i, S.AVS_TS, v);
 
   log_ship(i: number) {
     const b = this.base(i);
@@ -138,10 +143,14 @@ export class SSSBoard {
     console.log(`vvy:          ${this.ships[b + S.VVY]}`);
     console.log(`vvz:          ${this.ships[b + S.VVZ]}`);
     console.log(`v_ts:         ${this.ships[b + S.V_TS]}`);
-    console.log(`avx:          ${this.ships[b + S.AVX]}`);
-    console.log(`avy:          ${this.ships[b + S.AVY]}`);
-    console.log(`avz:          ${this.ships[b + S.AVZ]}`);
-    console.log(`a_ts:         ${this.ships[b + S.A_TS]}`);
+    
+    console.log(`avf:          ${this.ships[b + S.AVF]}`);
+    console.log(`avf_ts:          ${this.ships[b + S.AVF_TS]}`);
+    console.log(`avt:          ${this.ships[b + S.AVT]}`);
+    console.log(`avt_ts:          ${this.ships[b + S.AVT_TS]}`);
+    console.log(`avs:          ${this.ships[b + S.AVS]}`);
+    console.log(`avs_ts:          ${this.ships[b + S.AVS_TS]}`);
+    
     console.log("===================\n");
   }
 
@@ -184,10 +193,14 @@ export class SSSBoard {
       vvy:           this.ships[b + S.VVY]!,
       vvz:           this.ships[b + S.VVZ]!,
       v_ts:           this.ships[b + S.V_TS]!,
-      avx:           this.ships[b + S.AVX]!,
-      avy:           this.ships[b + S.AVY]!,
-      avz:           this.ships[b + S.AVZ]!,
-      a_ts:           this.ships[b + S.A_TS]!,
+      
+      avf: this.ships[b + S.AVF]!,
+      avf_ts: this.ships[b + S.AVF_TS]!,
+      avt: this.ships[b + S.AVT]!,
+      avt_ts: this.ships[b + S.AVT_TS]!,
+      avs: this.ships[b + S.AVS]!,
+      avs_ts: this.ships[b + S.AVS_TS]!,
+
     };
   }
 
@@ -230,10 +243,13 @@ export class SSSBoard {
     this.ships[b + S.VVY] = data.vvy;
     this.ships[b + S.VVZ] = data.vvz;
     this.ships[b + S.V_TS] = data.v_ts;
-    this.ships[b + S.AVX] = data.avx;
-    this.ships[b + S.AVY] = data.avy;
-    this.ships[b + S.AVZ] = data.avz;
-    this.ships[b + S.A_TS] = data.a_ts;
+    
+    this.ships[b + S.AVF]! = data.avf;
+    this.ships[b + S.AVF_TS]! = data.avf_ts;
+    this.ships[b + S.AVT]! = data.avt;
+    this.ships[b + S.AVT_TS]! = data.avt_ts;
+    this.ships[b + S.AVS]! = data.avs;
+    this.ships[b + S.AVS_TS]! = data.avs_ts;
   }
 
   /** Reset one ship slot when player exit or destroyed */

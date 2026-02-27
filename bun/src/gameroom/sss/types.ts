@@ -67,12 +67,19 @@ export interface Ship {
   vvz:          number;
   /** velocity timestamp */
   v_ts:         number;
-  /** angular velocity vector coo */
-  avx:          number;
-  /** angular velocity vector coo */
-  avy:          number;
-  /** angular velocity vector coo */
-  avz:          number;
-  /** angular timestamp */
-  a_ts:         number;
+  
+  /** angular velocity [deg/s] FRONT */
+  avf: number;
+  /** angular velocity FRONT timestamp [ms] */
+  avf_ts: number;
+
+  /** angular velocity [deg/s] TOP */
+  avt: number;
+  /** angular velocity TOP timestamp [ms] */
+  avt_ts: number;
+  
+  /** angular velocity [deg/s] SIDE */
+  avs: number;
+  /** angular velocity SIDE timestamp [ms] */
+  avs_ts: number;
 }
