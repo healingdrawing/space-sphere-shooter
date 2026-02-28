@@ -1,4 +1,4 @@
-import type { Leftmove } from "../../handlers/game/leftmove-handler";
+import type { Leftmove } from "../../tunnel";
 import { game_box } from "./game-box";
 
 export const leftmove_ship = (data: Leftmove) => {

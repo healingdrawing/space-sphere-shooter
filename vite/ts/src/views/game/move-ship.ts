@@ -1,4 +1,4 @@
-import type { Frontmove } from "../../handlers/game/move-handler";
+import type { Frontmove } from "../../tunnel";
 import { game_box } from "./game-box";
 
 export const move_ship = (data: Frontmove, front:boolean) => {

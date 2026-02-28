@@ -1,3 +1,4 @@
+import { quat, vec3 } from "gl-matrix";
 import { errlog, rawlog } from "../../../debug/debug";
 import { USERS_MAX_NUMBER } from "../../../ram/consts";
 import type { Ship } from "../types";
@@ -56,10 +57,13 @@ export class SSSBoard {
   
   get_avf = (i: number) => this.get(i, S.AVF);
   get_avf_ts = (i: number) => this.get(i, S.AVF_TS);
+  get_avf_tsend = (i: number) => this.get(i, S.AVF_TSEND);
   get_avt = (i: number) => this.get(i, S.AVT);
   get_avt_ts = (i: number) => this.get(i, S.AVT_TS);
+  get_avt_tsend = (i: number) => this.get(i, S.AVT_TSEND);
   get_avs = (i: number) => this.get(i, S.AVS);
   get_avs_ts = (i: number) => this.get(i, S.AVS_TS);
+  get_avs_tsend = (i: number) => this.get(i, S.AVS_TSEND);
 
   set_ship_idx = (i: number, v: number) => this.set(i, S.SHIP_IDX, v);
   set_R = (i: number, v: number) => this.set(i, S.R, v);
@@ -99,10 +103,13 @@ export class SSSBoard {
   set_vts = (i: number, v: number) => this.set(i, S.V_TS, v);
   set_avf = (i: number, v:number) => this.set(i, S.AVF, v);
   set_avf_ts = (i: number, v:number) => this.set(i, S.AVF_TS, v);
+  set_avf_tsend = (i: number, v:number) => this.set(i, S.AVF_TSEND, v);
   set_avt = (i: number, v:number) => this.set(i, S.AVT, v);
   set_avt_ts = (i: number, v:number) => this.set(i, S.AVT_TS, v);
+  set_avt_tsend = (i: number, v:number) => this.set(i, S.AVT_TSEND, v);
   set_avs = (i: number, v:number) => this.set(i, S.AVS, v);
   set_avs_ts = (i: number, v:number) => this.set(i, S.AVS_TS, v);
+  set_avs_tsend = (i: number, v:number) => this.set(i, S.AVS_TSEND, v);
 
   log_ship(i: number) {
     const b = this.base(i);
@@ -146,10 +153,13 @@ export class SSSBoard {
     
     console.log(`avf:          ${this.ships[b + S.AVF]}`);
     console.log(`avf_ts:          ${this.ships[b + S.AVF_TS]}`);
+    console.log(`avf_tsend:          ${this.ships[b + S.AVF_TSEND]}`);
     console.log(`avt:          ${this.ships[b + S.AVT]}`);
     console.log(`avt_ts:          ${this.ships[b + S.AVT_TS]}`);
+    console.log(`avt_tsend:          ${this.ships[b + S.AVT_TSEND]}`);
     console.log(`avs:          ${this.ships[b + S.AVS]}`);
     console.log(`avs_ts:          ${this.ships[b + S.AVS_TS]}`);
+    console.log(`avs_tsend:          ${this.ships[b + S.AVS_TSEND]}`);
     
     console.log("===================\n");
   }
@@ -196,10 +206,13 @@ export class SSSBoard {
       
       avf: this.ships[b + S.AVF]!,
       avf_ts: this.ships[b + S.AVF_TS]!,
+      avf_tsend: this.ships[b + S.AVF_TSEND]!,
       avt: this.ships[b + S.AVT]!,
       avt_ts: this.ships[b + S.AVT_TS]!,
+      avt_tsend: this.ships[b + S.AVT_TSEND]!,
       avs: this.ships[b + S.AVS]!,
       avs_ts: this.ships[b + S.AVS_TS]!,
+      avs_tsend: this.ships[b + S.AVS_TSEND]!,
 
     };
   }
@@ -246,10 +259,13 @@ export class SSSBoard {
     
     this.ships[b + S.AVF]! = data.avf;
     this.ships[b + S.AVF_TS]! = data.avf_ts;
+    this.ships[b + S.AVF_TSEND]! = data.avf_tsend;
     this.ships[b + S.AVT]! = data.avt;
     this.ships[b + S.AVT_TS]! = data.avt_ts;
+    this.ships[b + S.AVT_TSEND]! = data.avt_tsend;
     this.ships[b + S.AVS]! = data.avs;
     this.ships[b + S.AVS_TS]! = data.avs_ts;
+    this.ships[b + S.AVS_TSEND]! = data.avs_tsend;
   }
 
   /** Reset one ship slot when player exit or destroyed */
@@ -291,5 +307,79 @@ export class SSSBoard {
     this.reset();
   }
 
+  update_ship_rotations(now: number): void {
+    try {
+      for (let i = 1; i < this.sizeplus; i++) {
+        const b = this.base(i);
+        if (!this.ships[b + S.HP]) continue;
+  
+        this.applyAngularVelocity(b, S.AVF, now);
+        this.applyAngularVelocity(b, S.AVT, now);
+        this.applyAngularVelocity(b, S.AVS, now);
+      }
+    } catch {
+      errlog("update_ship_rotations error");
+    }
+  }
+  
+  private applyAngularVelocity(b: number, avOffset: number, now: number): void {
+    const tsOffset    = avOffset + 1;   // *_TS   (last update time)
+    const tsendOffset = avOffset + 2;   // *_TSEND (end time)
+  
+    const lastTs = this.ships[b + tsOffset]!;
+    const endTs  = this.ships[b + tsendOffset]!;
+  
+    if (endTs <= now || lastTs > now) return;
+  
+    const av = this.ships[b + avOffset]!;
+    if (av === 0) return;
+  
+    const dt = (now - lastTs) / 1000;
+    if (dt <= 0) return;
+  
+    const angleRad = av * dt * Math.PI / 180;
+  
+    const q = quat.create();
+  
+    switch (avOffset) {
+      case S.AVF:
+        quat.setAxisAngle(q, [this.ships[b + S.FVX]!, this.ships[b + S.FVY]!, this.ships[b + S.FVZ]!], angleRad);
+        break;
+      case S.AVT:
+        quat.setAxisAngle(q, [this.ships[b + S.TVX]!, this.ships[b + S.TVY]!, this.ships[b + S.TVZ]!], angleRad);
+        break;
+      case S.AVS:
+        const top   = vec3.fromValues(this.ships[b + S.TVX]!, this.ships[b + S.TVY]!, this.ships[b + S.TVZ]!);
+        const front = vec3.fromValues(this.ships[b + S.FVX]!, this.ships[b + S.FVY]!, this.ships[b + S.FVZ]!);
+        const side  = vec3.cross(vec3.create(), top, front);
+        vec3.normalize(side, side);
+        quat.setAxisAngle(q, side, angleRad);
+        break;
+      default:
+        return;
+    }
+  
+    let f = vec3.fromValues(this.ships[b + S.FVX]!, this.ships[b + S.FVY]!, this.ships[b + S.FVZ]!);
+    vec3.transformQuat(f, f, q);
+    vec3.normalize(f, f);
+  
+    let t = vec3.fromValues(this.ships[b + S.TVX]!, this.ships[b + S.TVY]!, this.ships[b + S.TVZ]!);
+    vec3.transformQuat(t, t, q);
+    vec3.normalize(t, t);
+  
+    this.ships[b + S.FVX] = f[0];
+    this.ships[b + S.FVY] = f[1];
+    this.ships[b + S.FVZ] = f[2];
+    this.ships[b + S.TVX] = t[0];
+    this.ships[b + S.TVY] = t[1];
+    this.ships[b + S.TVZ] = t[2];
+  
+    this.ships[b + tsOffset] = now;
+  
+    if (now >= endTs) {
+      this.ships[b + avOffset] = 0;
+      this.ships[b + tsendOffset] = now;
+    }
+  }
 
 }

@@ -1,8 +1,9 @@
 import type { WebSocketData } from "../../..";
+import type { GameRoomResponseMessage } from "../../base";
+import type { Frontmove } from "../types";
 import { devlog, errlog, rawlog } from "../../../debug/debug";
 import { MT } from "../../../enums/mt";
 import { gameroom } from "../../../ram/storage";
-import type { GameRoomResponseMessage } from "../../base";
 import { vec3 } from "gl-matrix";
 import { SOFF } from "../gameboard/enums";
 import { rts } from "../../../utils/basetime";
@@ -56,10 +57,10 @@ export function handle_front_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: U
 
   result.push({
     mt: MT.FRONTMOVE,
-    msg: {uuid:uuid,
+    msg:  {uuid:uuid,
       cx:ship.cx, cy:ship.cy, cz:ship.cz,
       vvx:ship.vvx, vvy:ship.vvy, vvz:ship.vvz, vts:now
-    },
+    } as Frontmove,
     ms: 0,
     uuids: [0]
   })

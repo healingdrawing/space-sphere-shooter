@@ -76,16 +76,22 @@ export enum SOFF {
   AVF,
   /** angular velocity FRONT timestamp [ms] */
   AVF_TS,
+  /** angular velocity FRONT END timestamp [ms] */
+  AVF_TSEND,
 
   /** angular velocity [deg/s] TOP */
   AVT,
   /** angular velocity TOP timestamp [ms] */
   AVT_TS,
+  /** angular velocity TOP END timestamp [ms] */
+  AVT_TSEND,
   
   /** angular velocity [deg/s] SIDE */
   AVS,
   /** angular velocity SIDE timestamp [ms] */
   AVS_TS,
+  /** angular velocity SIDE END timestamp [ms] */
+  AVS_TSEND,
 
 };
 

@@ -72,14 +72,30 @@ export interface Ship {
   avf: number;
   /** angular velocity FRONT timestamp [ms] */
   avf_ts: number;
+  /** angular velocity FRONT END timestamp [ms] */
+  avf_tsend:number;
 
   /** angular velocity [deg/s] TOP */
   avt: number;
   /** angular velocity TOP timestamp [ms] */
   avt_ts: number;
+  /** angular velocity TOP END timestamp [ms] */
+  avt_tsend:number;
   
   /** angular velocity [deg/s] SIDE */
   avs: number;
   /** angular velocity SIDE timestamp [ms] */
   avs_ts: number;
+  /** angular velocity SIDE END timestamp [ms] */
+  avs_tsend:number;
+}
+
+export type Frontmove = {
+  uuid:number, cx:number, cy:number, cz:number, vvx:number, vvy:number, vvz:number, vts:number 
+}
+
+export type Leftmove = {
+  uuid:number, avt:number, avt_ts:number, avt_tsend: number,
+  fvx:number, fvy:number, fvz:number,
+  tvx:number,tvy:number,tvz:number,      
 }

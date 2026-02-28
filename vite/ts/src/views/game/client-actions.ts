@@ -9,7 +9,13 @@ export const send_client_action = (ws:WebSocket, action:MT) => {
     return
   }
   console.log("released button. KeyCode:", action);//todo remove
-  const dummy = { code: action }
+
+  let power = 0
+  if (action === MT.LEFTMOVE) power = 45 //degrees dev gap //todo implement
+  else if (action === MT.RIGHTMOVE) power = 90
+
+  const dummy = { code: action, power }
+  
   // add message type
   const with_mt = mm.keyu8a(action, mm.obju8a(dummy))
   // add key. Now mt is second byte

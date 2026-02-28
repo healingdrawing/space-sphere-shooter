@@ -73,9 +73,9 @@ export class SSSGameRoom implements GameRoom {
       tvx: 0, tvy: 1, tvz: 0,
       vvx: 0, vvy: 0, vvz: 0, v_ts: 0,
       
-      avf: 0, avf_ts:0,
-      avt: 0, avt_ts:0,
-      avs: 0, avs_ts:0,
+      avf: 0, avf_ts:0, avf_tsend:0,
+      avt: 0, avt_ts:0, avt_tsend:0,
+      avs: 0, avs_ts:0, avs_tsend:0,
     };
     b.write_ship(i, ship)
 
@@ -107,6 +107,7 @@ export class SSSGameRoom implements GameRoom {
    */
   ships_auto_update(){
     const now = rts()
+    this.board.update_ship_rotations(now)
     this.board.update_ship_positions(now)
     
     let timer = this.ships_auto_update_timer
@@ -192,9 +193,7 @@ export class SSSGameRoom implements GameRoom {
       case MT.FRONTMOVE: return handle_front_move(ws, msg);
       case MT.STOPMOVE: return handle_stop_move(ws, msg);
     
-      case MT.LEFTMOVE:
-        handle_left_move(ws, msg);
-        break;
+      case MT.LEFTMOVE: return handle_left_move(ws, msg);
     
       case MT.RIGHTMOVE:
         handle_right_move(ws, msg);
