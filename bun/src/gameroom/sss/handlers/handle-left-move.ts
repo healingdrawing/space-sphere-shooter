@@ -7,7 +7,7 @@ import { vec3 } from "gl-matrix";
 import { SOFF } from "../gameboard/enums";
 import { rts } from "../../../utils/basetime";
 import { mm } from "../../../manage/message";
-import type { Leftmove } from "../types";
+import type { TopRotation } from "../types";
 
 export function handle_left_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
   devlog("handle_left_move() execution.")
@@ -49,6 +49,7 @@ export function handle_left_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: Ui
   const duration_s = Math.abs(power/avt)
   const now = rts()
   const avt_tsend =  now + duration_s*1000
+  b.set_avt(uuid, avt)
   b.set_avt_ts(uuid, now) // start timestamp
   b.set_avt_tsend(uuid, avt_tsend) //final timestamp
 
@@ -58,7 +59,7 @@ export function handle_left_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: Ui
       uuid, avt, avt_ts:now, avt_tsend,
       fvx:ship.fvx, fvy:ship.fvy, fvz:ship.fvz,
       tvx:ship.tvx,tvy:ship.tvy,tvz:ship.tvz,      
-    } as Leftmove,
+    } as TopRotation,
     ms: 0,
     uuids: [0]
   })

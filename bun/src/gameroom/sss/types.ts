@@ -94,8 +94,23 @@ export type Frontmove = {
   uuid:number, cx:number, cy:number, cz:number, vvx:number, vvy:number, vvz:number, vts:number 
 }
 
-export type Leftmove = {
+/** rotation around front vector */
+export type FrontRotation = {
+  uuid:number, avf:number, avf_ts:number, avf_tsend: number,
+  fvx:number, fvy:number, fvz:number,
+  tvx:number,tvy:number,tvz:number,      
+}
+
+/** rotation around top vector */
+export type TopRotation = {
   uuid:number, avt:number, avt_ts:number, avt_tsend: number,
+  fvx:number, fvy:number, fvz:number,
+  tvx:number,tvy:number,tvz:number,      
+}
+
+/** rotation around side vector */
+export type SideRotation = {
+  uuid:number, avs:number, avs_ts:number, avs_tsend: number,
   fvx:number, fvy:number, fvz:number,
   tvx:number,tvy:number,tvz:number,      
 }

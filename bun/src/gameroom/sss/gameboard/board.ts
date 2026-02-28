@@ -1,5 +1,5 @@
 import { quat, vec3 } from "gl-matrix";
-import { errlog, rawlog } from "../../../debug/debug";
+import { DEVLOG, devlog, dlog, errlog, rawlog } from "../../../debug/debug";
 import { USERS_MAX_NUMBER } from "../../../ram/consts";
 import type { Ship } from "../types";
 import { SOFF as S, SOFFSIZE } from "./enums";
@@ -312,6 +312,7 @@ export class SSSBoard {
       for (let i = 1; i < this.sizeplus; i++) {
         const b = this.base(i);
         if (!this.ships[b + S.HP]) continue;
+        // rawlog("log_ship:", this.log_ship(i)) //todo delete
   
         this.applyAngularVelocity(b, S.AVF, now);
         this.applyAngularVelocity(b, S.AVT, now);
@@ -379,6 +380,15 @@ export class SSSBoard {
     if (now >= endTs) {
       this.ships[b + avOffset] = 0;
       this.ships[b + tsendOffset] = now;
+      // dlog(false, "ROTATION END")
+      // if (DEVLOG) devlog(
+      //   `this.ships[b + S.FVX]:${this.ships[b + S.FVX]}`,
+      //   `this.ships[b + S.FVY]:${this.ships[b + S.FVY]}`,
+      //   `this.ships[b + S.FVZ]:${this.ships[b + S.FVZ]}`,
+      //   `this.ships[b + S.TVX]:${this.ships[b + S.TVX]}`,
+      //   `this.ships[b + S.TVY]:${this.ships[b + S.TVY]}`,
+      //   `this.ships[b + S.TVZ]:${this.ships[b + S.TVZ]}`,
+      // )
     }
   }
 

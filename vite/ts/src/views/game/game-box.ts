@@ -9,6 +9,7 @@ import { remove_ship } from "./remove-ship";
 import { move_ship } from "./move-ship";
 import { leftmove_ship } from "./leftmove-ship";
 import { crts } from "../../handlers/utils";
+import { check_rotations_metadata, rotateAxis } from "./rotate-ship";
 
 
 function create_game_box() {
@@ -111,8 +112,8 @@ function create_game_box() {
     let lastTime = crts();
     function animate() {
       if (!engine || !scene) return;
-      const currentTime = crts();
-      lastTime = currentTime;
+      const now = crts();
+      lastTime = now;
       
       // console.log("Divided deltaTime:", deltaTime);
       
@@ -121,14 +122,31 @@ function create_game_box() {
         // console.log('Moving ship:', ship.name, ship.metadata.velocity); // DEBUG
         if (ship.metadata?.velocity) {
           const v = ship.metadata.velocity as {x:number,y:number,z:number,vts:number}
-          const dt = (currentTime - v.vts)/1000; // Delta in seconds
+          const dt = (now - v.vts)/1000; // Delta in seconds
           const vec = new BABYLON.Vector3(v.x, v.y, v.z)
           const scaled = vec.scaleInPlace(dt);
           ship.position.addInPlace(scaled); // Use add() instead of addInPlace()
           
-          ship.metadata.velocity = {x:v.x,y:v.y,z:v.z,vts:currentTime}
+          ship.metadata.velocity = {x:v.x,y:v.y,z:v.z,vts:now}
           
           // console.log("After position:", ship.position);
+        }
+
+        check_rotations_metadata(ship, now)
+        if (ship.metadata.frontRotation){
+          const dt = (now - ship.metadata.frontRotation.ts ) / 1000
+          rotateAxis(ship, BABYLON.Axis.Z, ship.metadata.frontRotation, dt);
+          ship.metadata.frontRotation.ts = now
+        }
+        if (ship.metadata.topRotation){
+          const dt = (now - ship.metadata.topRotation.ts ) / 1000
+          rotateAxis(ship, BABYLON.Axis.Y, ship.metadata.topRotation, dt);
+          ship.metadata.topRotation.ts = now
+        }
+        if (ship.metadata.sideRotation){
+          const dt = (now - ship.metadata.sideRotation.ts ) / 1000
+          rotateAxis(ship, BABYLON.Axis.X, ship.metadata.sideRotation, dt);
+          ship.metadata.sideRotation.ts = now
         }
       }
 

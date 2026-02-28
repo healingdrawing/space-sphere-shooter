@@ -1,7 +1,7 @@
-import type { Leftmove } from "../../tunnel";
+import type { TopRotation } from "../../tunnel";
 import { game_box } from "./game-box";
+import { top_rotation } from "./rotate-ship";
 
-export const leftmove_ship = (data: Leftmove) => {
-  const mesh = game_box.ships[data.uuid]!
-  // rotate the mesh along top vector data.fvx/y/z, CCW direction
+export const leftmove_ship = (data: TopRotation) => {
+  top_rotation(data)
 }
