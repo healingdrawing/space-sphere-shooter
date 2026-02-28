@@ -16,7 +16,7 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ships:(BABYLON.Mesh |
   }
 
   const ship_mesh = BABYLON.MeshBuilder.CreateBox(`ship-${idx}`, {
-    width:  (ship.sr * 2)/1000,   // side radius * 2
+    width:  (ship.sr * 2)/300,   // side radius * 2 //warning to visual test 1000->300
     height: (ship.vr * 2)/1000,   // vertical radius * 2
     depth:  (ship.fr + ship.br)/1000   // front + back radius
   }, scene);

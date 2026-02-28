@@ -9,6 +9,7 @@ export const front_rotation = (data: FrontRotation) => {
 
 export const top_rotation = (data: TopRotation) => {
   const mesh = game_box.ships[data.uuid]!;
+  //warning //bug syncO...
   syncOrientation(mesh, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
   mesh.metadata.topRotation = {av: data.avt, ts: data.avt_ts, tsend: data.avt_tsend};
 };
@@ -23,10 +24,19 @@ function syncOrientation(mesh: BABYLON.Mesh, fvx: number, fvy: number, fvz: numb
   const front = new BABYLON.Vector3(fvx, fvy, fvz);
   const top = new BABYLON.Vector3(tvx, tvy, tvz);
   const side = BABYLON.Vector3.Cross(top, front);
+  // icorrect row-major-order , since babylonjs expects another order. 
+  // const mat = BABYLON.Matrix.FromArray([
+  //   side.x, top.x, front.x, 0,
+  //   side.y, top.y, front.y, 0,
+  //   side.z, top.z, front.z, 0,
+  //   0,      0,      0,      1
+  // ]);
+
+  // correct column-major-order
   const mat = BABYLON.Matrix.FromArray([
-    side.x, top.x, front.x, 0,
-    side.y, top.y, front.y, 0,
-    side.z, top.z, front.z, 0,
+    side.x, side.y, side.z, 0,
+    top.x,  top.y,  top.z,  0,
+    front.x, front.y, front.z, 0,
     0,      0,      0,      1
   ]);
   mesh.rotationQuaternion = BABYLON.Quaternion.FromRotationMatrix(mat);

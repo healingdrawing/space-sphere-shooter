@@ -64,32 +64,43 @@ function create_game_box() {
     if(!ship_mesh) return
     const camera = new BABYLON.ArcRotateCamera(
       "camera",
-      Math.PI,           // Alpha (angle around target)
-      Math.PI / 2.5,     // Beta (elevation)
-      ship.br / 25, // Radius
+      0,//Math.PI,           // Alpha (angle around target)
+      Math.PI / 2,//.5,     // Beta (elevation)
+      ship.br / 40, // Radius
       ship_mesh.position,
       scene
     );
-    
-    scene.registerBeforeRender(() => {
-      if (ship_mesh && ship) {
-        camera.target = ship_mesh.position;
-        
-        // Rotate camera to match ship's heading
-        const shipForward = new BABYLON.Vector3(ship.fvx, ship.fvy, ship.fvz)
-        const angle = Math.atan2(shipForward.x, shipForward.z);
-        camera.alpha = angle + Math.PI;
-      }
-    });
+    // camera.lockedTarget = ship_mesh
 
+    const cameraParent = new BABYLON.TransformNode("camParent", scene);
+    cameraParent.parent = ship_mesh;
+
+    camera.parent = cameraParent;
+    camera.position = new BABYLON.Vector3(0, ship.br/50, -ship.br /80);
+    camera.setTarget(BABYLON.Vector3.Zero());  // local origin
+    
+    
+    // scene.registerBeforeRender(() => {
+    //   if (ship_mesh && ship) {
+    //     camera.target = ship_mesh.position;
+        
+    //     // Rotate camera to match ship's heading
+    //     const shipForward = new BABYLON.Vector3(ship.fvx, ship.fvy, ship.fvz)
+    //     const angle = Math.atan2(shipForward.x, shipForward.z);
+    //     camera.alpha = angle + Math.PI;
+    //   }
+    // });
+    
+
+    // warning can not fix this creature properly. Skybox glitching and all vibrating
     // const camera = new BABYLON.FollowCamera("followCamera", new BABYLON.Vector3(0, 0, 0), scene);
-    // camera.radius = ship.br/1000 * 4;      // start with 4× back radius
-    // camera.heightOffset = ship.br/1000 * 1.5;  // lift above
+    // camera.radius = ship.br/50;      // start with 4× back radius
+    // camera.heightOffset = ship.br/20;  // lift above
     // camera.rotationOffset = 180;  // look from behind
     // camera.cameraAcceleration = 2;
     // camera.maxCameraSpeed = 10;
     // camera.lockedTarget = ship_mesh;   // follow this mesh. it will be tricky
-    // camera.minZ = 10; // Minimum distance
+    // camera.minZ = 0.01; // Minimum distance
     // camera.maxZ = 100000; // Maximum distance (increase as needed)
 
     const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 1), scene);
@@ -109,11 +120,9 @@ function create_game_box() {
     //   scene.render();
     // });
 
-    let lastTime = crts();
     function animate() {
       if (!engine || !scene) return;
       const now = crts();
-      lastTime = now;
       
       // console.log("Divided deltaTime:", deltaTime);
       
@@ -135,18 +144,19 @@ function create_game_box() {
         check_rotations_metadata(ship, now)
         if (ship.metadata.frontRotation){
           const dt = (now - ship.metadata.frontRotation.ts ) / 1000
-          rotateAxis(ship, BABYLON.Axis.Z, ship.metadata.frontRotation, dt);
           ship.metadata.frontRotation.ts = now
+          rotateAxis(ship, BABYLON.Axis.Z, ship.metadata.frontRotation, dt);
         }
         if (ship.metadata.topRotation){
           const dt = (now - ship.metadata.topRotation.ts ) / 1000
-          rotateAxis(ship, BABYLON.Axis.Y, ship.metadata.topRotation, dt);
+          // alert(`First dt: ${dt.toFixed(4)}s, angle: ${(ship.metadata.topRotation.av * dt).toFixed(2)}°`);
           ship.metadata.topRotation.ts = now
+          rotateAxis(ship, BABYLON.Axis.Y, ship.metadata.topRotation, dt);
         }
         if (ship.metadata.sideRotation){
           const dt = (now - ship.metadata.sideRotation.ts ) / 1000
-          rotateAxis(ship, BABYLON.Axis.X, ship.metadata.sideRotation, dt);
           ship.metadata.sideRotation.ts = now
+          rotateAxis(ship, BABYLON.Axis.X, ship.metadata.sideRotation, dt);
         }
       }
 
