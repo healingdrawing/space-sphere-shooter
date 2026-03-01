@@ -26,7 +26,7 @@ export function handle_front_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: U
   }
   if (lenSq !== 1) front = vec3.normalize(front, front);// warning check
 
-  const accel = ship.maccel
+  const accel = ship.maccel *30 //warning dev gap
 
   ship.vvx += front[0] * accel;
   ship.vvy += front[1] * accel;

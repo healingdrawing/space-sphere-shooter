@@ -10,9 +10,10 @@ export const send_client_action = (ws:WebSocket, action:MT) => {
   }
   console.log("released button. KeyCode:", action);//todo remove
 
-  let power = 0
+  let power = 0 //warning. polish check since server raise error is power 0
   if (action === MT.LEFTMOVE) power = 45 //degrees dev gap //todo implement
   else if (action === MT.RIGHTMOVE) power = 90
+  else if (action === MT.TOPMOVE) power = 90
 
   const dummy = { code: action, power }
   

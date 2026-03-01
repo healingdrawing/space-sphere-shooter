@@ -3,44 +3,52 @@ import { game_box } from "./game-box";
 
 export const front_rotation = (data: FrontRotation) => {
   const mesh = game_box.ships[data.uuid]!;
-  syncOrientation(mesh, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
+  // syncOrientation(mesh, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
   mesh.metadata.frontRotation = {av: data.avf, ts: data.avf_ts, tsend: data.avf_tsend};
 };
 
 export const top_rotation = (data: TopRotation) => {
   const mesh = game_box.ships[data.uuid]!;
   //warning //bug syncO...
-  syncOrientation(mesh, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
+  console.log("TOP_ROTATION called:", {
+    avt: data.avt,  // angular velocity
+    avt_ts: data.avt_ts,  // start time
+    avt_tsend: data.avt_tsend,  // end time
+    duration: data.avt_tsend - data.avt_ts,
+    vectors: { fvx: data.fvx, fvy: data.fvy, fvz: data.fvz, tvx: data.tvx, tvy: data.tvy, tvz: data.tvz },
+    meshQuatBefore: mesh.rotationQuaternion,
+    meshRotBefore: mesh.rotation
+  });
+  
+  // warning. very raw(possibly comment). must sync with server data before each rotation starts
+  // syncOrientation(mesh, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
+  
+  console.log("After sync:", {
+    meshQuatAfter: mesh.rotationQuaternion,
+    meshRotAfter: mesh.rotation
+  });
+
   mesh.metadata.topRotation = {av: data.avt, ts: data.avt_ts, tsend: data.avt_tsend};
 };
 
 export const side_rotation = (data: SideRotation) => {
   const mesh = game_box.ships[data.uuid]!;
-  syncOrientation(mesh, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
+
+  console.log("SIDE_ROTATION called:", {
+    avs: data.avs,  // angular velocity
+    avs_ts: data.avs_ts,  // start time
+    avs_tsend: data.avs_tsend,  // end time
+    duration: data.avs_tsend - data.avs_ts,
+    vectors: { fvx: data.fvx, fvy: data.fvy, fvz: data.fvz, tvx: data.tvx, tvy: data.tvy, tvz: data.tvz },
+    meshQuatBefore: mesh.rotationQuaternion,
+    meshRotBefore: mesh.rotation
+  });
+
+  // syncOrientation(mesh, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
   mesh.metadata.sideRotation = {av: data.avs, ts: data.avs_ts, tsend: data.avs_tsend};
 };
 
-function syncOrientation(mesh: BABYLON.Mesh, fvx: number, fvy: number, fvz: number, tvx: number, tvy: number, tvz: number) {
-  const front = new BABYLON.Vector3(fvx, fvy, fvz);
-  const top = new BABYLON.Vector3(tvx, tvy, tvz);
-  const side = BABYLON.Vector3.Cross(top, front);
-  // icorrect row-major-order , since babylonjs expects another order. 
-  // const mat = BABYLON.Matrix.FromArray([
-  //   side.x, top.x, front.x, 0,
-  //   side.y, top.y, front.y, 0,
-  //   side.z, top.z, front.z, 0,
-  //   0,      0,      0,      1
-  // ]);
 
-  // correct column-major-order
-  const mat = BABYLON.Matrix.FromArray([
-    side.x, side.y, side.z, 0,
-    top.x,  top.y,  top.z,  0,
-    front.x, front.y, front.z, 0,
-    0,      0,      0,      1
-  ]);
-  mesh.rotationQuaternion = BABYLON.Quaternion.FromRotationMatrix(mat);
-}
 
 export function rotateAxis(ship: BABYLON.Mesh, axis: BABYLON.Vector3, rot: {av: number, ts: number, tsend: number}, dt: number) {
   const angleRad = rot.av * dt * Math.PI / 180;

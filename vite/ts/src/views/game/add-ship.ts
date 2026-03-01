@@ -15,11 +15,46 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ships:(BABYLON.Mesh |
     return null //todo implement. Raw skip the already present ship
   }
 
+  const scale = 1 / 1000;  // common factor
+
   const ship_mesh = BABYLON.MeshBuilder.CreateBox(`ship-${idx}`, {
-    width:  (ship.sr * 2)/300,   // side radius * 2 //warning to visual test 1000->300
-    height: (ship.vr * 2)/1000,   // vertical radius * 2
-    depth:  (ship.fr + ship.br)/1000   // front + back radius
+    width:  (ship.sr * 2) * scale,
+    height: (ship.vr * 2) * scale,
+    depth:  (ship.fr + ship.br) * 3 * scale // front + back radius  //warning to visual test 1000->300
   }, scene);
+
+  const dot_size = ship.br / 1000;  // adjust divisor for visibility
+
+  const f_dot = BABYLON.MeshBuilder.CreateSphere("frontDot", { diameter: dot_size }, scene);
+  f_dot.position = new BABYLON.Vector3(0, 0, ship.fr * 4 * scale);
+  f_dot.parent = ship_mesh;
+  const f_mat = new BABYLON.StandardMaterial("blue", scene);
+  f_mat.diffuseColor = BABYLON.Color3.Blue();
+  f_mat.alpha = 1.0; // Make sure it's fully opaque
+  f_mat.backFaceCulling = true; // Cull back faces
+  f_dot.material = f_mat;
+
+
+
+  const t_dot = BABYLON.MeshBuilder.CreateSphere("topDot", { diameter: dot_size }, scene);
+  t_dot.position = new BABYLON.Vector3(0, ship.vr * 2 * scale, 0);
+  t_dot.parent = ship_mesh;
+  const t_mat = new BABYLON.StandardMaterial("green", scene);
+  t_mat.diffuseColor = BABYLON.Color3.Green();
+  t_mat.alpha = 1.0; // Make sure it's fully opaque
+  t_mat.backFaceCulling = true; // Cull back faces
+  t_dot.material = t_mat;
+
+
+  const s_dot = BABYLON.MeshBuilder.CreateSphere("sideDot", { diameter: dot_size }, scene);
+  s_dot.position = new BABYLON.Vector3(ship.sr * 2 * scale, 0,0);
+  s_dot.parent = ship_mesh;
+  const s_mat = new BABYLON.StandardMaterial("blue", scene);
+  s_mat.diffuseColor = BABYLON.Color3.Red();
+  s_mat.alpha = 1.0; // Make sure it's fully opaque
+  s_mat.backFaceCulling = true; // Cull back faces
+  s_dot.material = s_mat;
+
 
   // ship_mesh.showBoundingBox = true; //todo remove. test
 

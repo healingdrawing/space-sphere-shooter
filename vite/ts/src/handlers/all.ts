@@ -5,6 +5,7 @@ import { join_handler } from "./game/join-handler";
 import { ship_handler } from "./game/ship-handler";
 import { system_handler } from "./system_handler";
 import { leftmove_handler } from "./game/leftmove-handler";
+import { topmove_handler } from "./game/topmove-handler";
 
 /** handle all messages(by type t:MT). Upper level manager/router */
 export function all_handler(text: string, mt:number){
@@ -22,7 +23,7 @@ export function all_handler(text: string, mt:number){
     case MT.STOPMOVE: move_handler(text, false); break
     case MT.LEFTMOVE: leftmove_handler(text); break
     // case MT.RIGHTMOVE: rightmove_handler(text); break
-    // case MT.TOPMOVE: topmove_handler(text); break
+    case MT.TOPMOVE: topmove_handler(text); break
     // case MT.DOWNMOVE: downmove_handler(text); break
     // case MT.CWMOVE: cwmove_handler(text); break
     // case MT.CCWMOVE: ccwmove_handler(text); break

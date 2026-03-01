@@ -342,19 +342,20 @@ export class SSSBoard {
   
     const q = quat.create();
   
+    /** consider order around side, front, top . to provide persuit first numpad 7/8/9, then 4/6 horisontal . No quaternions. only vector rotate */
     switch (avOffset) {
-      case S.AVF:
-        quat.setAxisAngle(q, [this.ships[b + S.FVX]!, this.ships[b + S.FVY]!, this.ships[b + S.FVZ]!], angleRad);
-        break;
-      case S.AVT:
-        quat.setAxisAngle(q, [this.ships[b + S.TVX]!, this.ships[b + S.TVY]!, this.ships[b + S.TVZ]!], angleRad);
-        break;
       case S.AVS:
         const top   = vec3.fromValues(this.ships[b + S.TVX]!, this.ships[b + S.TVY]!, this.ships[b + S.TVZ]!);
         const front = vec3.fromValues(this.ships[b + S.FVX]!, this.ships[b + S.FVY]!, this.ships[b + S.FVZ]!);
         const side  = vec3.cross(vec3.create(), top, front);
         vec3.normalize(side, side);
         quat.setAxisAngle(q, side, angleRad);
+        break;
+      case S.AVF:
+        quat.setAxisAngle(q, [this.ships[b + S.FVX]!, this.ships[b + S.FVY]!, this.ships[b + S.FVZ]!], angleRad);
+        break;
+      case S.AVT:
+        quat.setAxisAngle(q, [this.ships[b + S.TVX]!, this.ships[b + S.TVY]!, this.ships[b + S.TVZ]!], angleRad);
         break;
       default:
         return;

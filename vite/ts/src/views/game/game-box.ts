@@ -10,6 +10,7 @@ import { move_ship } from "./move-ship";
 import { leftmove_ship } from "./leftmove-ship";
 import { crts } from "../../handlers/utils";
 import { check_rotations_metadata, rotateAxis } from "./rotate-ship";
+import { topmove_ship } from "./topmove-ship";
 
 
 function create_game_box() {
@@ -181,7 +182,7 @@ function create_game_box() {
   }
   
   
-  return { view, initGameView, add_ship, remove_ship, game_over, get_scene, ships, move_ship, leftmove_ship };
+  return { view, initGameView, add_ship, remove_ship, game_over, get_scene, ships, move_ship, leftmove_ship, topmove_ship };
 }
 
 export const game_box = create_game_box();

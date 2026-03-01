@@ -199,9 +199,7 @@ export class SSSGameRoom implements GameRoom {
         handle_right_move(ws, msg);
         break;
     
-      case MT.TOPMOVE:
-        handle_top_move(ws, msg);
-        break;
+      case MT.TOPMOVE: return handle_top_move(ws, msg);
     
       case MT.DOWNMOVE:
         handle_down_move(ws, msg);
