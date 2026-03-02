@@ -11,3 +11,6 @@ export { spip }
 
 import type { Ship, Frontmove, FrontRotation, TopRotation, SideRotation } from '../../../bun/src/gameroom/sss/types'
 export type { Ship, Frontmove, FrontRotation, TopRotation, SideRotation }
+
+import { gemm } from '../../../bun/src/gameroom/sss/gameboard/non-autistic-math/gemm'
+export { gemm }

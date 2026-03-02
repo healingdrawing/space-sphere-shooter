@@ -1,6 +1,6 @@
 // @ts-nocheck
 // gemm.ts
-export class GEMM {
+private class GEMM {
 
   /**
       return true if Float Arrays have same size
@@ -549,3 +549,5 @@ dot3Dline3D_x_plane3D(
   /* todo consider 3D specific below, without arrays, but only with numbers */
 
 }
+
+export const gemm = new GEMM()
