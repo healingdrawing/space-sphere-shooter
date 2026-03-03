@@ -6,7 +6,7 @@ import { manage_client_actions } from "./client-actions";
 import { add_exit_button_to_game_view } from "./exit-button";
 import { view_html_div } from "./html-view";
 import { remove_ship } from "./remove-ship";
-import { move_ship } from "./move-ship";
+import { check_move_metadata, move_ship } from "./move-ship";
 import { leftmove_ship } from "./leftmove-ship";
 import { rightmove_ship } from "./rightmove-ship";
 import { crts } from "../../handlers/utils";
@@ -55,6 +55,7 @@ function create_game_box() {
     engine = new BABYLON.Engine(canvas, true);
     
     scene = new BABYLON.Scene(engine);
+    scene.useRightHandedSystem = true //warning crucial line, and also on forum some crap in quaternions announced and confirmed in case of this. Creatures made left hand system default when the most planet (math and opengl) manage right hand system. It is ... mental. Now they drown in bugs and patches with advanced custom cameras. Felitaziones!
     scene.clearColor = new BABYLON.Color4(0, 0, 0, 1); // Set background to black
     
     const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000 }, scene);
@@ -129,6 +130,7 @@ function create_game_box() {
       for (const ship of game_box.ships) {
         if (!ship) continue
         // console.log('Moving ship:', ship.name, ship.metadata.velocity); // DEBUG
+        check_move_metadata(ship)
         if (ship.metadata?.velocity) {
           const v = ship.metadata.velocity as {x:number,y:number,z:number,vts:number}
           const dt = (now - v.vts)/1000; // Delta in seconds

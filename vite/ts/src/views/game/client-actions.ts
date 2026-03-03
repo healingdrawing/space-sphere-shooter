@@ -10,13 +10,14 @@ export const send_client_action = (ws:WebSocket, action:MT) => {
   }
   console.log("released button. KeyCode:", action);//todo remove
 
-  let power = 0 //warning. polish check since server raise error is power 0
-  if (action === MT.LEFTMOVE) power = 90 //degrees dev gap //todo implement
-  else if (action === MT.RIGHTMOVE) power = 90
-  else if (action === MT.TOPMOVE) power = 90
-  else if (action === MT.DOWNMOVE) power = 90
-  else if (action === MT.CWMOVE) power = 90
-  else if (action === MT.CCWMOVE) power = 90
+  let power = 0 //warning. polish check since server raise error if power 0
+  if (action === MT.LEFTMOVE) power = 30 //degrees dev gap //todo implement with press - hold - release - value
+  else if (action === MT.RIGHTMOVE) power = 30
+  else if (action === MT.TOPMOVE) power = 30
+  else if (action === MT.DOWNMOVE) power = 30
+  else if (action === MT.CWMOVE) power = 30
+  else if (action === MT.CCWMOVE) power = 30
+  // frotmove and stopmove work different at the moment. Just +delta move and fullstop.
 
   const dummy = { code: action, power }
   
