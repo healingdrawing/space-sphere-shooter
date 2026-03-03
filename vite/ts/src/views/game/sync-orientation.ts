@@ -1,41 +1,35 @@
+import { gemm } from "../../tunnel";
+
 export function syncOrientation(mesh: BABYLON.Mesh, fvx: number, fvy: number, fvz: number, tvx: number, tvy: number, tvz: number) {
-  const front = new BABYLON.Vector3(fvx, fvy, fvz).normalize();
-  const top = new BABYLON.Vector3(tvx, tvy, tvz).normalize();
-
-  let m = mesh.getWorldMatrix()
-  let xz = m.decomposeToTransformNode(mesh)
-  mesh.rotation.asArray()
-  let mesh_top = 
   
-  const PARALLEL_THRESHOLD = 0.999;
-
-  const topDot = BABYLON.Vector3.Dot(mesh_top, top);
-  if (Math.abs(topDot) < PARALLEL_THRESHOLD) {
-    const rotAxis = BABYLON.Vector3.Cross(mesh_top, top).normalize();
-    const angle = 1// Math.acos(Math.max(-1, Math.min(1, topDot)));
-    if (angle > 0.001) {
-      mesh.rotate(rotAxis, angle, BABYLON.Space.WORLD);
-    }
-  }
-
-  rotMat = mesh.getWorldMatrix();
-  let mesh_front = new BABYLON.Vector3(rotMat.m[8], rotMat.m[9], rotMat.m[10]).normalize();
-
-  const frontDot = BABYLON.Vector3.Dot(mesh_front, front);
-  if (Math.abs(frontDot) < PARALLEL_THRESHOLD) {
-    const rotAxis = BABYLON.Vector3.Cross(mesh_front, front).normalize();
-    const angle =2// Math.acos(Math.max(-1, Math.min(1, frontDot)));
-    if (angle > 0.001) {
-      // mesh.rotate(rotAxis, angle, BABYLON.Space.WORLD);
-      mesh.rotate(new BABYLON.Vector3(1,2,3), angle, BABYLON.Space.WORLD);
-    }
-  }
-
-  // const rotationQuat = BABYLON.Quaternion.Identity();
-  // mesh.getWorldMatrix().decompose(new BABYLON.Vector3(1, 1, 1), rotationQuat, BABYLON.Vector3.Zero());
-  // mesh.rotation = rotationQuat.toEulerAngles();
-
-  // mesh.markAsDirty("matrix");
-  // mesh.computeWorldMatrix(true);
+  /** read the mesh orientation */
+  const mesh_top_end = mesh.getChildren().find(c => c.name === "topDot") as BABYLON.Mesh;
+  const mesh_front_end = mesh.getChildren().find(c => c.name === "frontDot") as BABYLON.Mesh;
+  const center_dot = mesh.absolutePosition.asArray()
+  
+  /* create vector to rotate mesh to server sent orientation */
+  
+  /** correct mesh orientation top axis */
+  const top_dot = mesh_top_end.absolutePosition.asArray()
+  const mesh_top_v = gemm.vecXD(center_dot,top_dot)
+  const server_top_v = [tvx,tvy,tvz]
+  const raw_t_axis = gemm.vec3Dnormal(mesh_top_v, server_top_v)
+  const fix_t_axis = BABYLON.Vector3.FromArray(raw_t_axis)
+  const fix_t_angle = Math.acos(gemm.vecXDcos(mesh_top_v, server_top_v))
+  console.warn("BEFORE SYNC: server_top_v", server_top_v, "mesh_top_v", mesh_top_v, "fix_t_axis", fix_t_axis, "fix_t_angle", fix_t_angle)
+  if(fix_t_angle && gemm.vecXDnorm(raw_t_axis)) mesh.rotate(fix_t_axis, fix_t_angle, BABYLON.Space.LOCAL )
+  
+  const mesh_top_v2 = gemm.vecXD(mesh.absolutePosition.asArray(),mesh_top_end.absolutePosition.asArray())
+  console.warn("AFTER SYNC: server_top_v", server_top_v, "mesh_top_v", mesh_top_v2)
+  
+  /** correct front axis */
+  const front_dot = mesh_front_end.absolutePosition.asArray()
+  const mesh_front_v = gemm.vecXD(center_dot,front_dot)
+  const server_front_v = [fvx,fvy,fvz]
+  const raw_f_axis = gemm.vec3Dnormal(mesh_front_v, server_front_v)
+  const fix_f_axis = BABYLON.Vector3.FromArray(raw_f_axis)
+  const fix_f_angle = Math.acos(gemm.vecXDcos(mesh_front_v, server_front_v))
+  console.log("fix_f_axis", fix_f_axis, "fix_f_angle", fix_f_angle)
+  if(fix_f_angle && gemm.vecXDnorm(raw_f_axis)) mesh.rotate(fix_f_axis, fix_f_angle, BABYLON.Space.LOCAL)
   
 }

@@ -1,6 +1,6 @@
 import { store, ws_atom } from "../../atoms"
 import { ram } from "../../ram";
-import { type Ship } from "../../tunnel"
+import { gemm, type Ship } from "../../tunnel"
 import { add_ship } from "./add-ship";
 import { manage_client_actions } from "./client-actions";
 import { add_exit_button_to_game_view } from "./exit-button";
@@ -8,9 +8,14 @@ import { view_html_div } from "./html-view";
 import { remove_ship } from "./remove-ship";
 import { move_ship } from "./move-ship";
 import { leftmove_ship } from "./leftmove-ship";
+import { rightmove_ship } from "./rightmove-ship";
 import { crts } from "../../handlers/utils";
 import { check_rotations_metadata, rotateAxis } from "./rotate-ship";
 import { topmove_ship } from "./topmove-ship";
+import { xyz_dev } from "./xyz";
+import { downmove_ship } from "./downmove-ship";
+import { cwmove_ship } from "./cwmove-ship";
+import { ccwmove_ship } from "./ccwmove-ship";
 
 
 function create_game_box() {
@@ -62,6 +67,8 @@ function create_game_box() {
 
     const ship_mesh = add_ship(ship, scene, ships)
     
+    xyz_dev(ship, scene)
+
     if(!ship_mesh) return
     const camera = new BABYLON.ArcRotateCamera(
       "camera",
@@ -135,7 +142,7 @@ function create_game_box() {
           const dt = (now - v.vts)/1000; // Delta in seconds
           const vec = new BABYLON.Vector3(v.x, v.y, v.z)
           const scaled = vec.scaleInPlace(dt);
-          ship.position.addInPlace(scaled); // Use add() instead of addInPlace()
+          ship.position.addInPlace(scaled); // Use add() VS of addInPlace()
           
           ship.metadata.velocity = {x:v.x,y:v.y,z:v.z,vts:now}
           
@@ -143,22 +150,30 @@ function create_game_box() {
         }
 
         check_rotations_metadata(ship, now)
+        if (ship.metadata.sideRotation){
+          const dt = (now - ship.metadata.sideRotation.ts ) / 1000
+          ship.metadata.sideRotation.ts = now
+          const axisend = ship.getChildren().find(c => c.name === "sideDot") as BABYLON.Mesh;
+          const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship.absolutePosition.asArray(), axisend.absolutePosition.asArray()))
+          rotateAxis(ship, axis, ship.metadata.sideRotation, dt);
+        }
         if (ship.metadata.frontRotation){
           const dt = (now - ship.metadata.frontRotation.ts ) / 1000
           ship.metadata.frontRotation.ts = now
-          rotateAxis(ship, BABYLON.Axis.Z, ship.metadata.frontRotation, dt);
+          const axisend = ship.getChildren().find(c => c.name === "frontDot") as BABYLON.Mesh;
+          const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship.absolutePosition.asArray(), axisend.absolutePosition.asArray()))
+          rotateAxis(ship, axis, ship.metadata.frontRotation, dt);
         }
         if (ship.metadata.topRotation){
           const dt = (now - ship.metadata.topRotation.ts ) / 1000
           // alert(`First dt: ${dt.toFixed(4)}s, angle: ${(ship.metadata.topRotation.av * dt).toFixed(2)}°`);
           ship.metadata.topRotation.ts = now
-          rotateAxis(ship, BABYLON.Axis.Y, ship.metadata.topRotation, dt);
+          // const top = ship.metadata.top.mesh as BABYLON.Mesh //bullshit from ai
+          const axisend = ship.getChildren().find(c => c.name === "topDot") as BABYLON.Mesh;
+          const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship.absolutePosition.asArray(), axisend.absolutePosition.asArray()))
+          rotateAxis(ship, axis, ship.metadata.topRotation, dt);
         }
-        if (ship.metadata.sideRotation){
-          const dt = (now - ship.metadata.sideRotation.ts ) / 1000
-          ship.metadata.sideRotation.ts = now
-          rotateAxis(ship, BABYLON.Axis.X, ship.metadata.sideRotation, dt);
-        }
+        
       }
 
       // console.log("Total meshes in scene:", scene.meshes.length);
@@ -182,7 +197,7 @@ function create_game_box() {
   }
   
   
-  return { view, initGameView, add_ship, remove_ship, game_over, get_scene, ships, move_ship, leftmove_ship, topmove_ship };
+  return { view, initGameView, add_ship, remove_ship, game_over, get_scene, ships, move_ship, leftmove_ship, rightmove_ship, topmove_ship, downmove_ship, cwmove_ship, ccwmove_ship };
 }
 
 export const game_box = create_game_box();

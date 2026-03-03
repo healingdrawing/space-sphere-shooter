@@ -1,6 +1,6 @@
 // @ts-nocheck
 // gemm.ts
-private class GEMM {
+class GEMM {
 
   /**
       return true if Float Arrays have same size

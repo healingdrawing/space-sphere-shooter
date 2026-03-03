@@ -6,6 +6,10 @@ import { ship_handler } from "./game/ship-handler";
 import { system_handler } from "./system_handler";
 import { leftmove_handler } from "./game/leftmove-handler";
 import { topmove_handler } from "./game/topmove-handler";
+import { rightmove_handler } from "./game/rightmove-handler";
+import { downmove_handler } from "./game/downmove-handler";
+import { cwmove_handler } from "./game/cwmove-handler";
+import { ccwmove_handler } from "./game/ccwmove-handler";
 
 /** handle all messages(by type t:MT). Upper level manager/router */
 export function all_handler(text: string, mt:number){
@@ -22,11 +26,11 @@ export function all_handler(text: string, mt:number){
     case MT.FRONTMOVE: move_handler(text); break
     case MT.STOPMOVE: move_handler(text, false); break
     case MT.LEFTMOVE: leftmove_handler(text); break
-    // case MT.RIGHTMOVE: rightmove_handler(text); break
+    case MT.RIGHTMOVE: rightmove_handler(text); break
     case MT.TOPMOVE: topmove_handler(text); break
-    // case MT.DOWNMOVE: downmove_handler(text); break
-    // case MT.CWMOVE: cwmove_handler(text); break
-    // case MT.CCWMOVE: ccwmove_handler(text); break
+    case MT.DOWNMOVE: downmove_handler(text); break
+    case MT.CWMOVE: cwmove_handler(text); break
+    case MT.CCWMOVE: ccwmove_handler(text); break
     // case MT.TARGETMOVE: targetmove_handler(text); break
     case MT.S: system_handler(text); break
 

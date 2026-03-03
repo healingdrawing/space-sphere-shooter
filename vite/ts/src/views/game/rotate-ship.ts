@@ -1,5 +1,6 @@
 import type { FrontRotation, SideRotation, TopRotation } from "../../tunnel";
 import { game_box } from "./game-box";
+import { syncOrientation } from "./sync-orientation";
 
 export const front_rotation = (data: FrontRotation) => {
   const mesh = game_box.ships[data.uuid]!;
@@ -15,18 +16,13 @@ export const top_rotation = (data: TopRotation) => {
     avt_ts: data.avt_ts,  // start time
     avt_tsend: data.avt_tsend,  // end time
     duration: data.avt_tsend - data.avt_ts,
-    vectors: { fvx: data.fvx, fvy: data.fvy, fvz: data.fvz, tvx: data.tvx, tvy: data.tvy, tvz: data.tvz },
-    meshQuatBefore: mesh.rotationQuaternion,
-    meshRotBefore: mesh.rotation
+    vectors: { fvx: data.fvx, fvy: data.fvy, fvz: data.fvz, tvx: data.tvx, tvy: data.tvy, tvz: data.tvz },    
   });
   
-  // warning. very raw(possibly comment). must sync with server data before each rotation starts
+  // warning. glitching. very raw(possibly comment). must sync with server data before each rotation starts
   // syncOrientation(mesh, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
   
-  console.log("After sync:", {
-    meshQuatAfter: mesh.rotationQuaternion,
-    meshRotAfter: mesh.rotation
-  });
+  
 
   mesh.metadata.topRotation = {av: data.avt, ts: data.avt_ts, tsend: data.avt_tsend};
 };
@@ -40,8 +36,6 @@ export const side_rotation = (data: SideRotation) => {
     avs_tsend: data.avs_tsend,  // end time
     duration: data.avs_tsend - data.avs_ts,
     vectors: { fvx: data.fvx, fvy: data.fvy, fvz: data.fvz, tvx: data.tvx, tvy: data.tvy, tvz: data.tvz },
-    meshQuatBefore: mesh.rotationQuaternion,
-    meshRotBefore: mesh.rotation
   });
 
   // syncOrientation(mesh, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
@@ -52,7 +46,7 @@ export const side_rotation = (data: SideRotation) => {
 
 export function rotateAxis(ship: BABYLON.Mesh, axis: BABYLON.Vector3, rot: {av: number, ts: number, tsend: number}, dt: number) {
   const angleRad = rot.av * dt * Math.PI / 180;
-  ship.rotate(axis, angleRad, BABYLON.Space.LOCAL);
+  ship.rotateAround(ship.absolutePosition ,axis, angleRad);
 }
 
 /** clean if rotation complete */

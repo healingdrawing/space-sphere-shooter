@@ -46,7 +46,7 @@ export function handle_top_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uin
   }
   const power = obj.power // 0-100% -> 90 deg
   /* *-1 before send to client. to rotate CCW. need check babylonjs(client) VS gl-matrix(server)  */
-  // const avt = Math.sign(power) * ship.max_avelo // +-[deg/s]. avoid accel at the moment
+  // const avs = Math.sign(power) * ship.max_avelo // +-[deg/s]. avoid accel at the moment
   const avs = 45
   const duration_s = Math.abs(power/avs)
   const now = rts()

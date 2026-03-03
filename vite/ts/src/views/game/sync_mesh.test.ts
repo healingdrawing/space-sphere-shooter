@@ -77,78 +77,7 @@ describe("syncOrientation", () => {
 });
 
 function syncOrientation(mesh: BABYLON.Mesh, fvx: number, fvy: number, fvz: number, tvx: number, tvy: number, tvz: number) {
-  // const front = new BABYLON.Vector3(fvx, fvy, fvz).normalize();
-  // const top = new BABYLON.Vector3(tvx, tvy, tvz).normalize();
-
-  // let rotMat = mesh.getWorldMatrix();
-  // let mesh_top = new BABYLON.Vector3(rotMat.m[4], rotMat.m[5], rotMat.m[6]).normalize();
-  
-  // const PARALLEL_THRESHOLD = 0.999;
-
-  // const topDot = BABYLON.Vector3.Dot(mesh_top, top);
-  // if (Math.abs(topDot) < PARALLEL_THRESHOLD) {
-  //   const rotAxis = BABYLON.Vector3.Cross(mesh_top, top).normalize();
-  //   const angle = Math.acos(Math.max(-1, Math.min(1, topDot)));
-  //   if (angle > 0.001) {
-  //     mesh.rotate(rotAxis, angle, BABYLON.Space.WORLD);
-  //   }
-  // }
-
-  // rotMat = mesh.getWorldMatrix();
-  // let mesh_front = new BABYLON.Vector3(rotMat.m[8], rotMat.m[9], rotMat.m[10]).normalize();
-
-  // const frontDot = BABYLON.Vector3.Dot(mesh_front, front);
-  // if (Math.abs(frontDot) < PARALLEL_THRESHOLD) {
-  //   const rotAxis = BABYLON.Vector3.Cross(mesh_front, front).normalize();
-  //   const angle = Math.acos(Math.max(-1, Math.min(1, frontDot)));
-  //   if (angle > 0.001) {
-  //     mesh.rotate(rotAxis, angle, BABYLON.Space.WORLD);
-  //   }
-  // }
-
-  // //mesh.markAsDirty("matrix");
-  // mesh.computeWorldMatrix(true);
   
   
-  const front = new BABYLON.Vector3(fvx, fvy, fvz).normalize();
-  const top = new BABYLON.Vector3(tvx, tvy, tvz).normalize();
-
-  let rotMat = mesh.getWorldMatrix();
-  let mesh_top = new BABYLON.Vector3(rotMat.m[4], rotMat.m[5], rotMat.m[6]).normalize();
-  
-  const PARALLEL_THRESHOLD = 0.999;
-
-  const topDot = BABYLON.Vector3.Dot(mesh_top, top);
-  if (Math.abs(topDot) < PARALLEL_THRESHOLD) {
-    const rotAxis = BABYLON.Vector3.Cross(mesh_top, top).normalize();
-    const angle = Math.acos(Math.max(-1, Math.min(1, topDot)));
-    if (angle > 0.001) {
-      mesh.rotate(rotAxis, angle, BABYLON.Space.WORLD);
-    }
-  }
-
-  rotMat = mesh.getWorldMatrix();
-  let mesh_front = new BABYLON.Vector3(rotMat.m[8], rotMat.m[9], rotMat.m[10]).normalize();
-
-  const frontDot = BABYLON.Vector3.Dot(mesh_front, front);
-  if (Math.abs(frontDot) < PARALLEL_THRESHOLD) {
-    const rotAxis = BABYLON.Vector3.Cross(mesh_front, front).normalize();
-    const angle = Math.acos(Math.max(-1, Math.min(1, frontDot)));
-    if (angle > 0.001) {
-      mesh.rotate(rotAxis, angle, BABYLON.Space.WORLD);
-    }
-  }
-
-  const rotationQuat = BABYLON.Quaternion.Identity();
-  mesh.getWorldMatrix().decompose(new BABYLON.Vector3(1, 1, 1), rotationQuat, BABYLON.Vector3.Zero());
-  mesh.rotation = rotationQuat.toEulerAngles();
-
-  mesh.markAsDirty("matrix");
-  mesh.computeWorldMatrix(true);
-
-  let rotMat2 = mesh.getWorldMatrix();
-  let mesh_top2 = new BABYLON.Vector3(rotMat.m[4], rotMat.m[5], rotMat.m[6]).normalize();
-  let mesh_front2 = new BABYLON.Vector3(rotMat.m[8], rotMat.m[9], rotMat.m[10]).normalize();
-  console.log("top:",top.asArray(), "mtop:", mesh_top2.asArray(), "front:", front.asArray(), "mfront:", mesh_front2.asArray())
 
 }

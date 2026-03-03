@@ -3,6 +3,7 @@ import { DEVLOG, devlog, dlog, errlog, rawlog } from "../../../debug/debug";
 import { USERS_MAX_NUMBER } from "../../../ram/consts";
 import type { Ship } from "../types";
 import { SOFF as S, SOFFSIZE } from "./enums";
+import { gemm } from "./non-autistic-math/gemm";
 
 export class SSSBoard {
   
@@ -313,10 +314,10 @@ export class SSSBoard {
         const b = this.base(i);
         if (!this.ships[b + S.HP]) continue;
         // rawlog("log_ship:", this.log_ship(i)) //todo delete
-  
+          /** consider order around side, front, top . to provide persuit first numpad 7/8/9, then 4/6 horisontal . No quaternions. only vector rotate */
+        this.applyAngularVelocity(b, S.AVS, now);
         this.applyAngularVelocity(b, S.AVF, now);
         this.applyAngularVelocity(b, S.AVT, now);
-        this.applyAngularVelocity(b, S.AVS, now);
       }
     } catch {
       errlog("update_ship_rotations error");
@@ -339,42 +340,44 @@ export class SSSBoard {
     if (dt <= 0) return;
   
     const angleRad = av * dt * Math.PI / 180;
+
+    /** top vector */
+    let t = [this.ships[b + S.TVX]!, this.ships[b + S.TVY]!, this.ships[b + S.TVZ]!]
+    /** front vector */
+    let f = [this.ships[b + S.FVX]!, this.ships[b + S.FVY]!, this.ships[b + S.FVZ]!]
   
-    const q = quat.create();
-  
-    /** consider order around side, front, top . to provide persuit first numpad 7/8/9, then 4/6 horisontal . No quaternions. only vector rotate */
     switch (avOffset) {
       case S.AVS:
-        const top   = vec3.fromValues(this.ships[b + S.TVX]!, this.ships[b + S.TVY]!, this.ships[b + S.TVZ]!);
-        const front = vec3.fromValues(this.ships[b + S.FVX]!, this.ships[b + S.FVY]!, this.ships[b + S.FVZ]!);
-        const side  = vec3.cross(vec3.create(), top, front);
-        vec3.normalize(side, side);
-        quat.setAxisAngle(q, side, angleRad);
+        /** side vector */
+        const s = gemm.vec3Dnormal(f,t)
+        t = gemm.vec3Drotate(t, s, angleRad, true)
+        f = gemm.vec3Drotate(f, s, angleRad, true)
+
+        this.ships[b + S.TVX] = t[0]!;
+        this.ships[b + S.TVY] = t[1]!;
+        this.ships[b + S.TVZ] = t[2]!;
+        this.ships[b + S.FVX] = f[0]!;
+        this.ships[b + S.FVY] = f[1]!;
+        this.ships[b + S.FVZ] = f[2]!;
+
         break;
       case S.AVF:
-        quat.setAxisAngle(q, [this.ships[b + S.FVX]!, this.ships[b + S.FVY]!, this.ships[b + S.FVZ]!], angleRad);
+        t = gemm.vec3Drotate(t, f, angleRad, true);
+        this.ships[b + S.TVX] = t[0]!;
+        this.ships[b + S.TVY] = t[1]!;
+        this.ships[b + S.TVZ] = t[2]!;
+
         break;
       case S.AVT:
-        quat.setAxisAngle(q, [this.ships[b + S.TVX]!, this.ships[b + S.TVY]!, this.ships[b + S.TVZ]!], angleRad);
+        f = gemm.vec3Drotate(f, t, angleRad, true);
+        this.ships[b + S.FVX] = f[0]!;
+        this.ships[b + S.FVY] = f[1]!;
+        this.ships[b + S.FVZ] = f[2]!;
+
         break;
       default:
         return;
     }
-  
-    let f = vec3.fromValues(this.ships[b + S.FVX]!, this.ships[b + S.FVY]!, this.ships[b + S.FVZ]!);
-    vec3.transformQuat(f, f, q);
-    vec3.normalize(f, f);
-  
-    let t = vec3.fromValues(this.ships[b + S.TVX]!, this.ships[b + S.TVY]!, this.ships[b + S.TVZ]!);
-    vec3.transformQuat(t, t, q);
-    vec3.normalize(t, t);
-  
-    this.ships[b + S.FVX] = f[0];
-    this.ships[b + S.FVY] = f[1];
-    this.ships[b + S.FVZ] = f[2];
-    this.ships[b + S.TVX] = t[0];
-    this.ships[b + S.TVY] = t[1];
-    this.ships[b + S.TVZ] = t[2];
   
     this.ships[b + tsOffset] = now;
   

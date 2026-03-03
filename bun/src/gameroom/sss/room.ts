@@ -69,8 +69,8 @@ export class SSSGameRoom implements GameRoom {
 
       //todo randomise without collision damage some way
       cx: 0, cy: 0, cz: 0,
-      fvx: 1, fvy: 0, fvz: 0,
-      tvx: 0, tvy: 1, tvz: 0,
+      fvx: 0, fvy: 0, fvz: 1, //z is front axis default
+      tvx: 0, tvy: 1, tvz: 0, // y is top/vertical axis default
       vvx: 0, vvy: 0, vvz: 0, v_ts: 0,
       
       avf: 0, avf_ts:0, avf_tsend:0,
@@ -195,23 +195,15 @@ export class SSSGameRoom implements GameRoom {
     
       case MT.LEFTMOVE: return handle_left_move(ws, msg);
     
-      case MT.RIGHTMOVE:
-        handle_right_move(ws, msg);
-        break;
+      case MT.RIGHTMOVE: return handle_right_move(ws, msg);
     
       case MT.TOPMOVE: return handle_top_move(ws, msg);
     
-      case MT.DOWNMOVE:
-        handle_down_move(ws, msg);
-        break;
+      case MT.DOWNMOVE: return handle_down_move(ws, msg);
     
-      case MT.CWMOVE:
-        handle_cw_move(ws, msg);
-        break;
+      case MT.CWMOVE: return handle_cw_move(ws, msg);
     
-      case MT.CCWMOVE:
-        handle_ccw_move(ws, msg);
-        break;
+      case MT.CCWMOVE: return handle_ccw_move(ws, msg);
     
       case MT.TARGETMOVE:
         handle_target_move(ws, msg);

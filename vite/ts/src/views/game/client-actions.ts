@@ -12,8 +12,11 @@ export const send_client_action = (ws:WebSocket, action:MT) => {
 
   let power = 0 //warning. polish check since server raise error is power 0
   if (action === MT.LEFTMOVE) power = 45 //degrees dev gap //todo implement
-  else if (action === MT.RIGHTMOVE) power = 90
-  else if (action === MT.TOPMOVE) power = 90
+  else if (action === MT.RIGHTMOVE) power = 45
+  else if (action === MT.TOPMOVE) power = 45
+  else if (action === MT.DOWNMOVE) power = 45
+  else if (action === MT.CWMOVE) power = 45
+  else if (action === MT.CCWMOVE) power = 45
 
   const dummy = { code: action, power }
   
