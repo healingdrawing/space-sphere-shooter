@@ -10,7 +10,7 @@ import { move_ship } from "./move-ship";
 import { leftmove_ship } from "./leftmove-ship";
 import { rightmove_ship } from "./rightmove-ship";
 import { crts } from "../../handlers/utils";
-import { check_rotations_metadata, rotateAxis } from "./rotate-ship";
+import { check_rotations_metadata, rotateAxis as rotate_around_Axis } from "./rotate-ship";
 import { topmove_ship } from "./topmove-ship";
 import { xyz_dev } from "./xyz";
 import { downmove_ship } from "./downmove-ship";
@@ -78,15 +78,18 @@ function create_game_box() {
       ship_mesh.position,
       scene
     );
-    // camera.lockedTarget = ship_mesh
-
+    
     const cameraParent = new BABYLON.TransformNode("camParent", scene);
-    cameraParent.parent = ship_mesh;
-
-    camera.parent = cameraParent;
+    
     camera.position = new BABYLON.Vector3(0, ship.br/50, -ship.br /80);
     camera.setTarget(BABYLON.Vector3.Zero());  // local origin
+
+    // cameraParent.rotate(BABYLON.Vector3.Up(), Math.PI)
+    // cameraParent.rotate(BABYLON.Vector3.Forward(), Math.PI)
     
+    
+    camera.parent = cameraParent;
+    cameraParent.parent = ship_mesh;
     
     // scene.registerBeforeRender(() => {
     //   if (ship_mesh && ship) {
@@ -99,17 +102,6 @@ function create_game_box() {
     //   }
     // });
     
-
-    // warning can not fix this creature properly. Skybox glitching and all vibrating
-    // const camera = new BABYLON.FollowCamera("followCamera", new BABYLON.Vector3(0, 0, 0), scene);
-    // camera.radius = ship.br/50;      // start with 4× back radius
-    // camera.heightOffset = ship.br/20;  // lift above
-    // camera.rotationOffset = 180;  // look from behind
-    // camera.cameraAcceleration = 2;
-    // camera.maxCameraSpeed = 10;
-    // camera.lockedTarget = ship_mesh;   // follow this mesh. it will be tricky
-    // camera.minZ = 0.01; // Minimum distance
-    // camera.maxZ = 100000; // Maximum distance (increase as needed)
 
     const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 1), scene);
     light.intensity = 0.5;//todo test
@@ -154,15 +146,15 @@ function create_game_box() {
           const dt = (now - ship.metadata.sideRotation.ts ) / 1000
           ship.metadata.sideRotation.ts = now
           const axisend = ship.getChildren().find(c => c.name === "sideDot") as BABYLON.Mesh;
-          const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship.absolutePosition.asArray(), axisend.absolutePosition.asArray()))
-          rotateAxis(ship, axis, ship.metadata.sideRotation, dt);
+          const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship.absolutePosition.asArray(), axisend.absolutePosition.asArray())).negate()
+          rotate_around_Axis(ship, axis, ship.metadata.sideRotation, dt);
         }
         if (ship.metadata.frontRotation){
           const dt = (now - ship.metadata.frontRotation.ts ) / 1000
           ship.metadata.frontRotation.ts = now
           const axisend = ship.getChildren().find(c => c.name === "frontDot") as BABYLON.Mesh;
           const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship.absolutePosition.asArray(), axisend.absolutePosition.asArray()))
-          rotateAxis(ship, axis, ship.metadata.frontRotation, dt);
+          rotate_around_Axis(ship, axis, ship.metadata.frontRotation, dt);
         }
         if (ship.metadata.topRotation){
           const dt = (now - ship.metadata.topRotation.ts ) / 1000
@@ -171,7 +163,7 @@ function create_game_box() {
           // const top = ship.metadata.top.mesh as BABYLON.Mesh //bullshit from ai
           const axisend = ship.getChildren().find(c => c.name === "topDot") as BABYLON.Mesh;
           const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship.absolutePosition.asArray(), axisend.absolutePosition.asArray()))
-          rotateAxis(ship, axis, ship.metadata.topRotation, dt);
+          rotate_around_Axis(ship, axis, ship.metadata.topRotation, dt);
         }
         
       }

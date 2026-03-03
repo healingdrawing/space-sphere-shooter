@@ -381,18 +381,19 @@ export class SSSBoard {
   
     this.ships[b + tsOffset] = now;
   
+    dlog(true, "ROTATION STAMP")
+    if (DEVLOG) devlog(
+      `fvx:${this.ships[b + S.FVX]}`,
+      `fvy:${this.ships[b + S.FVY]}`,
+      `fvz:${this.ships[b + S.FVZ]}`,
+      `tvx:${this.ships[b + S.TVX]}`,
+      `tvy:${this.ships[b + S.TVY]}`,
+      `tvz:${this.ships[b + S.TVZ]}`,
+    )
+
     if (now >= endTs) {
       this.ships[b + avOffset] = 0;
       this.ships[b + tsendOffset] = now;
-      // dlog(false, "ROTATION END")
-      // if (DEVLOG) devlog(
-      //   `this.ships[b + S.FVX]:${this.ships[b + S.FVX]}`,
-      //   `this.ships[b + S.FVY]:${this.ships[b + S.FVY]}`,
-      //   `this.ships[b + S.FVZ]:${this.ships[b + S.FVZ]}`,
-      //   `this.ships[b + S.TVX]:${this.ships[b + S.TVX]}`,
-      //   `this.ships[b + S.TVY]:${this.ships[b + S.TVY]}`,
-      //   `this.ships[b + S.TVZ]:${this.ships[b + S.TVZ]}`,
-      // )
     }
   }
 

@@ -58,7 +58,7 @@ export function handle_left_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: Ui
   result.push({
     mt: MT.LEFTMOVE,
     msg: {
-      uuid, avt:-avt, avt_ts:now, avt_tsend,
+      uuid, avt:avt, avt_ts:now, avt_tsend,
       fvx:ship.fvx, fvy:ship.fvy, fvz:ship.fvz,
       tvx:ship.tvx,tvy:ship.tvy,tvz:ship.tvz,      
     } as TopRotation,

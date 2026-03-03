@@ -5,7 +5,8 @@ export function syncOrientation(mesh: BABYLON.Mesh, fvx: number, fvy: number, fv
   /** read the mesh orientation */
   const mesh_top_end = mesh.getChildren().find(c => c.name === "topDot") as BABYLON.Mesh;
   const mesh_front_end = mesh.getChildren().find(c => c.name === "frontDot") as BABYLON.Mesh;
-  const center_dot = mesh.absolutePosition.asArray()
+  const mcv  = mesh.absolutePosition
+  const center_dot = mcv.asArray()
   
   /* create vector to rotate mesh to server sent orientation */
   
@@ -17,7 +18,7 @@ export function syncOrientation(mesh: BABYLON.Mesh, fvx: number, fvy: number, fv
   const fix_t_axis = BABYLON.Vector3.FromArray(raw_t_axis)
   const fix_t_angle = Math.acos(gemm.vecXDcos(mesh_top_v, server_top_v))
   console.warn("BEFORE SYNC: server_top_v", server_top_v, "mesh_top_v", mesh_top_v, "fix_t_axis", fix_t_axis, "fix_t_angle", fix_t_angle)
-  if(fix_t_angle && gemm.vecXDnorm(raw_t_axis)) mesh.rotate(fix_t_axis, fix_t_angle, BABYLON.Space.LOCAL )
+  if(fix_t_angle && gemm.vecXDnorm(raw_t_axis)) mesh.rotateAround(mcv, fix_t_axis, fix_t_angle)
   
   const mesh_top_v2 = gemm.vecXD(mesh.absolutePosition.asArray(),mesh_top_end.absolutePosition.asArray())
   console.warn("AFTER SYNC: server_top_v", server_top_v, "mesh_top_v", mesh_top_v2)
@@ -30,6 +31,6 @@ export function syncOrientation(mesh: BABYLON.Mesh, fvx: number, fvy: number, fv
   const fix_f_axis = BABYLON.Vector3.FromArray(raw_f_axis)
   const fix_f_angle = Math.acos(gemm.vecXDcos(mesh_front_v, server_front_v))
   console.log("fix_f_axis", fix_f_axis, "fix_f_angle", fix_f_angle)
-  if(fix_f_angle && gemm.vecXDnorm(raw_f_axis)) mesh.rotate(fix_f_axis, fix_f_angle, BABYLON.Space.LOCAL)
+  if(fix_f_angle && gemm.vecXDnorm(raw_f_axis)) mesh.rotateAround(mcv, fix_f_axis, fix_f_angle)
   
 }

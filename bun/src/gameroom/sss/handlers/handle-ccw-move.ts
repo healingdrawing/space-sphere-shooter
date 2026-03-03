@@ -58,7 +58,7 @@ export function handle_ccw_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uin
   result.push({
     mt: MT.CWMOVE,
     msg: {
-      uuid, avf:-avf, avf_ts:now, avf_tsend,
+      uuid, avf:avf, avf_ts:now, avf_tsend,
       fvx:ship.fvx, fvy:ship.fvy, fvz:ship.fvz,
       tvx:ship.tvx,tvy:ship.tvy,tvz:ship.tvz,      
     } as FrontRotation,

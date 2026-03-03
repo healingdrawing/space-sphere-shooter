@@ -69,8 +69,8 @@ export class SSSGameRoom implements GameRoom {
 
       //todo randomise without collision damage some way
       cx: 0, cy: 0, cz: 0,
-      fvx: 0, fvy: 0, fvz: 1, //z is front axis default
-      tvx: 0, tvy: 1, tvz: 0, // y is top/vertical axis default
+      fvx: 0, fvy: 0, fvz: 1, //z is front axis default (babylonjs default way)
+      tvx: 0, tvy: 1, tvz: 0, // y is top/vertical axis default (babylonjs default way)
       vvx: 0, vvy: 0, vvz: 0, v_ts: 0,
       
       avf: 0, avf_ts:0, avf_tsend:0,

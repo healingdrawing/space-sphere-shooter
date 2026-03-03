@@ -58,7 +58,7 @@ export function handle_right_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: U
   result.push({
     mt: MT.RIGHTMOVE,
     msg: {
-      uuid, avt:-avt, avt_ts:now, avt_tsend,
+      uuid, avt:avt, avt_ts:now, avt_tsend,
       fvx:ship.fvx, fvy:ship.fvy, fvz:ship.fvz,
       tvx:ship.tvx,tvy:ship.tvy,tvz:ship.tvz,      
     } as TopRotation,
