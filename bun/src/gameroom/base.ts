@@ -46,8 +46,6 @@ export function broadcast_exit_message(uuid:number){
 
 // Base interface - every game room must have
 export interface GameRoom {
-  players: Uint8Array;
-
   /** todo manage logic for game message then return where each object of array has
    *  {
    * 

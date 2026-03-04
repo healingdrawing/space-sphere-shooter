@@ -19,6 +19,29 @@ export const send_client_action = (ws:WebSocket, action:MT) => {
   else if (action === MT.CCWMOVE) power = 30
   // frotmove and stopmove work different at the moment. Just +delta move and fullstop.
 
+  /* shot section */
+  else if (action){}
+
+  switch(action){
+    case MT.LEFTMOVE: power = 30; break
+    case MT.RIGHTMOVE: power = 30; break
+    case MT.TOPMOVE: power = 30; break
+    case MT.DOWNMOVE: power = 30; break
+    case MT.CWMOVE: power = 30; break
+    case MT.CCWMOVE: power = 30; break
+    
+    /* shot section */
+    
+    case MT.FRONTSHOT: power = 50; break //warning at the moment the power is not used on server side, for shot
+    case MT.LEFTSHOT: power = 50; break
+    case MT.RIGHTSHOT: power = 50; break
+    case MT.BACKSHOT: power = 50; break
+    case MT.TOPSHOT: power = 50; break
+    case MT.DOWNSHOT: power = 50; break
+    
+    default: break
+  }
+
   const dummy = { code: action, power }
   
   // add message type

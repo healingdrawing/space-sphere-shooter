@@ -16,8 +16,8 @@ export class SSSGameRoom implements GameRoom {
   private room_size = USERS_MAX_NUMBER + 1;
   /** generate new uuid:number in game room and return */
   new_uuid = () =>{
-    const p = this.players //uint8array
     const size = this.room_size
+    const p = this.board.players //uint8array
     for(let i = 1;i < size;i++){
       if (!p[i]){
         p[i]=1 // make slot busy
@@ -28,7 +28,6 @@ export class SSSGameRoom implements GameRoom {
     return 0
   }
   
-  players: Uint8Array = new Uint8Array(this.room_size)
   /** gameboard, where gameplay calculated using handle message */
   board:SSSBoard
 
@@ -40,7 +39,6 @@ export class SSSGameRoom implements GameRoom {
   }
   /** clean room, gameboard, broadcast client exit */
   remove_client(uuid:number){
-    this.players[uuid] = 0 //clean the slot, and free the "uuid"(that is index in array)
     //warning non mandatory reset_ship call. Can set ship_idx=0 to speedup, with artefacts
     this.board.reset_ship(uuid)
     this.check_room_is_empty()
@@ -92,7 +90,7 @@ export class SSSGameRoom implements GameRoom {
   /** check there are no connected players, than stop ships autoupdate */
   private check_room_is_empty(){
     const size = this.room_size
-    const p = this.players
+    const p = this.board.players
     
     for (let i=1;i<size;i++) if(p[i]) return //check someone still connected
     
@@ -166,9 +164,7 @@ export class SSSGameRoom implements GameRoom {
 
       case MT.EXIT: handle_exit(ws, msg); break
     
-      case MT.FRONTSHOT:
-        handle_front_shot(ws, msg);
-        break;
+      case MT.FRONTSHOT: return handle_front_shot(ws, msg);
     
       case MT.LEFTSHOT:
         handle_left_shot(ws, msg);

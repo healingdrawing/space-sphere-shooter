@@ -114,3 +114,26 @@ export type SideRotation = {
   fvx:number, fvy:number, fvz:number,
   tvx:number,tvy:number,tvz:number,      
 }
+
+/** lazer gun shot beam. Separatedly sent with full coordinates, to manage the delay effect */
+export type LazerBeam = {
+  /** ship/user index */
+  uuid:number,
+  /** angle degrees of the laser beam precision. The 1+. More angle less damage(but client only draw) */
+  a: number,
+
+  /** x coordinate of the distanted by 1000 lazer beam, used to manage delay visually */
+  x:number,
+  /** y coordinate of the distanted by 1000 lazer beam, used to manage delay visually */
+  y:number,
+  /** z coordinate of the distanted by 1000 lazer beam, used to manage delay visually */
+  z:number,
+  
+  /** vector x coordinate of the normal to lazer beam direction, (to calc cross beams independently of ship mesh position) */
+  nx:number,
+  /** vector y coordinate of the normal to lazer beam direction, (to calc cross beams independently of ship mesh position) */
+  ny:number,
+  /** vector z coordinate of the normal to lazer beam direction, (to calc cross beams independently of ship mesh position) */
+  nz:number,
+  
+}

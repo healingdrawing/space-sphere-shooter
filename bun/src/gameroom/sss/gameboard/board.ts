@@ -4,14 +4,18 @@ import { USERS_MAX_NUMBER } from "../../../ram/consts";
 import type { Ship } from "../types";
 import { SOFF as S, SOFFSIZE } from "./enums";
 import { gemm } from "./non-autistic-math/gemm";
+import { users } from "../../../ram/storage";
+import type { GameRoomResponseMessage } from "../../base";
 
 export class SSSBoard {
   
 
-  /** the world sphere diameter */
+  /** the world sphere diameter //todo not implemented */
   readonly size = USERS_MAX_NUMBER
   private readonly sizeplus = this.size + 1
 
+  /** duplication of gameroom property */
+  players = new Uint8Array(this.sizeplus);
   ships = new Float32Array(this.sizeplus * SOFFSIZE);
 
   base = (i: number) => i * SOFFSIZE;
@@ -270,13 +274,86 @@ export class SSSBoard {
   }
 
   /** Reset one ship slot when player exit or destroyed */
-  reset_ship(i: number) {
-    const b = this.base(i);
+  reset_ship(uuid: number) {
+    this.players[uuid] = 0
+    const b = this.base(uuid);
     this.ships.fill(0, b, b + SOFFSIZE);
   }
 
   reset(){
-    this.ships.fill(0)
+    this.players.fill(0);
+    this.ships.fill(0);
+  }
+
+  /** implements lazer shot.
+   * Subtracts energy from shooter, damage hp of targets. 26 boxes around, not implemented at the moment.
+   * @param uuid the shooter uuid, to subtract energy from ship.en
+   * @param guns guns number(angle of beam rotation at the moment)
+   * @param power requested power of for shot 0-100% of max_en
+   * @param en current energy units available to use
+   * @param max_en maximum energy units capacity
+   * @param vx coordinate of the lazer beam front direction
+   * @param vy coordinate of the lazer beam front direction
+   * @param vz coordinate of the lazer beam front direction
+   * @param nx x coordinate of lazer beam normal axis to rotate beam
+   * @param ny y coordinate of lazer beam normal axis to rotate beam
+   * @param nz z coordinate of lazer beam normal axis to rotate beam
+   * @param cx coordinate of the start lazer beam
+   * @param cy coordinate of the start lazer beam
+   * @param cz coordinate of the start lazer beam
+  */
+  lazer_shot(
+    uuid:number,
+    guns:number, power:number, en:number, max_en:number,
+    vx:number, vy:number, vz:number,
+    nx:number, ny:number, nz:number,
+    cx:number, cy:number, cz:number,
+  ):GameRoomResponseMessage[]
+  {
+    const result:GameRoomResponseMessage[] = []
+    // todo refactor to not use getters/read_ship to speedup
+    const s = this.read_ship(uuid)
+
+    /** beam front vector */
+    const bfv = [vx,vy,vz]
+    /** beam normal vector */
+    const bnv = [nx,ny,nz]
+
+    /** beam side vector to rotate in vertical plane */
+    const bsv = gemm.vec3Dnormal(bfv,bnv)
+    
+    /** raw distance from ship center to count damage. //todo implement Ellipsoid. Not implemented */
+    //warning /1000 because of client side division by 1000 at the moment
+    const r = ( Math.min( s.br, s.sr, s.vr, s.fr ) / 1000 )
+    /** max distance from ship center when ship affected by beam */
+    const dmax = (2*r*r)**0.5
+    
+    /* raw collision just calc distance from beam vector to center of ship. Then compare with dmax */
+    
+    /* ships except uuid, no 26 boxes approach at the moment */
+    const p = this.players //zero index is empty always
+    const lena = p.length
+    for (let i=1;i<lena;i++){
+      if (!p[i] || i === uuid) continue
+      /** target */
+      const t = this.read_ship(i)
+      const tc = [t.cx, t.cy, t.cz]
+      /** plane from target ship center and beam vector as normal */
+      const pt = gemm.plane3D_dot3Dnormal(tc,bfv)
+      /** projection of the beam start dot to pt, to measure distance */
+      const dot = gemm.projection_dot3D_on_plane3D([cx,cy,cz], pt)
+      /** distance from target ship center to beam front vector */
+      const dt = gemm.vecXDnorm(gemm.vecXD(dot, tc))
+      // warning need proper sketch first
+    }
+
+
+
+    return result
+  }
+
+  constructor() {
+    this.reset();
   }
 
   update_ship_positions(now: number) {
@@ -302,10 +379,6 @@ export class SSSBoard {
     } catch (e) {
       errlog("board.ts unsafe update_ship_positons() error")
     }
-  }
-
-  constructor() {
-    this.reset();
   }
 
   update_ship_rotations(now: number): void {

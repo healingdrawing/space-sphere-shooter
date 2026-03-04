@@ -29,7 +29,7 @@ export function handle_join(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Ar
     })
     // collect all other ships and send to new client
     const b = gameroom.board
-    const p = gameroom.players
+    const p = b.players
     const size = p.length
     for(let i = 1;i < size;i++){
       if (i !== uuid && p[i]){
