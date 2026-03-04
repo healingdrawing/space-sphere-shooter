@@ -5,7 +5,7 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ships:(BABYLON.Mesh |
   console.log("add_ship data:", ship)
 
   const idx = ship.idx;
-  if (idx < 1 || idx >= ram.umn){
+  if (idx < 1 || idx > ram.umn){
     console.error("add_ship: wrong index of the ship. Should not happen ", idx)
     return null
   }
