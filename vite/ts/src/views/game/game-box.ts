@@ -58,7 +58,7 @@ function create_game_box() {
     scene.useRightHandedSystem = true //warning crucial line, and also on forum some crap in quaternions announced and confirmed in case of this. Creatures made left hand system default when the most planet (math and opengl) manage right hand system. It is ... mental. Now they drown in bugs and patches with advanced custom cameras. Felitaziones!
     scene.clearColor = new BABYLON.Color4(0, 0, 0, 1); // Set background to black
     
-    const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000 }, scene);
+    const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000 }, scene);//warning bind lazer to this
     const skyboxMaterial = new BABYLON.StandardMaterial("skyBoxMaterial", scene);
     skyboxMaterial.backFaceCulling = false; // Ensure the back faces are rendered
     skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("./textures/1", scene);
