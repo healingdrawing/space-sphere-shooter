@@ -16,6 +16,7 @@ import { xyz_dev } from "./xyz";
 import { downmove_ship } from "./downmove-ship";
 import { cwmove_ship } from "./cwmove-ship";
 import { ccwmove_ship } from "./ccwmove-ship";
+import { lazer_shot } from "./lazer-shot";
 
 
 function create_game_box() {
@@ -26,6 +27,8 @@ function create_game_box() {
 
   let scene: BABYLON.Scene;
   const get_scene = () => scene
+
+  
 
   const ships: (BABYLON.Mesh | null)[] = new Array(ram.umn).fill(null);
   let animationId: number | null = null;
@@ -191,7 +194,7 @@ function create_game_box() {
   }
   
   
-  return { view, initGameView, add_ship, remove_ship, game_over, get_scene, ships, move_ship, leftmove_ship, rightmove_ship, topmove_ship, downmove_ship, cwmove_ship, ccwmove_ship };
+  return { view, initGameView, add_ship, remove_ship, game_over, get_scene, ships, move_ship, leftmove_ship, rightmove_ship, topmove_ship, downmove_ship, cwmove_ship, ccwmove_ship, lazer_shot };
 }
 
 export const game_box = create_game_box();

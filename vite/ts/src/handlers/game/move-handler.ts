@@ -11,6 +11,6 @@ export const move_handler = (text:string, front = true) => {
     //todo check
     game_box.move_ship(obj, front)
   } catch (e) {
-    console.error("wrong frontmove data received")
+    console.error("wrong frontmove or stopmove data received")
   }
 }

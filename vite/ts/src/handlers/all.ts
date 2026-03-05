@@ -10,6 +10,7 @@ import { rightmove_handler } from "./game/rightmove-handler";
 import { downmove_handler } from "./game/downmove-handler";
 import { cwmove_handler } from "./game/cwmove-handler";
 import { ccwmove_handler } from "./game/ccwmove-handler";
+import { frontshot_handler } from "./game/frontshot-handler";
 
 /** handle all messages(by type t:MT). Upper level manager/router */
 export function all_handler(text: string, mt:number){
@@ -17,7 +18,7 @@ export function all_handler(text: string, mt:number){
     case MT.JOIN: join_handler(text); break
     case MT.EXIT: exit_handler(text); break
     case MT.SHIP: ship_handler(text); break
-    // case MT.FRONTSHOT: frontshot_handler(text); break
+    case MT.FRONTSHOT: frontshot_handler(text); break
     // case MT.LEFTSHOT: leftshot_handler(text); break
     // case MT.RIGHTSHOT: rightshot_handler(text); break
     // case MT.BACKSHOT: backshot_handler(text); break
