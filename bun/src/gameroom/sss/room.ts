@@ -10,6 +10,7 @@ import type { WebSocketData } from "../..";
 import { parse_guns, parse_limits } from "./ship/limits";
 import type { Ship } from "./types";
 import { rts } from "../../utils/basetime";
+import { users } from "../../ram/storage";
 
 export class SSSGameRoom implements GameRoom {
   /** incrementable index as uuid of players. Just ++ every time. Ok for now */
@@ -38,12 +39,20 @@ export class SSSGameRoom implements GameRoom {
     return uuid
   }
   /** clean room, gameboard, broadcast client exit */
-  remove_client(uuid:number){
+  remove_client(uuid:number, force_close_ws = false){
     //warning non mandatory reset_ship call. Can set ship_idx=0 to speedup, with artefacts
     this.board.reset_ship(uuid)
     this.check_room_is_empty()
     //inform other clients to remove ship
     broadcast_exit_message(uuid)
+    if (force_close_ws) this.force_close_ws(uuid)
+  }
+
+  /* // todo consider implement delayed actions executor as tmdc. this is raw gap */
+  force_close_ws(uuid:number){
+    const user = users.get(uuid)
+    if (user) user.ws.close()
+    else errlog("force_close_ws failed to get user. It is raw implementation.")
   }
 
   join_game( uuid:number, nick:string, rgb:{r:number,g:number,b:number}, ){
@@ -62,7 +71,7 @@ export class SSSGameRoom implements GameRoom {
       front_guns: front_guns, side_guns: side_guns, vert_guns: vert_guns,
       engines: engines,
       fr: fr, br: br, sr: sr, vr: vr,
-      max_en: max_en, en: 0, en_ts: 0,
+      max_en: max_en, en: max_en, en_ts: 0,
       max_hp: max_hp, hp: max_hp, hp_ts: 0, //warning at the moment do not plan recover
 
       //todo randomise without collision damage some way

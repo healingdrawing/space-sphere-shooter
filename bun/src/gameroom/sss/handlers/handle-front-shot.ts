@@ -78,6 +78,7 @@ export function handle_front_shot(ws: Bun.ServerWebSocket<WebSocketData>, msg: U
     uuids: [0]
   })
   
+  devlog("damage_messages",damage_messages) //todo remove
   result.push(...damage_messages)
   
   return result

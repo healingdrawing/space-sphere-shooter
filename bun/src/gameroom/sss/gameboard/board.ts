@@ -4,8 +4,9 @@ import { USERS_MAX_NUMBER } from "../../../ram/consts";
 import type { Ship } from "../types";
 import { SOFF as S, SOFFSIZE } from "./enums";
 import { gemm } from "./non-autistic-math/gemm";
-import { users } from "../../../ram/storage";
+import { gameroom, users } from "../../../ram/storage";
 import type { GameRoomResponseMessage } from "../../base";
+import { MT } from "../../../enums/mt";
 
 export class SSSBoard {
   
@@ -289,7 +290,7 @@ export class SSSBoard {
    * Subtracts energy from shooter, damage hp of targets. 26 boxes around, not implemented at the moment.
    * @param uuid the shooter uuid, to subtract energy from ship.en
    * @param guns guns number(angle of beam rotation at the moment)
-   * @param power requested power of for shot 0-100% of max_en
+   * @param power requested power of for shot 0-100% of current en
    * @param en current energy units available to use
    * @param max_en maximum energy units capacity
    * @param vx coordinate of the lazer beam front direction
@@ -311,8 +312,15 @@ export class SSSBoard {
   ):GameRoomResponseMessage[]
   {
     const result:GameRoomResponseMessage[] = []
+
+    /* damage value */
+    const damage = power/100 * en / guns * 0.5 // * 0.5 to satisfy density 0-2
+
     // todo refactor to not use getters/read_ship to speedup
     const s = this.read_ship(uuid)
+
+    /** beam start dot */
+    const bs = [cx,cy,cz]
 
     /** beam front vector */
     const bfv = [vx,vy,vz]
@@ -322,11 +330,6 @@ export class SSSBoard {
     /** beam side vector to rotate in vertical plane */
     const bsv = gemm.vec3Dnormal(bfv,bnv)
     
-    /** raw distance from ship center to count damage. //todo implement Ellipsoid. Not implemented */
-    //warning /1000 because of client side division by 1000 at the moment
-    const r = ( Math.min( s.br, s.sr, s.vr, s.fr ) / 1000 )
-    /** max distance from ship center when ship affected by beam */
-    const dmax = (2*r*r)**0.5
     
     /* raw collision just calc distance from beam vector to center of ship. Then compare with dmax */
     
@@ -335,19 +338,75 @@ export class SSSBoard {
     const lena = p.length
     for (let i=1;i<lena;i++){
       if (!p[i] || i === uuid) continue
-      /** target */
+      /** target ship to check hit */
       const t = this.read_ship(i)
+      
+      /** raw distance from ship center to count damage. //todo implement Ellipsoid. Not implemented */
+      //warning /1000 because of client side division by 1000 at the moment
+      const r = ( Math.min( t.br, t.sr, t.vr, t.fr ) / 1000 )
+      /** max distance from target ship center when target ship affected by beam */
+      const dmax = (2*r*r)**0.5
+      
       const tc = [t.cx, t.cy, t.cz]
-      /** plane from target ship center and beam vector as normal */
-      const pt = gemm.plane3D_dot3Dnormal(tc,bfv)
-      /** projection of the beam start dot to pt, to measure distance */
-      const dot = gemm.projection_dot3D_on_plane3D([cx,cy,cz], pt)
-      /** distance from target ship center to beam front vector */
-      const dt = gemm.vecXDnorm(gemm.vecXD(dot, tc))
-      // warning need proper sketch first
+
+      /** vertical plane of the cross styled beam */
+      const vp = gemm.plane3D_dot3Dnormal(bs,bsv)
+      /** horizontal plane of the cross styled beam */
+      const hp = gemm.plane3D_dot3Dnormal(bs,bsv)
+
+      /** projection of the target ship to the vertical plane of the beam */
+      const vp_dot = gemm.projection_dot3D_on_plane3D(tc, vp)
+      /** projection of the target ship to the horizontal plane of the beam */
+      const hp_dot = gemm.projection_dot3D_on_plane3D(tc, hp)
+      /** distance from target ship center to vertical plane of the beam */
+      const vd = gemm.vecXDnorm(gemm.vecXD(tc, vp_dot))
+      /** distance from target ship center to horizontal plane of the beam */
+      const hd = gemm.vecXDnorm(gemm.vecXD(tc, hp_dot))
+      
+      rawlog("vd:"+vd+" dmax:", dmax)
+      /* at the moment just in plane and close to front directions */
+      /* how much hit the target ship by cross lazerbeam */
+      let density = 0
+      /* check affecting the target ship by two planes sequently */
+      if(vd<dmax){ /* target ship damagable sphere intersects the vertical plane */
+        devlog("vd<dmax")
+        /* check the beam angle affects target ship sphere */
+        const vp_dot_to_hp = gemm.projection_dot3D_on_plane3D(vp_dot, hp)
+        /** distance from vp_dot to hp  */
+        const d_to_hp = gemm.vecXDnorm(gemm.vecXD(vp_dot_to_hp, vp_dot))
+        /** distance from beam start to vp_dot_to_hp */
+        const d_far_v = gemm.vecXDnorm(gemm.vecXD(bs, vp_dot_to_hp))
+        /** limit distance from beam vector to vertical direction, depends on angle and how far target is */
+        const limit = d_far_v * Math.tan(gemm.radians(guns/2)) //half of 90 max, so not more than 45
+        devlog("d_to_hp < limit:"+ (d_to_hp < limit))
+        if(d_to_hp < limit) density++
+      }
+      /* now the similarly appropriate for horizontal plane of the beam */
+      if (hd<dmax){
+        const hp_dot_to_vp = gemm.projection_dot3D_on_plane3D(hp_dot, vp)
+        const d_to_vp = gemm.vecXDnorm(gemm.vecXD(hp_dot_to_vp, hp_dot))
+        const d_far_h = gemm.vecXDnorm(gemm.vecXD(bs, hp_dot_to_vp))
+        const limit = d_far_h * Math.tan(gemm.radians(guns/2))
+        if(d_to_vp < limit) density++
+      }
+
+      if (!density) continue
+      const thp = t.hp - damage*density
+      devlog("thp t.hp damage density", thp, t.hp, damage, density)
+
+      if(thp >0){
+        this.set_hp(i, thp)
+        result.push({
+          mt:MT.S,
+          msg: {hit:t.idx, hp:thp},
+          ms:0,
+          uuids:[0]
+        })
+      }else{
+        //todo consider implement destroy-exit as delayed action, if it will be more cases to use in parallel with gameroomresponsemessages . and delayed actions executor the similar way as tmdc
+        gameroom.remove_client(t.idx, true)
+      }
     }
-
-
 
     return result
   }
