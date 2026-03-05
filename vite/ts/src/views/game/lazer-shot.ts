@@ -29,26 +29,29 @@ export const lazer_shot = (data: LazerBeam) => {
 }
 
 function lazer_beam(start: BABYLON.Vector3, end: BABYLON.Vector3, axis: BABYLON.Vector3, angleRad: number, scene: BABYLON.Scene) {
-  const line = BABYLON.MeshBuilder.CreateLines("laser", {
-    points: [start.clone(), end.clone()]
+  const tube = BABYLON.MeshBuilder.CreateTube("laser", {
+    path: [start.clone(), end.clone()],
+    radius: 0.15,
+    updatable: false
   }, scene);
-  line.color = new BABYLON.Color3(1, 0.2, 0.1);
 
-  const glow = new BABYLON.GlowLayer("glow", scene);
-  glow.intensity = 1.6;
-  glow.addIncludedOnlyMesh(line);
+  const laserMat = new BABYLON.StandardMaterial("laserMat", scene);
+  laserMat.emissiveColor = new BABYLON.Color3(1, 0.2, 0.1);
+  tube.material = laserMat;
 
-  const steps = 12; // 0.2 s @ 60 fps
+  const glow = new BABYLON.GlowLayer("boo", scene)
+  glow.addIncludedOnlyMesh(tube);
+
+  const steps = 12;
   const stepAngle = angleRad / steps;
   let i = 0;
 
   const animate = () => {
     if (i >= steps) {
-      line.dispose();
-      glow.dispose();
+      tube.dispose();
       return;
     }
-    line.rotateAround(start, axis.normalize(), stepAngle);
+    tube.rotateAround(start, axis.normalize(), stepAngle);
     i++;
     requestAnimationFrame(animate);
   };
