@@ -43,14 +43,14 @@ function lazer_beam(start: BABYLON.Vector3, end: BABYLON.Vector3, axis: BABYLON.
       angle_rad,
       last_ms:crts(), // last time animation rendered
       elapsed_ms: 0,
-      duration_ms: 200 // 200 ms = 0.2 sec = duration of the animation
+      duration_ms: 50 // 200 ms = 0.2 sec = duration of the animation
     }};
   
     const laserMat = new BABYLON.StandardMaterial("laserMat", scene);
     laserMat.emissiveColor = new BABYLON.Color3(1, 0.2, 0.1);
     tube.material = laserMat;
   
-    const glow = new BABYLON.GlowLayer("boo", scene)
+    const glow = game_box.get_glow_box()
     glow.addIncludedOnlyMesh(tube);
   
     game_box.animated_lazer_beams.push(tube);
