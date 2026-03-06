@@ -1,4 +1,7 @@
-/** to manage ship props */
+/** to manage ship props.
+ * The interface used instead of type, because vscode does not highlight all methods of the type,
+ * and interface some bit more flexible in use.
+ * */
 export interface Ship {
   /** user index. It is client uuid, and in same time the limited array index */
   idx:     number;

@@ -17,10 +17,11 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ships:(BABYLON.Mesh |
 
   const scale = 1 / 1000;  // common factor
 
+  // warning // todo the center must be displaced. The depth property grows proportionally to two sides
   const ship_mesh = BABYLON.MeshBuilder.CreateBox(`ship-${idx}`, {
     width:  (ship.sr * 2) * scale,
     height: (ship.vr * 2) * scale,
-    depth:  (ship.fr + ship.br) * 3 * scale // front + back radius  //warning to visual test 
+    depth:  (ship.fr + ship.br) * scale // front + back radius  
   }, scene);
   
   // Position at center

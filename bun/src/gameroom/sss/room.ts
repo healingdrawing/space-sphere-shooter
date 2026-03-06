@@ -36,6 +36,7 @@ export class SSSGameRoom implements GameRoom {
   add_client(){
     const uuid = this.new_uuid()
     if (!this.ships_auto_update_timer) this.ships_auto_update() //should fire only, when first active connection
+    if (!this.collisions_auto_update_timer) this.collisions_auto_update() //should fire only, when first active connection
     return uuid
   }
   /** clean room, gameboard, broadcast client exit */
@@ -96,6 +97,7 @@ export class SSSGameRoom implements GameRoom {
   }
 
   private ships_auto_update_timer: NodeJS.Timeout | null = null;
+  private collisions_auto_update_timer: NodeJS.Timeout | null = null;
   /** check there are no connected players, than stop ships autoupdate */
   private check_room_is_empty(){
     const size = this.room_size
@@ -107,10 +109,19 @@ export class SSSGameRoom implements GameRoom {
       clearTimeout(this.ships_auto_update_timer)
       this.ships_auto_update_timer = null
     }
+    if (this.collisions_auto_update_timer){
+      clearTimeout(this.collisions_auto_update_timer)
+      this.collisions_auto_update_timer = null
+    }
   }
 
   /** update:
-   * ship positions, with pause 200ms(not super precised, but should be enough)
+   * 
+   * ship rotations
+   * 
+   * ship positions
+   * 
+   * with pause 100ms(not super precised, but should be enough)
    */
   ships_auto_update(){
     const now = rts()
@@ -120,9 +131,25 @@ export class SSSGameRoom implements GameRoom {
     let timer = this.ships_auto_update_timer
     if(!timer ) timer = setTimeout(() => {
       this.ships_auto_update()
-    }, 10);//todo consider to move 200[ms] to .env 
+    }, 100);//todo consider to move 200[ms] to .env 
   }
 
+  /** update:
+   * 
+   * ship collisions
+   * 
+   * with pause 100ms(not super precised, but should be enough)
+   */
+  collisions_auto_update(){
+    this.board.raw_ships_collider()
+    
+    let timer = this.collisions_auto_update_timer
+    if(!timer ) timer = setTimeout(() => {
+      this.collisions_auto_update()
+    }, 100);//todo consider to move 200[ms] to .env 
+  }
+
+  // warning artefact, from tmdc styled approach, used to execute delayed actions of gameboard. NOT USED
   // recursive_actions_executor( actions:TMDC_BOARD_ACTION[] ){
   //   const alen = actions.length
   //   for (let i=0;i<alen;i++){

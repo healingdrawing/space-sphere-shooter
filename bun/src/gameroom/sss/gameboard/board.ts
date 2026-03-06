@@ -7,6 +7,7 @@ import { gemm } from "./non-autistic-math/gemm";
 import { gameroom, users } from "../../../ram/storage";
 import type { GameRoomResponseMessage } from "../../base";
 import { MT } from "../../../enums/mt";
+import { two_ships_collision } from "./collide/obb";
 
 export class SSSBoard {
   
@@ -15,7 +16,10 @@ export class SSSBoard {
   readonly size = USERS_MAX_NUMBER
   private readonly sizeplus = this.size + 1
 
-  /** duplication of gameroom property */
+  /** for iteration // warning up to 254 players at the moment, since Uint8Array used, and zero index not used
+   * 
+   * The index is uuid of player slot. The value 0 - empty, can be used again, or 1 - used by player(ws client).
+   */
   players = new Uint8Array(this.sizeplus);
   ships = new Float32Array(this.sizeplus * SOFFSIZE);
 
@@ -528,5 +532,42 @@ export class SSSBoard {
       this.ships[b + tsendOffset] = now;
     }
   }
+
+  /** all ships collision detection, without 26 zones around etc.
+ * Simplified to box, not a asymmetrical ellipsoid etc
+ * */
+raw_ships_collider() {
+  // console.log("raw_ships_collider() executed")
+  const s = this.ships
+  const lens = this.players.length
+  
+  for (let i = 1; i < lens; i++) {
+    // const b = this.base(i) // calculated inside readship
+
+    if (!s[i * SOFFSIZE]) continue;
+    const s1 = this.read_ship(i) // todo refactor without read_ship and getters/setters to speedup
+
+    for (let j = i + 1; j < lens; j++) {
+      if (!s[j * SOFFSIZE]) continue;
+      const s2 = this.read_ship(j)
+
+      if (two_ships_collision(
+        s1.cx, s1.cy, s1.cz,
+        s1.fvx, s1.fvy, s1.fvz,
+        s1.tvx, s1.tvy, s1.tvz,
+        s1.fr/1000, s1.br/1000, s1.sr/1000, s1.vr/1000,
+        
+        s2.cx, s2.cy, s2.cz,
+        s2.fvx, s2.fvy, s2.fvz,
+        s2.tvx, s2.tvy, s2.tvz,
+        s2.fr/1000, s2.br/1000, s2.sr/1000, s2.vr/1000,
+      )) {
+        // collision happened
+        console.log(`Collision: ${s1.idx} ↔ ${s2.idx}`);
+        // add your logic: damage, explode, push apart, etc.
+      }else console.log("no collision")
+    }
+  }
+}
 
 }
