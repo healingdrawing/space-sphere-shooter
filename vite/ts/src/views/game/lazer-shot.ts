@@ -1,3 +1,4 @@
+import { crts } from "../../handlers/utils";
 import { gemm, type LazerBeam } from "../../tunnel";
 import { game_box } from "./game-box";
 
@@ -28,33 +29,34 @@ export const lazer_shot = (data: LazerBeam) => {
   lazer_beam(start, end, vert_axis.clone().negate(), a_rad, scene)
 }
 
-function lazer_beam(start: BABYLON.Vector3, end: BABYLON.Vector3, axis: BABYLON.Vector3, angleRad: number, scene: BABYLON.Scene) {
-  const tube = BABYLON.MeshBuilder.CreateTube("laser", {
-    path: [start.clone(), end.clone()],
-    radius: 0.15,
-    updatable: false
-  }, scene);
-
-  const laserMat = new BABYLON.StandardMaterial("laserMat", scene);
-  laserMat.emissiveColor = new BABYLON.Color3(1, 0.2, 0.1);
-  tube.material = laserMat;
-
-  const glow = new BABYLON.GlowLayer("boo", scene)
-  glow.addIncludedOnlyMesh(tube);
-
-  const steps = 12;
-  const stepAngle = angleRad / steps;
-  let i = 0;
-
-  const animate = () => {
-    if (i >= steps) {
-      tube.dispose();
-      return;
-    }
-    tube.rotateAround(start, axis.normalize(), stepAngle);
-    i++;
-    requestAnimationFrame(animate);
-  };
-
-  animate();
+function lazer_beam(start: BABYLON.Vector3, end: BABYLON.Vector3, axis: BABYLON.Vector3, angle_rad: number, scene: BABYLON.Scene) {
+  try {
+    const tube = BABYLON.MeshBuilder.CreateTube("laser", {
+      path: [start.clone(), end.clone()],
+      radius: 0.15,
+      updatable: false
+    }, scene);
+  
+    tube.metadata = {animation:{
+      pivot: start.clone(),
+      axis: axis.normalize(),
+      angle_rad,
+      last_ms:crts(), // last time animation rendered
+      elapsed_ms: 0,
+      duration_ms: 200 // 200 ms = 0.2 sec = duration of the animation
+    }};
+  
+    const laserMat = new BABYLON.StandardMaterial("laserMat", scene);
+    laserMat.emissiveColor = new BABYLON.Color3(1, 0.2, 0.1);
+    tube.material = laserMat;
+  
+    const glow = new BABYLON.GlowLayer("boo", scene)
+    glow.addIncludedOnlyMesh(tube);
+  
+    game_box.animated_lazer_beams.push(tube);
+    
+  } catch (e) {
+    console.error("lazer_beam() crush: "+e)
+  }
+  
 }

@@ -28,8 +28,8 @@ function create_game_box() {
   let scene: BABYLON.Scene;
   const get_scene = () => scene
 
-  
-
+  /* to avoid quaternion injection, since it is bugged in edge case(reported, confirmed on forum) */
+  const animated_lazer_beams: BABYLON.Mesh[] = [];
   const ships: (BABYLON.Mesh | null)[] = new Array(ram.umn).fill(null);
   let animationId: number | null = null;
   
@@ -173,6 +173,29 @@ function create_game_box() {
         
       }
 
+      for (let i = game_box.animated_lazer_beams.length - 1; i >= 0; i--) {
+        const mesh = game_box.animated_lazer_beams[i];
+        const m_a = mesh.metadata.animation;
+      
+        if (!m_a) continue;
+
+        const elapsed_ms = m_a.elapsed_ms
+        const duration_ms = m_a.duration_ms
+      
+        if (elapsed_ms > duration_ms) {
+          mesh.dispose();
+          game_box.animated_lazer_beams.splice(i, 1);
+          continue;
+        }
+
+        const dt = now - m_a.last_ms
+        const progress = dt/ m_a.duration_ms;
+        m_a.last_ms = now
+        m_a.elapsed_ms += dt
+        if (!progress) continue
+        mesh.rotateAround(m_a.pivot, m_a.axis, m_a.angle_rad * progress);
+      }
+
       // console.log("Total meshes in scene:", scene.meshes.length);
       // scene.meshes.forEach(m => console.log("  -", m.name));
 
@@ -194,7 +217,7 @@ function create_game_box() {
   }
   
   
-  return { view, initGameView, add_ship, remove_ship, game_over, get_scene, ships, move_ship, leftmove_ship, rightmove_ship, topmove_ship, downmove_ship, cwmove_ship, ccwmove_ship, lazer_shot };
+  return { view, initGameView, add_ship, remove_ship, game_over, get_scene, ships, move_ship, leftmove_ship, rightmove_ship, topmove_ship, downmove_ship, cwmove_ship, ccwmove_ship, lazer_shot, animated_lazer_beams };
 }
 
 export const game_box = create_game_box();
