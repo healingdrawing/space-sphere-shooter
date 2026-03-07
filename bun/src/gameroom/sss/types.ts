@@ -25,13 +25,13 @@ export interface Ship {
   side_guns:    number;
   vert_guns:    number;
   engines: number;
-  /** front radius */
+  /** front radius [m], finally desided to /1000 in init process to shorten client/server calcs */
   fr:           number;
-  /** back radius */
+  /** back radius [m], finally desided to /1000 in init process to shorten client/server calcs */
   br:           number;
-  /** side radius */
+  /** side radius [m], finally desided to /1000 in init process to shorten client/server calcs */
   sr:           number;
-  /** vertical radius */
+  /** vertical radius [m], finally desided to / 1000 in init process to shorten client/server calcs */
   vr:           number;
   /** max energy */
   max_en:       number;

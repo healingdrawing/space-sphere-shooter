@@ -556,15 +556,16 @@ raw_ships_collider() {
         s1.cx, s1.cy, s1.cz,
         s1.fvx, s1.fvy, s1.fvz,
         s1.tvx, s1.tvy, s1.tvz,
-        s1.fr/1000, s1.br/1000, s1.sr/1000, s1.vr/1000,
+        s1.fr, s1.br, s1.sr, s1.vr,
         
         s2.cx, s2.cy, s2.cz,
         s2.fvx, s2.fvy, s2.fvz,
         s2.tvx, s2.tvy, s2.tvz,
-        s2.fr/1000, s2.br/1000, s2.sr/1000, s2.vr/1000,
+        s2.fr, s2.br, s2.sr, s2.vr,
       )) {
         const s1hp = s1.hp
         const s2hp = s2.hp
+        // rawlog("collision: ",s1.idx, " ", s2.idx)
         if (s1hp > s2hp){
           this.set_hp(s1.idx, s1hp-s2hp)
           gameroom.remove_client(s2.idx, true)

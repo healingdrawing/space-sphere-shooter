@@ -86,7 +86,7 @@ function create_game_box() {
       scene
     );
     
-    camera.position = new BABYLON.Vector3(0, ship.vr/200, -ship.br /80);
+    camera.position = new BABYLON.Vector3(0, ship.vr * 5, -ship.br * 10);
     camera.setTarget(BABYLON.Vector3.Zero());  // local origin
 
     camera.parent = ship_box;

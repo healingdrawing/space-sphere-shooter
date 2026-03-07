@@ -56,10 +56,10 @@ export const parse_limits = (nick:string):{
   const max_avelo = 20 + (sum_nick - sum_others) / 1000 // [deg/s]
   const maccel = 1 * 1000 / mass * (1+sum_others)/(1+sum_nick) // [m/(s*s)]
   const daccel = 10 * 1000 / mass * (1+sum_nick)/(1+sum_others) // [deg/(s*s)]
-  const fr = mass + sum_consonants // [mm]
-  const br = mass + sum_consonants * 0.5 // [mm]
-  const sr = mass + sum_vowels // [mm]
-  const vr = mass + sum_digits // [mm]
+  const fr = (mass + sum_consonants) /1000 // [m]
+  const br = (mass + sum_consonants * 0.5) /1000 // [m]
+  const sr = (mass + sum_vowels) /1000 // [m]
+  const vr = (mass + sum_digits) /1000 // [m]
   const max_en = mass + sum_others // energy power [units]. Probably, when shot 1 unit of an energy is equals of 0.5 units of hp (when shot is maximum precised)
   const max_hp = mass + sum_others // health power [units]
 

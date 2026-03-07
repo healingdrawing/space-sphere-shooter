@@ -15,7 +15,7 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BABYLON.T
     return null //todo implement. Raw skip the already present ship
   }
 
-  const scale = 1 / 1000;  // common factor
+  const scale = 1;  // common factor
 
   const box = new BABYLON.TransformNode(`ship-box-${idx}`, scene);
   box.position.set(ship.cx, ship.cy, ship.cz);
@@ -49,10 +49,11 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BABYLON.T
   
   ship_boxes[idx] = box
 
-  const dot_size = ship.br * scale;
+  const dot_size = ship.br / 2 * scale;
 
+  /* todo these dots are needed, only hide them from visuals later, keep for orientation */
   const f_dot = BABYLON.MeshBuilder.CreateSphere("frontDot", { diameter: dot_size }, scene);
-  f_dot.position = new BABYLON.Vector3(0, 0, ship.fr * 4 * scale);
+  f_dot.position = new BABYLON.Vector3(0, 0, ship.fr * 2 * scale);
   f_dot.parent = box;
   const f_mat = new BABYLON.StandardMaterial("blue", scene);
   f_mat.diffuseColor = BABYLON.Color3.Blue();
