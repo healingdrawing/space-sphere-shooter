@@ -346,8 +346,7 @@ export class SSSBoard {
       const t = this.read_ship(i)
       
       /** raw distance from ship center to count damage. //todo implement Ellipsoid. Not implemented */
-      //warning /1000 because of client side division by 1000 at the moment
-      const r = ( Math.min( t.br, t.sr, t.vr, t.fr ) / 1000 )
+      const r = ( Math.min( t.br, t.sr, t.vr, t.fr ) )
       /** max distance from target ship center when target ship affected by beam */
       const dmax = (2*r*r)**0.5
       
@@ -551,7 +550,6 @@ export class SSSBoard {
         if (!s[j * SOFFSIZE]) continue;
         const s2 = this.read_ship(j)
 
-        // todo /1000 is scale from client side, must be delivered from server in init moment and reused for both
         if (two_ships_collision(
           s1.cx, s1.cy, s1.cz,
           s1.fvx, s1.fvy, s1.fvz,
