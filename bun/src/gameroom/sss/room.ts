@@ -76,9 +76,9 @@ export class SSSGameRoom implements GameRoom {
       max_hp: max_hp, hp: max_hp, hp_ts: 0, //warning at the moment do not plan recover
 
       //todo randomise without collision damage some way
-      cx: b.ship_initial_random_coordinate(),
-      cy: b.ship_initial_random_coordinate(),
-      cz: b.ship_initial_random_coordinate(),
+      cx: 0, // b.ship_initial_random_coordinate(),
+      cy: 0, // b.ship_initial_random_coordinate(),
+      cz: 0, // b.ship_initial_random_coordinate(),
       
       fvx: 0, fvy: 0, fvz: 1, //z is front axis default (babylonjs default way)
       tvx: 0, tvy: 1, tvz: 0, // y is top/vertical axis default (babylonjs default way)

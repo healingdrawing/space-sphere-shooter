@@ -74,6 +74,7 @@ function create_game_box() {
 
     const ship_box = add_ship(ship, scene, ship_boxes)
     
+    
     xyz_dev(scene)
 
     if(!ship_box) return
@@ -86,8 +87,8 @@ function create_game_box() {
       scene
     );
     
-    camera.position = new BABYLON.Vector3(0, ship.vr * 5, -ship.br * 10);
-    camera.setTarget(BABYLON.Vector3.Zero());  // local origin
+    camera.position = new BABYLON.Vector3(0, ship.vr * 4, -ship.br * 10);
+    camera.setTarget(new BABYLON.Vector3(0,0,1000));  // local origin
 
     camera.parent = ship_box;
     
