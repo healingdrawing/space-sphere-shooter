@@ -15,17 +15,17 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BABYLON.T
     return null //todo implement. Raw skip the already present ship
   }
 
-  const scale = 1;  // common factor
+  const scale = 1;  // common factor //warning change it to potentially ruin collisions etc
 
   const box = new BABYLON.TransformNode(`ship-box-${idx}`, scene);
   box.position.set(ship.cx, ship.cy, ship.cz);
   box.metadata = {} // warning this needed, or metadata is null and check of subprops is not straight
 
   // warning // todo the center must be displaced. The depth property grows proportionally to two sides
-  const ship_mesh = BABYLON.MeshBuilder.CreateBox(`ship-mesh-${idx}`, {
-    width:  (ship.sr * 2) * scale,
-    height: (ship.vr * 2) * scale,
-    depth:  (ship.fr + ship.br) * scale // front + back radius  
+  const ship_mesh = BABYLON.MeshBuilder.CreateSphere(`ship-mesh-${idx}`, {
+    diameterX:  (ship.sr * 2) * scale,
+    diameterY: (ship.vr * 2) * scale,
+    diameterZ:  (ship.fr + ship.br) * scale // front + back radius  
   }, scene);
   const offset = (ship.fr - ship.br) / 2 * scale;
   ship_mesh.position.set(offset * ship.fvx, offset * ship.fvy, offset * ship.fvz); // relative offset i hope
