@@ -3,9 +3,8 @@ import { game_box } from "../../views/game/game-box"
 import { type LazerBeam } from "../../tunnel"
 
 
-export const frontshot_handler = (text:string, front = true) => {
+export const frontshot_handler = (text:string) => {
   console.log("frontshot_handler() text:", text) //todo remove
-  let obj:LazerBeam
   try {
     const obj = mm.parse(text) as LazerBeam
     //todo check

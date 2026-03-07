@@ -1,6 +1,6 @@
 import { gemm } from "../../tunnel";
 
-export function syncOrientation(mesh: BABYLON.Mesh, fvx: number, fvy: number, fvz: number, tvx: number, tvy: number, tvz: number) {
+export function syncOrientation(mesh: BABYLON.TransformNode, fvx: number, fvy: number, fvz: number, tvx: number, tvy: number, tvz: number) {
   
   /** read the mesh orientation */
   const mesh_top_end = mesh.getChildren().find(c => c.name === "topDot") as BABYLON.Mesh;

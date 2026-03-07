@@ -3,13 +3,13 @@ import { game_box } from "./game-box";
 import { syncOrientation } from "./sync-orientation";
 
 export const front_rotation = (data: FrontRotation) => {
-  const mesh = game_box.ships[data.uuid]!;
-  syncOrientation(mesh, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
-  mesh.metadata.frontRotation = {av: data.avf, ts: data.avf_ts, tsend: data.avf_tsend};
+  const ship_box = game_box.ship_boxes[data.uuid]!;
+  syncOrientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
+  ship_box.metadata.frontRotation = {av: data.avf, ts: data.avf_ts, tsend: data.avf_tsend};
 };
 
 export const top_rotation = (data: TopRotation) => {
-  const mesh = game_box.ships[data.uuid]!;
+  const ship_box = game_box.ship_boxes[data.uuid]!;
   //warning //bug syncO...
   console.log("TOP_ROTATION call:", {
     avt: data.avt,  // angular velocity
@@ -20,15 +20,15 @@ export const top_rotation = (data: TopRotation) => {
   });
   
   // warning. glitching. very raw(possibly comment). must sync with server data before each rotation starts
-  syncOrientation(mesh, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
+  syncOrientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
   
   
 
-  mesh.metadata.topRotation = {av: data.avt, ts: data.avt_ts, tsend: data.avt_tsend};
+  ship_box.metadata.topRotation = {av: data.avt, ts: data.avt_ts, tsend: data.avt_tsend};
 };
 
 export const side_rotation = (data: SideRotation) => {
-  const mesh = game_box.ships[data.uuid]!;
+  const ship_box = game_box.ship_boxes[data.uuid]!;
 
   console.log("SIDE_ROTATION called:", {
     avs: data.avs,  // angular velocity
@@ -38,49 +38,49 @@ export const side_rotation = (data: SideRotation) => {
     vectors: { fvx: data.fvx, fvy: data.fvy, fvz: data.fvz, tvx: data.tvx, tvy: data.tvy, tvz: data.tvz },
   });
 
-  syncOrientation(mesh, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
-  mesh.metadata.sideRotation = {av: data.avs, ts: data.avs_ts, tsend: data.avs_tsend};
+  syncOrientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
+  ship_box.metadata.sideRotation = {av: data.avs, ts: data.avs_ts, tsend: data.avs_tsend};
 };
 
 
 
-export function rotateAxis(ship: BABYLON.Mesh, axis: BABYLON.Vector3, rot: {av: number, ts: number, tsend: number}, dt: number) {
+export function rotateAxis(ship: BABYLON.TransformNode, axis: BABYLON.Vector3, rot: {av: number, ts: number, tsend: number}, dt: number) {
   const angleRad = rot.av * dt * Math.PI / 180;
   ship.rotateAround(ship.absolutePosition ,axis, angleRad);
 }
 
 /** clean if rotation complete */
-export function check_rotations_metadata(ship:BABYLON.Mesh, now: number){
-  if (ship.metadata.sideRotation && now >= ship.metadata.sideRotation.tsend) {
-    delete ship.metadata.sideRotation;
+export function check_rotations_metadata(ship_box:BABYLON.TransformNode, now: number){
+  if (ship_box.metadata?.sideRotation && now >= ship_box.metadata.sideRotation.tsend) {
+    delete ship_box.metadata.sideRotation;
     console.warn("SIDE ROTATION END")
-    log_orientation(ship)
+    log_orientation(ship_box)
   }
-  if (ship.metadata.frontRotation && now >= ship.metadata.frontRotation.tsend) {
-    delete ship.metadata.frontRotation;
+  if (ship_box.metadata.frontRotation && now >= ship_box.metadata.frontRotation.tsend) {
+    delete ship_box.metadata.frontRotation;
     console.warn("FRONT ROTATION END")
-    log_orientation(ship)
+    log_orientation(ship_box)
   }
-  if (ship.metadata.topRotation && now >= ship.metadata.topRotation.tsend) {
-    delete ship.metadata.topRotation;
+  if (ship_box.metadata.topRotation && now >= ship_box.metadata.topRotation.tsend) {
+    delete ship_box.metadata.topRotation;
     console.warn("TOP ROTATION END")
-    log_orientation(ship)
+    log_orientation(ship_box)
   }
 }
 
-function log_orientation(mesh:BABYLON.Mesh){
-  const mesh_top_end = mesh.getChildren().find(c => c.name === "topDot") as BABYLON.Mesh;
-  const mesh_front_end = mesh.getChildren().find(c => c.name === "frontDot") as BABYLON.Mesh;
-  const center_dot = mesh.absolutePosition.asArray()
+function log_orientation(ship_box:BABYLON.TransformNode){
+  const box_top_end = ship_box.getChildren().find(c => c.name === "topDot") as BABYLON.Mesh;
+  const box_front_end = ship_box.getChildren().find(c => c.name === "frontDot") as BABYLON.Mesh;
+  const center_dot = ship_box.absolutePosition.asArray()
   
   /* create vector to rotate mesh to server sent orientation */
   
   /** correct mesh orientation top axis */
-  const top_dot = mesh_top_end.absolutePosition.asArray()
+  const top_dot = box_top_end.absolutePosition.asArray()
   const t = gemm.vecXDone(gemm.vecXD(center_dot,top_dot))
     
   /** correct front axis */
-  const front_dot = mesh_front_end.absolutePosition.asArray()
+  const front_dot = box_front_end.absolutePosition.asArray()
   const f = gemm.vecXDone(gemm.vecXD(center_dot,front_dot))
 
   console.log(

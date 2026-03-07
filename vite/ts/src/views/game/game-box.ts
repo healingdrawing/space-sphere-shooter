@@ -33,7 +33,7 @@ function create_game_box() {
 
   /* to avoid quaternion injection, since it is bugged in edge case(reported, confirmed on forum) */
   const animated_lazer_beams: BABYLON.Mesh[] = [];
-  const ships: (BABYLON.Mesh | null)[] = new Array(ram.umn).fill(null);
+  const ship_boxes: (BABYLON.TransformNode | null)[] = new Array(ram.umn).fill(null);
   
   let animationId: number | null = null;
   
@@ -72,27 +72,24 @@ function create_game_box() {
     skybox.material = skyboxMaterial;
     skybox.infiniteDistance = true; // Prevent the skybox from scaling with the camera
 
-    const ship_mesh = add_ship(ship, scene, ships)
+    const ship_box = add_ship(ship, scene, ship_boxes)
     
-    xyz_dev(ship, scene)
+    xyz_dev(scene)
 
-    if(!ship_mesh) return
+    if(!ship_box) return
     const camera = new BABYLON.ArcRotateCamera(
       "camera",
       0,//Math.PI,           // Alpha (angle around target)
       Math.PI / 2,//.5,     // Beta (elevation)
       ship.br / 40, // Radius
-      ship_mesh.position,
+      ship_box.position,
       scene
     );
-    
-    const cameraParent = new BABYLON.TransformNode("camParent", scene);
     
     camera.position = new BABYLON.Vector3(0, ship.vr/200, -ship.br /80);
     camera.setTarget(BABYLON.Vector3.Zero());  // local origin
 
-    camera.parent = cameraParent;
-    cameraParent.parent = ship_mesh;
+    camera.parent = ship_box;
     
     const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 1), scene);
     light.intensity = 0.5;//todo test
@@ -102,7 +99,7 @@ function create_game_box() {
       if (!engine || !scene) return;
       const now = crts();
       
-      for (const ship of game_box.ships) {
+      for (const ship of game_box.ship_boxes) {
         if (!ship) continue
         
         check_move_metadata(ship)
@@ -184,7 +181,7 @@ function create_game_box() {
   }
   
   
-  return { view, initGameView, add_ship, remove_ship, game_over, get_scene, ships, move_ship, leftmove_ship, rightmove_ship, topmove_ship, downmove_ship, cwmove_ship, ccwmove_ship, get_glow_box, lazer_shot, animated_lazer_beams };
+  return { view, initGameView, add_ship, remove_ship, game_over, get_scene, ship_boxes, move_ship, leftmove_ship, rightmove_ship, topmove_ship, downmove_ship, cwmove_ship, ccwmove_ship, get_glow_box, lazer_shot, animated_lazer_beams };
 }
 
 export const game_box = create_game_box();

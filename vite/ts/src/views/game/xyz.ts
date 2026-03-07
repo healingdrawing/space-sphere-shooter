@@ -1,5 +1,3 @@
-import type { Ship } from "../../tunnel";
-
-export function xyz_dev(ship: Ship, scene: BABYLON.Scene){
-  const axes = new BABYLON.Debug.AxesViewer(scene, 15)
+export function xyz_dev(scene: BABYLON.Scene){
+  new BABYLON.Debug.AxesViewer(scene, 15)
 }

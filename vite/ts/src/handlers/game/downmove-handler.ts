@@ -3,7 +3,6 @@ import { game_box } from "../../views/game/game-box"
 
 export const downmove_handler = (text:string) => {
   console.log("downmove_handler() text:", text) //todo remove
-  let obj:SideRotation
   try {
     const obj = mm.parse(text) as SideRotation
     //todo check

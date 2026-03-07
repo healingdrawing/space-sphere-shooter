@@ -4,7 +4,7 @@ import { game_box } from "./game-box";
 
 export const lazer_shot = (data: LazerBeam) => {
   console.warn("lazer shot")
-  const s = game_box.ships[data.uuid]
+  const s = game_box.ship_boxes[data.uuid]
   if(!s) {
     console.error("\nship not found")
     return

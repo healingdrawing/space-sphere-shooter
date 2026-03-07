@@ -3,7 +3,6 @@ import { game_box } from "../../views/game/game-box"
 
 export const cwmove_handler = (text:string) => {
   console.log("cwmove_handler() text:", text) //todo remove
-  let obj:FrontRotation
   try {
     const obj = mm.parse(text) as FrontRotation
     //todo check
