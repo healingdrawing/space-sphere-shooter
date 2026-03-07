@@ -72,7 +72,7 @@ function create_game_box() {
     skybox.material = skyboxMaterial;
     skybox.infiniteDistance = true; // Prevent the skybox from scaling with the camera
 
-    const ship_box = add_ship(ship, scene, ship_boxes)
+    const ship_box = await add_ship(ship, scene, ship_boxes)
     
     
     xyz_dev(scene)

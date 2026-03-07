@@ -2,7 +2,7 @@ import { ram } from "../../ram";
 import { type Ship } from "../../tunnel";
 import { createRawShipHull } from "./ship-mesh";
 
-export const add_ship = (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BABYLON.TransformNode | null)[]) => {
+export const add_ship = async (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BABYLON.TransformNode | null)[]) => {
   console.log("add_ship data:", ship)
 
   const idx = ship.idx;
@@ -31,8 +31,9 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BABYLON.T
   // ship_mesh.position.set(offset * ship.fvx, offset * ship.fvy, offset * ship.fvz); // relative offset i hope
   // ship_mesh.parent = box; // warning do not use box.addChild() , produces weird result for move/rotate move
 
-  const {hull, core} = createRawShipHull(ship, scene, scale)
+  const {hull, core} = await createRawShipHull(ship, scene, scale)
   hull.parent = box
+  hull.position = BABYLON.Vector3.Zero();   // reset local pos after baking, attempt to fix displacement after async CSG2 implemented
   core.parent = box
   // Position at center
   // ship_mesh.position.set(ship.cx, ship.cy, ship.cz);
