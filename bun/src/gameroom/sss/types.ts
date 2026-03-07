@@ -124,6 +124,8 @@ export type LazerBeam = {
   uuid:number,
   /** angle degrees of the laser beam precision. The 1+. More angle less damage(but client only draw) */
   a: number,
+  /** displacement radius from center of ship, to visualize shot not from inside the ship model, but from distance */
+  d: number,
 
   /** x coordinate of the distanted by 1000 lazer beam, used to manage delay visually */
   x:number,

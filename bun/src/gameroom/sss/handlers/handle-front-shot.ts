@@ -34,6 +34,11 @@ export function handle_front_shot(ws: Bun.ServerWebSocket<WebSocketData>, msg: U
   const s = b.read_ship(uuid)
 
   const a = s.front_guns
+
+  // check impossibility to shot
+  if (!a) return [{ mt: MT.S, msg: { alert_text:"your ship does not have front gun, ... buddy", }, ms: 0, uuids: [uuid] }]
+
+  const d = s.fr
   
   /* beam start position */
   let cx = s.cx
@@ -62,17 +67,12 @@ export function handle_front_shot(ws: Bun.ServerWebSocket<WebSocketData>, msg: U
   // todo consider ban if power is outside 0-100. hijacking
   const power = obj.power // 0-100% -> manage later some way. In case of shot as % of max_en but <= en
   
-  // check impossibility to shot
-  let text:string | null = null
-  if (!guns) text = "your ship does not have front gun, ... buddy"
-  if (text) return [{ mt: MT.S, msg: { alert_text:text, }, ms: 0, uuids: [uuid] }]
-
   const damage_messages = b.lazer_shot( uuid, guns, power, en, max_en, vx, vy, vz, nx, ny, nz, cx,cy,cz )
   
   result.push({
     mt: MT.FRONTSHOT,
     msg: {
-      uuid, a, x, y, z, nx, ny, nz     
+      uuid, a, d, x, y, z, nx, ny, nz     
     } as LazerBeam,
     ms: 0,
     uuids: [0]

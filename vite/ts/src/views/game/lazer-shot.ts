@@ -18,24 +18,43 @@ export const lazer_shot = (data: LazerBeam) => {
   const sdot = [start.x, start.y, start.z]
   /* end dot */
   const edot = [data.x, data.y, data.z]
+  /** beam vector */
+  const bv = gemm.vecXDone(gemm.vecXD(sdot,edot))
+  /** beam front vector BABYLON */
+  const front_axis = new BABYLON.Vector3(bv[0],bv[1],bv[2])
+  
   /* side vector, to rotate in vertical plane */
-  const sv = gemm.vec3Dnormal(gemm.vecXD(sdot,edot), [data.nx, data.ny, data.nz])
+  const sv = gemm.vec3Dnormal(bv, [data.nx, data.ny, data.nz])
   const side_axis = new BABYLON.Vector3(sv[0], sv[1], sv[2]).normalize()
   const vert_axis = new BABYLON.Vector3(data.nx, data.ny, data.nz).normalize()
   const scene = game_box.get_scene()
-  lazer_beam(start, end, side_axis.clone(), a_rad, scene)
-  lazer_beam(start, end, side_axis.clone().negate(), a_rad, scene)
-  lazer_beam(start, end, vert_axis.clone(), a_rad, scene)
-  lazer_beam(start, end, vert_axis.clone().negate(), a_rad, scene)
+  lazer_beam(start, end, front_axis, data.d, side_axis.clone(), a_rad, scene)
+  lazer_beam(start, end, front_axis, data.d, side_axis.clone().negate(), a_rad, scene)
+  lazer_beam(start, end, front_axis, data.d, vert_axis.clone(), a_rad, scene)
+  lazer_beam(start, end, front_axis, data.d, vert_axis.clone().negate(), a_rad, scene)
 }
 
-function lazer_beam(start: BABYLON.Vector3, end: BABYLON.Vector3, axis: BABYLON.Vector3, angle_rad: number, scene: BABYLON.Scene) {
+/**
+ * // todo refactor to separated coordinates when suitable. F.e. bv can be BABYLON.Vector3 also, or bvx,bvy,bvz
+ * @param start dot of beam trajectory, and also center of rotation of the beam mesh
+ * @param end end of trajectory in far
+ * @param front_axis to move visible beam start point outside ship mesh along beam direction
+ * @param d displacement along fron_axis of the beam
+ * @param axis rotation axis of the beam in time of animation
+ * @param angle_rad rotation angle of the beam during animation
+ * @param scene 
+ */
+function lazer_beam(start: BABYLON.Vector3, end: BABYLON.Vector3, front_axis: BABYLON.Vector3,
+  d:number, axis: BABYLON.Vector3, angle_rad: number, scene: BABYLON.Scene) {
   try {
     const tube = BABYLON.MeshBuilder.CreateTube("laser", {
       path: [start.clone(), end.clone()],
       radius: 0.15,
       updatable: false
     }, scene);
+
+    /* offset along beam vector, to move beam visible start outside the ship mesh */
+    tube.position = front_axis.scale(d);
   
     tube.metadata = {animation:{
       pivot: start.clone(),
