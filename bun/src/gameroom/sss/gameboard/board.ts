@@ -551,6 +551,7 @@ raw_ships_collider() {
       if (!s[j * SOFFSIZE]) continue;
       const s2 = this.read_ship(j)
 
+      // todo /1000 is scale from client side, must be delivered from server in init moment and reused for both
       if (two_ships_collision(
         s1.cx, s1.cy, s1.cz,
         s1.fvx, s1.fvy, s1.fvz,
@@ -562,10 +563,20 @@ raw_ships_collider() {
         s2.tvx, s2.tvy, s2.tvz,
         s2.fr/1000, s2.br/1000, s2.sr/1000, s2.vr/1000,
       )) {
-        // collision happened
-        console.log(`Collision: ${s1.idx} ↔ ${s2.idx}`);
-        // add your logic: damage, explode, push apart, etc.
-      }else console.log("no collision")
+        const s1hp = s1.hp
+        const s2hp = s2.hp
+        if (s1hp > s2hp){
+          this.set_hp(s1.idx, s1hp-s2hp)
+          gameroom.remove_client(s2.idx, true)
+        } else if (s2hp > s1hp){
+          this.set_hp(s2.idx, s2hp-s1hp)
+          gameroom.remove_client(s1.idx, true)
+        } else {
+          gameroom.remove_client(s1.idx, true)
+          gameroom.remove_client(s2.idx, true)
+        }
+
+      }
     }
   }
 }

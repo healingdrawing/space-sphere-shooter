@@ -17,8 +17,9 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BABYLON.T
 
   const scale = 1 / 1000;  // common factor
 
-  const ship_box = new BABYLON.TransformNode(`ship-box-${idx}`, scene);
-  ship_box.position.set(ship.cx, ship.cy, ship.cz);
+  const box = new BABYLON.TransformNode(`ship-box-${idx}`, scene);
+  box.position.set(ship.cx, ship.cy, ship.cz);
+  box.metadata = {} // warning this needed, or metadata is null and check of subprops is not straight
 
   // warning // todo the center must be displaced. The depth property grows proportionally to two sides
   const ship_mesh = BABYLON.MeshBuilder.CreateBox(`ship-mesh-${idx}`, {
@@ -28,7 +29,7 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BABYLON.T
   }, scene);
   const offset = (ship.fr - ship.br) / 2 * scale;
   ship_mesh.position.set(offset * ship.fvx, offset * ship.fvy, offset * ship.fvz); // relative offset i hope
-  ship_box.addChild(ship_mesh);
+  ship_mesh.parent = box; // warning do not use box.addChild() , produces weird result for move/rotate move
   
   // Position at center
   // ship_mesh.position.set(ship.cx, ship.cy, ship.cz);
@@ -46,16 +47,13 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BABYLON.T
   // const top = new BABYLON.Vector3(ship.tvx, ship.tvy, ship.tvz);
   ship_mesh.lookAt(ship_mesh.position.add(front));
   
-  // Store reference for later updates
-  ship_mesh.metadata = { shipIndex: idx };
-
-  ship_boxes[idx] = ship_box
+  ship_boxes[idx] = box
 
   const dot_size = ship.br * scale;
 
   const f_dot = BABYLON.MeshBuilder.CreateSphere("frontDot", { diameter: dot_size }, scene);
   f_dot.position = new BABYLON.Vector3(0, 0, ship.fr * 4 * scale);
-  f_dot.parent = ship_box;
+  f_dot.parent = box;
   const f_mat = new BABYLON.StandardMaterial("blue", scene);
   f_mat.diffuseColor = BABYLON.Color3.Blue();
   f_mat.alpha = 1.0; // Make sure it's fully opaque
@@ -66,7 +64,7 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BABYLON.T
 
   const t_dot = BABYLON.MeshBuilder.CreateSphere("topDot", { diameter: dot_size }, scene);
   t_dot.position = new BABYLON.Vector3(0, ship.vr * 2 * scale, 0);
-  t_dot.parent = ship_box;
+  t_dot.parent = box;
   const t_mat = new BABYLON.StandardMaterial("green", scene);
   t_mat.diffuseColor = BABYLON.Color3.Green();
   t_mat.alpha = 1.0; // Make sure it's fully opaque
@@ -76,7 +74,7 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BABYLON.T
 
   const s_dot = BABYLON.MeshBuilder.CreateSphere("sideDot", { diameter: dot_size }, scene);
   s_dot.position = new BABYLON.Vector3(ship.sr * 2 * scale, 0,0);
-  s_dot.parent = ship_box;
+  s_dot.parent = box;
   const s_mat = new BABYLON.StandardMaterial("blue", scene);
   s_mat.diffuseColor = BABYLON.Color3.Red();
   s_mat.alpha = 1.0; // Make sure it's fully opaque
@@ -85,9 +83,9 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BABYLON.T
 
   ship_mesh.showBoundingBox = true; //todo remove. test
   const axes = new BABYLON.Debug.AxesViewer(scene, 10)
-  axes.xAxis.parent = ship_box;
-  axes.yAxis.parent = ship_box;
-  axes.zAxis.parent = ship_box;
+  axes.xAxis.parent = box;
+  axes.yAxis.parent = box;
+  axes.zAxis.parent = box;
 
-  return ship_box;
+  return box;
 }

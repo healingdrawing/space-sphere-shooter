@@ -131,7 +131,7 @@ export class SSSGameRoom implements GameRoom {
     let timer = this.ships_auto_update_timer
     if(!timer ) timer = setTimeout(() => {
       this.ships_auto_update()
-    }, 100);//todo consider to move 200[ms] to .env 
+    }, 10);//todo consider to move 200[ms] to .env 
   }
 
   /** update:

@@ -11,15 +11,19 @@ export const move_ship = (data: Frontmove) => {
 }
 
 /** clean if move complete */
-export function check_move_metadata(ship:BABYLON.TransformNode){
-  if (ship.metadata.velocity
-    && !ship.metadata.velocity.x
-    && !ship.metadata.velocity.y
-    && !ship.metadata.velocity.z
+export function check_move_metadata(box:BABYLON.TransformNode){
+  if(!box.metadata){
+    console.error("!box.metadata fired")
+    return
+  }
+  if (box.metadata.velocity
+    && !box.metadata.velocity.x
+    && !box.metadata.velocity.y
+    && !box.metadata.velocity.z
   ) {
-    delete ship.metadata.velocity;
+    delete box.metadata.velocity;
     console.warn("MOVE FORWARD STOPPED")
-    log_position(ship)
+    log_position(box)
   }
 }
 
