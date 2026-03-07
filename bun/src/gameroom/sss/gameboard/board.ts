@@ -534,52 +534,59 @@ export class SSSBoard {
   }
 
   /** all ships collision detection, without 26 zones around etc.
- * Simplified to box, not a asymmetrical ellipsoid etc
- * */
-raw_ships_collider() {
-  // console.log("raw_ships_collider() executed")
-  const s = this.ships
-  const lens = this.players.length
-  
-  for (let i = 1; i < lens; i++) {
-    // const b = this.base(i) // calculated inside readship
+   * Simplified to box, not a asymmetrical ellipsoid etc
+   * */
+  raw_ships_collider() {
+    // console.log("raw_ships_collider() executed")
+    const s = this.ships
+    const lens = this.players.length
+    
+    for (let i = 1; i < lens; i++) {
+      // const b = this.base(i) // calculated inside readship
 
-    if (!s[i * SOFFSIZE]) continue;
-    const s1 = this.read_ship(i) // todo refactor without read_ship and getters/setters to speedup
+      if (!s[i * SOFFSIZE]) continue;
+      const s1 = this.read_ship(i) // todo refactor without read_ship and getters/setters to speedup
 
-    for (let j = i + 1; j < lens; j++) {
-      if (!s[j * SOFFSIZE]) continue;
-      const s2 = this.read_ship(j)
+      for (let j = i + 1; j < lens; j++) {
+        if (!s[j * SOFFSIZE]) continue;
+        const s2 = this.read_ship(j)
 
-      // todo /1000 is scale from client side, must be delivered from server in init moment and reused for both
-      if (two_ships_collision(
-        s1.cx, s1.cy, s1.cz,
-        s1.fvx, s1.fvy, s1.fvz,
-        s1.tvx, s1.tvy, s1.tvz,
-        s1.fr, s1.br, s1.sr, s1.vr,
-        
-        s2.cx, s2.cy, s2.cz,
-        s2.fvx, s2.fvy, s2.fvz,
-        s2.tvx, s2.tvy, s2.tvz,
-        s2.fr, s2.br, s2.sr, s2.vr,
-      )) {
-        const s1hp = s1.hp
-        const s2hp = s2.hp
-        // rawlog("collision: ",s1.idx, " ", s2.idx)
-        if (s1hp > s2hp){
-          this.set_hp(s1.idx, s1hp-s2hp)
-          gameroom.remove_client(s2.idx, true)
-        } else if (s2hp > s1hp){
-          this.set_hp(s2.idx, s2hp-s1hp)
-          gameroom.remove_client(s1.idx, true)
-        } else {
-          gameroom.remove_client(s1.idx, true)
-          gameroom.remove_client(s2.idx, true)
+        // todo /1000 is scale from client side, must be delivered from server in init moment and reused for both
+        if (two_ships_collision(
+          s1.cx, s1.cy, s1.cz,
+          s1.fvx, s1.fvy, s1.fvz,
+          s1.tvx, s1.tvy, s1.tvz,
+          s1.fr, s1.br, s1.sr, s1.vr,
+          
+          s2.cx, s2.cy, s2.cz,
+          s2.fvx, s2.fvy, s2.fvz,
+          s2.tvx, s2.tvy, s2.tvz,
+          s2.fr, s2.br, s2.sr, s2.vr,
+        )) {
+          const s1hp = s1.hp
+          const s2hp = s2.hp
+          // rawlog("collision: ",s1.idx, " ", s2.idx)
+          if (s1hp > s2hp){
+            this.set_hp(s1.idx, s1hp-s2hp)
+            gameroom.remove_client(s2.idx, true)
+          } else if (s2hp > s1hp){
+            this.set_hp(s2.idx, s2hp-s1hp)
+            gameroom.remove_client(s1.idx, true)
+          } else {
+            gameroom.remove_client(s1.idx, true)
+            gameroom.remove_client(s2.idx, true)
+          }
+
         }
-
       }
     }
   }
-}
+
+  /** random coordinate for ship spawn between 100 and 200  // todo consider implement check to avoid initial collision */
+  ship_initial_random_coordinate(){
+    const c = 100*(1 + Math.random()) * (Math.random()<0.5?-1:1)
+    devlog("new ship random coordinate",c)
+    return c
+  }
 
 }

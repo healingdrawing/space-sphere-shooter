@@ -18,7 +18,7 @@ export function handle_join(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Ar
     ws.data.nick = nick.substring(0,15) //warning //todo not sanitized
     const uuid = ws.data.uuid
     const ship = gameroom.join_game(uuid, nick, rgb)
-    //todo convert to float32array, encode as {s:arr},add type JOIN, return as message object
+    //todo consider to convert ship object to float32array or 64, encode as {s:arr},add type JOIN, return as message object. Then on client side parse respectively, to decrease net data transfer.
     
     // send order to join game. init add new(controllable) ship etc
     result.push({
