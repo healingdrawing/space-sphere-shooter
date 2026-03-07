@@ -1,5 +1,6 @@
 import { ram } from "../../ram";
 import { type Ship } from "../../tunnel";
+import { createRawShipHull } from "./ship-mesh";
 
 export const add_ship = (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BABYLON.TransformNode | null)[]) => {
   console.log("add_ship data:", ship)
@@ -21,16 +22,18 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BABYLON.T
   box.position.set(ship.cx, ship.cy, ship.cz);
   box.metadata = {} // warning this needed, or metadata is null and check of subprops is not straight
 
-  // warning // todo the center must be displaced. The depth property grows proportionally to two sides
-  const ship_mesh = BABYLON.MeshBuilder.CreateSphere(`ship-mesh-${idx}`, {
-    diameterX:  (ship.sr * 2) * scale,
-    diameterY: (ship.vr * 2) * scale,
-    diameterZ:  (ship.fr + ship.br) * scale // front + back radius  
-  }, scene);
-  const offset = (ship.fr - ship.br) / 2 * scale;
-  ship_mesh.position.set(offset * ship.fvx, offset * ship.fvy, offset * ship.fvz); // relative offset i hope
-  ship_mesh.parent = box; // warning do not use box.addChild() , produces weird result for move/rotate move
-  
+  // const ship_mesh = BABYLON.MeshBuilder.CreateSphere(`ship-mesh-${idx}`, {
+  //   diameterX:  (ship.sr * 2) * scale,
+  //   diameterY: (ship.vr * 2) * scale,
+  //   diameterZ:  (ship.fr + ship.br) * scale // front + back radius  
+  // }, scene);
+  // const offset = (ship.fr - ship.br) / 2 * scale;
+  // ship_mesh.position.set(offset * ship.fvx, offset * ship.fvy, offset * ship.fvz); // relative offset i hope
+  // ship_mesh.parent = box; // warning do not use box.addChild() , produces weird result for move/rotate move
+
+  const {hull, core} = createRawShipHull(ship, scene, scale)
+  hull.parent = box
+  core.parent = box
   // Position at center
   // ship_mesh.position.set(ship.cx, ship.cy, ship.cz);
 
@@ -40,12 +43,12 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BABYLON.T
   mat.emissiveColor = new BABYLON.Color3(ship.r * 0.3/255, ship.g * 0.3/255, ship.b * 0.3/255);
   mat.alpha = 1.0; // Make sure it's fully opaque
   mat.backFaceCulling = true; // Cull back faces
-  ship_mesh.material = mat;
+  hull.material = mat;
 
   // Orientation using front + top vectors
   const front = new BABYLON.Vector3(ship.fvx, ship.fvy, ship.fvz);
   // const top = new BABYLON.Vector3(ship.tvx, ship.tvy, ship.tvz);
-  ship_mesh.lookAt(ship_mesh.position.add(front));
+  hull.lookAt(hull.position.add(front));
   
   ship_boxes[idx] = box
 
@@ -82,7 +85,7 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BABYLON.T
   s_mat.backFaceCulling = true; // Cull back faces
   s_dot.material = s_mat;
 
-  ship_mesh.showBoundingBox = true; //todo remove. test
+  hull.showBoundingBox = true; //todo remove. test
   const axes = new BABYLON.Debug.AxesViewer(scene, 10)
   axes.xAxis.parent = box;
   axes.yAxis.parent = box;

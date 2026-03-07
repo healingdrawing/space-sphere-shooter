@@ -51,15 +51,18 @@ export const parse_limits = (nick:string):{
   
   const sum_nick = sum_digits + sum_vowels + sum_consonants + sum_others //sum of nick char values
 
+  const dscale = 1 // warning bugged to increase the difference in ship sizes, wrong proportions
+
+  // todo implement on client side
   const mass = 1000 + sum_nick // [kg] also will be radius of core sphere [mm]
   const max_lvelo = 1 + (sum_nick + sum_others) / 1000 // [m/s]
   const max_avelo = 20 + (sum_nick - sum_others) / 1000 // [deg/s]
   const maccel = 1 * 1000 / mass * (1+sum_others)/(1+sum_nick) // [m/(s*s)]
   const daccel = 10 * 1000 / mass * (1+sum_nick)/(1+sum_others) // [deg/(s*s)]
-  const fr = (mass + sum_consonants) /1000 // [m]
-  const br = (mass + sum_consonants * 0.5) /1000 // [m]
-  const sr = (mass + sum_vowels) /1000 // [m]
-  const vr = (mass + sum_digits) /1000 // [m]
+  const fr = (mass + sum_consonants * dscale) /1000 // [m]
+  const br = (mass + sum_consonants * dscale * 0.5) /1000 // [m]
+  const sr = (mass + sum_vowels * dscale) /1000 // [m]
+  const vr = (mass + sum_digits * dscale) /1000 // [m]
   const max_en = mass + sum_others // energy power [units]. Probably, when shot 1 unit of an energy is equals of 0.5 units of hp (when shot is maximum precised)
   const max_hp = mass + sum_others // health power [units]
 
