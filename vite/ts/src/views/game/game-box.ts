@@ -104,7 +104,7 @@ function create_game_box() {
         if (!ship) continue
         
         check_move_metadata(ship)
-        if (ship.metadata?.velocity) {
+        if (ship.metadata.velocity) {
           const v = ship.metadata.velocity as {x:number,y:number,z:number,vts:number}
           const dt = (now - v.vts)/1000; // Delta in seconds
           const vec = new BABYLON.Vector3(v.x, v.y, v.z)

@@ -471,28 +471,90 @@ export class SSSBoard {
       return
     }// hypotetical case of some wrong data and also the first moment
 
+    
+    /** top vector */
+    let t = [this.ships[b + S.TVX]!, this.ships[b + S.TVY]!, this.ships[b + S.TVZ]!]
+    /** front vector */
+    let f = [this.ships[b + S.FVX]!, this.ships[b + S.FVY]!, this.ships[b + S.FVZ]!]
+    
+    const av = this.ships[b + avOffset]!;
+    if (av === 0) return;
+    
     if (now >= tsend){
       /* case of small rotation still need to be to satisfy the ... "plan" */
       if (now > tsend){
         //todo implement rotation to difference of time
+        const dt = (tsend - last_ts) / 1000;
+        const angle_rad = av * dt * Math.PI / 180;
+        rawlog("rotation last step: dt=",dt ," angle_rad=", angle_rad)
+        this.rotate_ship(b,f,t,avOffset,angle_rad)
       }
       this.ships[b + avOffset] = 0;
       this.ships[b + tsend_offset] = now;
       return;
     }
-  
-    const av = this.ships[b + avOffset]!;
-    if (av === 0) return;
-  
+
     const dt = (now - last_ts) / 1000;
     
     const angle_rad = av * dt * Math.PI / 180;
-
-    /** top vector */
-    let t = [this.ships[b + S.TVX]!, this.ships[b + S.TVY]!, this.ships[b + S.TVZ]!]
-    /** front vector */
-    let f = [this.ships[b + S.FVX]!, this.ships[b + S.FVY]!, this.ships[b + S.FVZ]!]
+    rawlog("rotation step: dt=",dt ," angle_rad=", angle_rad)
+    this.rotate_ship(b,f,t,avOffset,angle_rad)
   
+    this.ships[b + ts_offset] = now;
+  
+    // switch (avOffset) {
+    //   case S.AVS:
+    //     /** side vector */
+    //     const s = gemm.vec3Dnormal(f,t)
+    //     f = gemm.vecXDone(gemm.vec3Drotate(f, s, angle_rad, true)) // rotated + scaled to one
+    //     t = gemm.vec3Dnormal(s,f) // scaled to one under the hood
+
+    //     this.ships[b + S.TVX] = t[0]!;
+    //     this.ships[b + S.TVY] = t[1]!;
+    //     this.ships[b + S.TVZ] = t[2]!;
+    //     this.ships[b + S.FVX] = f[0]!;
+    //     this.ships[b + S.FVY] = f[1]!;
+    //     this.ships[b + S.FVZ] = f[2]!;
+
+    //     break;
+    //   case S.AVF:
+    //     t = gemm.vecXDone(gemm.vec3Drotate(t, f, angle_rad, true));
+    //     this.ships[b + S.TVX] = t[0]!;
+    //     this.ships[b + S.TVY] = t[1]!;
+    //     this.ships[b + S.TVZ] = t[2]!;
+
+    //     break;
+    //   case S.AVT:
+    //     f = gemm.vecXDone(gemm.vec3Drotate(f, t, angle_rad, true));
+    //     this.ships[b + S.FVX] = f[0]!;
+    //     this.ships[b + S.FVY] = f[1]!;
+    //     this.ships[b + S.FVZ] = f[2]!;
+
+    //     break;
+    //   default:
+    //     return;
+    // }
+  
+    // this.ships[b + ts_offset] = now;
+
+    dlog(true, "ROTATION STAMP")
+    if (DEVLOG) devlog(
+      `fvx:${this.ships[b + S.FVX]}`,
+      `fvy:${this.ships[b + S.FVY]}`,
+      `fvz:${this.ships[b + S.FVZ]}`,
+      `tvx:${this.ships[b + S.TVX]}`,
+      `tvy:${this.ships[b + S.TVY]}`,
+      `tvz:${this.ships[b + S.TVZ]}`,
+    )
+  }
+
+  rotate_ship(
+    b:number,
+    f:number[],
+    t:number[],
+    avOffset:number,
+    angle_rad:number,    
+  ){
     switch (avOffset) {
       case S.AVS:
         /** side vector */
@@ -526,17 +588,7 @@ export class SSSBoard {
         return;
     }
   
-    this.ships[b + ts_offset] = now;
-  
-    dlog(true, "ROTATION STAMP")
-    if (DEVLOG) devlog(
-      `fvx:${this.ships[b + S.FVX]}`,
-      `fvy:${this.ships[b + S.FVY]}`,
-      `fvz:${this.ships[b + S.FVZ]}`,
-      `tvx:${this.ships[b + S.TVX]}`,
-      `tvy:${this.ships[b + S.TVY]}`,
-      `tvz:${this.ships[b + S.TVZ]}`,
-    )
+    
   }
 
   /** all ships collision detection, without 26 zones around etc.
