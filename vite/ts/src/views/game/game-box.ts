@@ -35,7 +35,7 @@ function create_game_box() {
   const animated_lazer_beams: BABYLON.Mesh[] = [];
   const ship_boxes: (BABYLON.TransformNode | null)[] = new Array(ram.umn).fill(null);
   
-  let animationId: number | null = null;
+  // let animationId: number | null = null;
   
   async function initGameView(ship:Ship) {
     console.log("dummy init game view executed")
@@ -165,7 +165,8 @@ function create_game_box() {
       // scene.meshes.forEach(m => console.log("  -", m.name));
 
       scene.render();
-      animationId = requestAnimationFrame(animate);
+      // animationId = requestAnimationFrame(animate);
+      requestAnimationFrame(animate);
     }
     animate();
   }
