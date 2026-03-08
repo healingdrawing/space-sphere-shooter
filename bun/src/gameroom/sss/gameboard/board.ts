@@ -460,21 +460,33 @@ export class SSSBoard {
   }
   
   private applyAngularVelocity(b: number, avOffset: number, now: number): void {
-    const tsOffset    = avOffset + 1;   // *_TS   (last update time)
-    const tsendOffset = avOffset + 2;   // *_TSEND (end time)
+    const ts_offset    = avOffset + 1;   // *_TS   (last update time)
+    const tsend_offset = avOffset + 2;   // *_TSEND (end time)
   
-    const lastTs = this.ships[b + tsOffset]!;
-    const endTs  = this.ships[b + tsendOffset]!;
+    const last_ts = this.ships[b + ts_offset]!;
+    const tsend  = this.ships[b + tsend_offset]!;
   
-    if (endTs <= now || lastTs > now) return;
+    if (last_ts >= now){
+      errlog("applyAngularVelocity() last_ts > now. should not happen")
+      return
+    }// hypotetical case of some wrong data and also the first moment
+
+    if (now >= tsend){
+      /* case of small rotation still need to be to satisfy the ... "plan" */
+      if (now > tsend){
+        //todo implement rotation to difference of time
+      }
+      this.ships[b + avOffset] = 0;
+      this.ships[b + tsend_offset] = now;
+      return;
+    }
   
     const av = this.ships[b + avOffset]!;
     if (av === 0) return;
   
-    const dt = (now - lastTs) / 1000;
-    if (dt <= 0) return;
-  
-    const angleRad = av * dt * Math.PI / 180;
+    const dt = (now - last_ts) / 1000;
+    
+    const angle_rad = av * dt * Math.PI / 180;
 
     /** top vector */
     let t = [this.ships[b + S.TVX]!, this.ships[b + S.TVY]!, this.ships[b + S.TVZ]!]
@@ -485,8 +497,8 @@ export class SSSBoard {
       case S.AVS:
         /** side vector */
         const s = gemm.vec3Dnormal(f,t)
-        t = gemm.vec3Drotate(t, s, angleRad, true)
-        f = gemm.vec3Drotate(f, s, angleRad, true)
+        f = gemm.vecXDone(gemm.vec3Drotate(f, s, angle_rad, true)) // rotated + scaled to one
+        t = gemm.vec3Dnormal(s,f) // scaled to one under the hood
 
         this.ships[b + S.TVX] = t[0]!;
         this.ships[b + S.TVY] = t[1]!;
@@ -497,14 +509,14 @@ export class SSSBoard {
 
         break;
       case S.AVF:
-        t = gemm.vec3Drotate(t, f, angleRad, true);
+        t = gemm.vecXDone(gemm.vec3Drotate(t, f, angle_rad, true));
         this.ships[b + S.TVX] = t[0]!;
         this.ships[b + S.TVY] = t[1]!;
         this.ships[b + S.TVZ] = t[2]!;
 
         break;
       case S.AVT:
-        f = gemm.vec3Drotate(f, t, angleRad, true);
+        f = gemm.vecXDone(gemm.vec3Drotate(f, t, angle_rad, true));
         this.ships[b + S.FVX] = f[0]!;
         this.ships[b + S.FVY] = f[1]!;
         this.ships[b + S.FVZ] = f[2]!;
@@ -514,7 +526,7 @@ export class SSSBoard {
         return;
     }
   
-    this.ships[b + tsOffset] = now;
+    this.ships[b + ts_offset] = now;
   
     dlog(true, "ROTATION STAMP")
     if (DEVLOG) devlog(
@@ -525,11 +537,6 @@ export class SSSBoard {
       `tvy:${this.ships[b + S.TVY]}`,
       `tvz:${this.ships[b + S.TVZ]}`,
     )
-
-    if (now >= endTs) {
-      this.ships[b + avOffset] = 0;
-      this.ships[b + tsendOffset] = now;
-    }
   }
 
   /** all ships collision detection, without 26 zones around etc.

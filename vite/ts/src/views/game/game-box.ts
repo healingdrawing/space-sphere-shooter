@@ -10,7 +10,7 @@ import { check_move_metadata, move_ship } from "./move-ship";
 import { leftmove_ship } from "./leftmove-ship";
 import { rightmove_ship } from "./rightmove-ship";
 import { crts } from "../../handlers/utils";
-import { check_rotations_metadata, rotateAxis as rotate_around_Axis } from "./rotate-ship";
+import { check_rotations_metadata, rotate_around_axis } from "./rotate-ship";
 import { topmove_ship } from "./topmove-ship";
 import { xyz_dev } from "./xyz";
 import { downmove_ship } from "./downmove-ship";
@@ -119,21 +119,21 @@ function create_game_box() {
           ship.metadata.sideRotation.ts = now
           const axisend = ship.getChildren().find(c => c.name === "sideDot") as BABYLON.Mesh;
           const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship.absolutePosition.asArray(), axisend.absolutePosition.asArray())).negate()
-          rotate_around_Axis(ship, axis, ship.metadata.sideRotation, dt);
+          rotate_around_axis(ship, axis, ship.metadata.sideRotation, dt);
         }
         if (ship.metadata.frontRotation){
           const dt = (now - ship.metadata.frontRotation.ts ) / 1000
           ship.metadata.frontRotation.ts = now
           const axisend = ship.getChildren().find(c => c.name === "frontDot") as BABYLON.Mesh;
           const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship.absolutePosition.asArray(), axisend.absolutePosition.asArray()))
-          rotate_around_Axis(ship, axis, ship.metadata.frontRotation, dt);
+          rotate_around_axis(ship, axis, ship.metadata.frontRotation, dt);
         }
         if (ship.metadata.topRotation){
           const dt = (now - ship.metadata.topRotation.ts ) / 1000
           ship.metadata.topRotation.ts = now
           const axisend = ship.getChildren().find(c => c.name === "topDot") as BABYLON.Mesh;
           const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship.absolutePosition.asArray(), axisend.absolutePosition.asArray()))
-          rotate_around_Axis(ship, axis, ship.metadata.topRotation, dt);
+          rotate_around_axis(ship, axis, ship.metadata.topRotation, dt);
         }
         
       }
