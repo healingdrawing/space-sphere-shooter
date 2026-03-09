@@ -8,6 +8,8 @@ import { SOFF } from "../gameboard/enums";
 import { rts } from "../../../utils/basetime";
 import { mm } from "../../../manage/message";
 import type { SideRotation, TopRotation } from "../types";
+import { CCR } from "../../../manage/close";
+import { calc_av, calc_duration } from "../ship/limits";
 
 export function handle_move_down(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
   devlog("handle_down_move() execution.")
@@ -15,13 +17,18 @@ export function handle_move_down(ws: Bun.ServerWebSocket<WebSocketData>, msg: Ui
   const result:GameRoomResponseMessage[] = []
 
   let obj:{code:number, power:number}
+  let power = 0
 
   try {
     obj = mm.u8aobj(msg) as {code:number, power:number}
-    if(!obj.power){
+    power = obj.power/100
+    if(!power){
       errlog("incorrect down move message from client(no obj.power)")
       return result
-  }
+    } else if (power < 0 || power > 1){
+      errlog("down move power outside of allowed range. Hijacking")
+      ws.close(CCR.HIJACKING.code, CCR.HIJACKING.reason)
+    }
   } catch (e) {
     errlog("incorrect down move message from client","mm.u8aobj(msg) parsing fail")
     return result
@@ -44,11 +51,11 @@ export function handle_move_down(ws: Bun.ServerWebSocket<WebSocketData>, msg: Ui
     errlog("zero top vector", top)
     return result;
   }
-  const power = obj.power // 0-100% -> 90 deg
-  /* *-1 before send to client. to rotate CCW. need check babylonjs(client) VS gl-matrix(server)  */
+  // const power = obj.power // 0-100% -> 90 deg
+  
   // const avs = Math.sign(power) * ship.max_avelo // +-[deg/s]. avoid accel at the moment
-  const avs = -45
-  const duration_s = Math.abs(power/avs)
+  const avs = -(calc_av(ship.max_avelo, power))
+  const duration_s = calc_duration(-avs, power)
   const now = rts()
   const avs_tsend =  now + duration_s*1000
 
