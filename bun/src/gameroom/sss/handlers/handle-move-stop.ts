@@ -7,7 +7,7 @@ import type { GameRoomResponseMessage } from "../../base";
 import { SOFF } from "../gameboard/enums";
 
 export function handle_move_stop(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array): GameRoomResponseMessage[] {
-  devlog("handle_stop_move() execution.")
+  devlog("handle_move_stop() execution.")
 
   const result: GameRoomResponseMessage[] = [];
   const uuid = ws.data.uuid;

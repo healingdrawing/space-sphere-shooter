@@ -1,5 +1,5 @@
 import type { WebSocketData } from "../../..";
-import { devlog, errlog, rawlog } from "../../../debug/debug";
+import { DEVLOG, devlog, errlog, rawlog } from "../../../debug/debug";
 import { MT } from "../../../enums/mt";
 import { gameroom } from "../../../ram/storage";
 import type { GameRoomResponseMessage } from "../../base";
@@ -11,7 +11,7 @@ import type { LazerBeam } from "../types";
 import { gemm } from "../gameboard/non-autistic-math/gemm";
 
 export function handle_shot_front(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
-  devlog("handle_front_shot() execution.")
+  devlog("handle_shot_front() execution.")
 
   const result:GameRoomResponseMessage[] = []
 
@@ -60,14 +60,13 @@ export function handle_shot_front(ws: Bun.ServerWebSocket<WebSocketData>, msg: U
   let ny = s.tvy
   let nz = s.tvz
 
-  let guns = s.front_guns
   let max_en = s.max_en
   let en = s.en
   
   // todo consider ban if power is outside 0-100. hijacking
   const power = obj.power // 0-100% -> manage later some way. In case of shot as % of max_en but <= en
   
-  const damage_messages = b.lazer_shot( uuid, guns, power, en, max_en, vx, vy, vz, nx, ny, nz, cx,cy,cz )
+  const damage_messages = b.lazer_shot( uuid, a, power, en, max_en, vx, vy, vz, nx, ny, nz, cx,cy,cz )
   
   result.push({
     mt: MT.FRONTSHOT,
@@ -78,7 +77,7 @@ export function handle_shot_front(ws: Bun.ServerWebSocket<WebSocketData>, msg: U
     uuids: [0]
   })
   
-  devlog("damage_messages",damage_messages) //todo remove
+  if(DEVLOG) devlog("damage_messages",damage_messages) //todo remove
   result.push(...damage_messages)
   
   return result

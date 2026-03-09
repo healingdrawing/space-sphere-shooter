@@ -12,7 +12,7 @@ import { CCR } from "../../../manage/close";
 import { calc_av, calc_duration } from "../ship/limits";
 
 export function handle_move_top(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
-  devlog("handle_top_move() execution.")
+  devlog("handle_move_top() execution.")
 
   const result:GameRoomResponseMessage[] = []
 

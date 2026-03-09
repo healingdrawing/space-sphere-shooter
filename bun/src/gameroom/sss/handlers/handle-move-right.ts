@@ -12,7 +12,7 @@ import { CCR } from "../../../manage/close";
 import { calc_av, calc_duration } from "../ship/limits";
 
 export function handle_move_right(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
-  devlog("handle_right_move() execution.")
+  devlog("handle_move_right() execution.")
 
   const result:GameRoomResponseMessage[] = []
 

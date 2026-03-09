@@ -11,7 +11,7 @@ import { mm } from "../../../manage/message";
 import { CCR } from "../../../manage/close";
 
 export function handle_move_front(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
-  devlog("handle_front_move() execution.")
+  devlog("handle_move_front() execution.")
 
   const result:GameRoomResponseMessage[] = []
 

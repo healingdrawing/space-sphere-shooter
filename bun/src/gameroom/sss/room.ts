@@ -213,9 +213,7 @@ export class SSSGameRoom implements GameRoom {
         handle_shot_right(ws, msg);
         break;
     
-      case MT.BACKSHOT:
-        handle_shot_back(ws, msg);
-        break;
+      case MT.BACKSHOT: return handle_shot_back(ws, msg);
     
       case MT.TOPSHOT:
         handle_shot_top(ws, msg);
