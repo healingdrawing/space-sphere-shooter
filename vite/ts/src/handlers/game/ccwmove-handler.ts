@@ -8,6 +8,6 @@ export const ccwmove_handler = (text:string) => {
     //todo check
     game_box.ccwmove_ship(obj)
   } catch (e) {
-    console.error("wrong ccwmove data received")
+    console.error("wrong ccwmove data received:",e)
   }
 }

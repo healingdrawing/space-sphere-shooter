@@ -8,6 +8,6 @@ export const topmove_handler = (text:string) => {
     //todo check
     game_box.topmove_ship(obj)
   } catch (e) {
-    console.error("wrong topmove data received")
+    console.error("wrong topmove data received:",e)
   }
 }

@@ -8,6 +8,6 @@ export const cwmove_handler = (text:string) => {
     //todo check
     game_box.cwmove_ship(obj)
   } catch (e) {
-    console.error("wrong cwmove data received")
+    console.error("wrong cwmove data received:",e)
   }
 }

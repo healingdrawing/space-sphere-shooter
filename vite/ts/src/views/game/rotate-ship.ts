@@ -1,3 +1,4 @@
+import { crts } from "../../handlers/utils";
 import { gemm, type FrontRotation, type SideRotation, type TopRotation } from "../../tunnel";
 import { game_box } from "./game-box";
 import { syncOrientation } from "./sync-orientation";
@@ -5,6 +6,11 @@ import { syncOrientation } from "./sync-orientation";
 export const front_rotation = (data: FrontRotation) => {
   const ship_box = game_box.ship_boxes[data.uuid]!;
   /* raw stop previous rotations */
+  const now = crts()
+  /* patch to force function rotate to present timestamp */
+  if(ship_box.metadata.sideRotation) ship_box.metadata.sideRotation.tsend = now;
+  if(ship_box.metadata.topRotation) ship_box.metadata.topRotation.tsend = now;
+  check_rotations_metadata(ship_box, now+1)
   delete ship_box.metadata.sideRotation;
   delete ship_box.metadata.topRotation;
   syncOrientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
@@ -14,6 +20,11 @@ export const front_rotation = (data: FrontRotation) => {
 export const top_rotation = (data: TopRotation) => {
   const ship_box = game_box.ship_boxes[data.uuid]!;
   /* raw stop previous rotations */
+  const now = crts()
+  /* patch to force function rotate to present timestamp */
+  if(ship_box.metadata.frontRotation) ship_box.metadata.frontRotation.tsend = now;
+  if(ship_box.metadata.sideRotation) ship_box.metadata.sideRotation.tsend = now;
+  check_rotations_metadata(ship_box, now+1)
   delete ship_box.metadata.frontRotation;
   delete ship_box.metadata.sideRotation;
 
@@ -32,6 +43,11 @@ export const top_rotation = (data: TopRotation) => {
 export const side_rotation = (data: SideRotation) => {
   const ship_box = game_box.ship_boxes[data.uuid]!;
   /* raw stop previous rotations */
+  const now = crts()
+  /* patch to force function rotate to present timestamp */
+  if(ship_box.metadata.topRotation) ship_box.metadata.topRotation.tsend = now;
+  if(ship_box.metadata.frontRotation) ship_box.metadata.frontRotation.tsend = now;
+  check_rotations_metadata(ship_box, now+1)
   delete ship_box.metadata.topRotation;
   delete ship_box.metadata.frontRotation;
 
@@ -65,8 +81,9 @@ export function check_rotations_metadata(ship_box:BABYLON.TransformNode, now: nu
       if (now > side_tsend){ /* need rotate up to equal condition */
         const fake_dt = (side_tsend - meta_side.ts) / 1000
         // meta_side.ts = now // commented since metadata will be removed anyways
-        const axisend = ship_box.getChildren().find(c => c.name === "sideDot") as BABYLON.Mesh;
-        const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship_box.absolutePosition.asArray(), axisend.absolutePosition.asArray())).negate()
+        // const axisend = ship_box.getChildren().find(c => c.name === "sideDot") as BABYLON.Mesh;
+        // const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship_box.absolutePosition.asArray(), axisend.absolutePosition.asArray())).negate()
+        const axis = ship_box.getDirection(BABYLON.Vector3.Left())
         rotate_around_axis(ship_box, axis, meta_side, fake_dt);
       }
       delete ship_box.metadata.sideRotation;
@@ -82,8 +99,9 @@ export function check_rotations_metadata(ship_box:BABYLON.TransformNode, now: nu
       if (now > front_tsend){ /* need rotate up to equal condition */
         const fake_dt = (front_tsend - meta_front.ts) / 1000
         // meta_front.ts = now // commented since metadata will be removed anyways
-        const axisend = ship_box.getChildren().find(c => c.name === "frontDot") as BABYLON.Mesh;
-        const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship_box.absolutePosition.asArray(), axisend.absolutePosition.asArray()))
+        // const axisend = ship_box.getChildren().find(c => c.name === "frontDot") as BABYLON.Mesh;
+        // const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship_box.absolutePosition.asArray(), axisend.absolutePosition.asArray()))
+        const axis = ship_box.getDirection(BABYLON.Vector3.Forward())
         rotate_around_axis(ship_box, axis, meta_front, fake_dt);
       }
       delete ship_box.metadata.frontRotation;
@@ -105,8 +123,9 @@ export function check_rotations_metadata(ship_box:BABYLON.TransformNode, now: nu
         //   "\nfake_dt:", fake_dt
         // )
         ship_box.metadata.topRotation.ts = now // commented since metadata will be removed anyways
-        const axisend = ship_box.getChildren().find(c => c.name === "topDot") as BABYLON.Mesh;
-        const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship_box.absolutePosition.asArray(), axisend.absolutePosition.asArray()))
+        // const axisend = ship_box.getChildren().find(c => c.name === "topDot") as BABYLON.Mesh;
+        // const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship_box.absolutePosition.asArray(), axisend.absolutePosition.asArray()))
+        const axis = ship_box.getDirection(BABYLON.Vector3.Up())
         rotate_around_axis(ship_box, axis, meta_top, fake_dt);
       }
       delete ship_box.metadata.topRotation;

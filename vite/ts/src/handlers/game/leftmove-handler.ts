@@ -8,6 +8,6 @@ export const leftmove_handler = (text:string) => {
     //todo check
     game_box.leftmove_ship(obj)
   } catch (e) {
-    console.error("wrong leftmove data received")
+    console.error("wrong leftmove data received:",e)
   }
 }

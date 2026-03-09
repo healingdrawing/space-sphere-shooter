@@ -60,6 +60,7 @@ export function handle_move_ccw(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uin
   const avf_tsend =  now + duration_s*1000
 
   /* raw stop previous rotations */
+  b.update_ship_rotations(now)
   b.set_avt(uuid, 0)
   b.set_avs(uuid, 0)
 
@@ -69,7 +70,7 @@ export function handle_move_ccw(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uin
   b.set_avf_tsend(uuid, avf_tsend) //final timestamp
 
   result.push({
-    mt: MT.CWMOVE,
+    mt: MT.CCWMOVE,
     msg: {
       uuid, avf:avf, avf_ts:now, avf_tsend,
       fvx:ship.fvx, fvy:ship.fvy, fvz:ship.fvz,

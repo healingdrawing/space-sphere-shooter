@@ -60,6 +60,7 @@ export function handle_move_down(ws: Bun.ServerWebSocket<WebSocketData>, msg: Ui
   const avs_tsend =  now + duration_s*1000
 
   /* raw stop previous rotations */
+  b.update_ship_rotations(now)
   b.set_avf(uuid, 0)
   b.set_avt(uuid, 0)
 
@@ -69,7 +70,7 @@ export function handle_move_down(ws: Bun.ServerWebSocket<WebSocketData>, msg: Ui
   b.set_avs_tsend(uuid, avs_tsend) //final timestamp
 
   result.push({
-    mt: MT.TOPMOVE,
+    mt: MT.DOWNMOVE,
     msg: {
       uuid, avs:avs, avs_ts:now, avs_tsend,
       fvx:ship.fvx, fvy:ship.fvy, fvz:ship.fvz,

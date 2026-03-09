@@ -8,6 +8,6 @@ export const downmove_handler = (text:string) => {
     //todo check
     game_box.downmove_ship(obj)
   } catch (e) {
-    console.error("wrong downmove data received")
+    console.error("wrong downmove data received:",e)
   }
 }
