@@ -68,3 +68,25 @@ export const parse_limits = (nick:string):{
 
  return {mass, max_lvelo, max_avelo, maccel, daccel, fr, br, sr, vr, max_en, max_hp}
 }
+
+/**
+ * calculate angular velocity [deg/s] for rotation
+ * @param max_avelo 
+ * @param power 
+ * @returns 
+ */
+export const calc_av = ( max_avelo:number, power:number ) =>{
+  devlog("calc_av [deg/s]", max_avelo*(1/5+4/5*power**2)) // todo remove
+  return max_avelo*(1/5+4/5*power**2)
+}
+
+/**
+ * calculate duration [s] of angular rotation 
+ * @param av 
+ * @param power 
+ * @returns 
+ */
+export const calc_duration = ( av:number, power:number ) =>{
+  devlog("calc_duration [s]", 90*(1/5+4/5*power**2)/av)
+  return 90*power/av
+}

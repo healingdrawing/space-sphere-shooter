@@ -8,6 +8,8 @@ import { SOFF } from "../gameboard/enums";
 import { rts } from "../../../utils/basetime";
 import { mm } from "../../../manage/message";
 import type { FrontRotation } from "../types";
+import { CCR } from "../../../manage/close";
+import { calc_duration, calc_av } from "../ship/limits";
 
 export function handle_move_ccw(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
   devlog("handle_ccw_move() execution.")
@@ -15,13 +17,18 @@ export function handle_move_ccw(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uin
   const result:GameRoomResponseMessage[] = []
 
   let obj:{code:number, power:number}
+  let power = 0
 
   try {
     obj = mm.u8aobj(msg) as {code:number, power:number}
-    if(!obj.power){
+    power = obj.power/100
+    if(!power){
       errlog("incorrect ccw move message from client(no obj.power)")
       return result
-  }
+    } else if (power < 0 || power > 1){
+      errlog("ccw move power outside of allowed range. Hijacking")
+      ws.close(CCR.HIJACKING.code, CCR.HIJACKING.reason)
+    }
   } catch (e) {
     errlog("incorrect ccw move message from client","mm.u8aobj(msg) parsing fail")
     return result
@@ -44,11 +51,11 @@ export function handle_move_ccw(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uin
     errlog("zero top vector", top)
     return result;
   }
-  const power = obj.power // 0-100% -> 90 deg
+  // const power = obj.power // 0-100% -> 90 deg
   
   // const avf = Math.sign(power) * ship.max_avelo // +-[deg/s]. avoid accel at the moment
-  const avf = -45
-  const duration_s = Math.abs(power/avf)
+  const avf = -(calc_av(ship.max_avelo, power))
+  const duration_s = calc_duration(-avf, power)
   const now = rts()
   const avf_tsend =  now + duration_s*1000
 

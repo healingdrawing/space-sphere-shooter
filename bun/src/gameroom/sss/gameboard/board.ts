@@ -498,7 +498,7 @@ export class SSSBoard {
     const dt = (now - last_ts) / 1000;
     
     const angle_rad = av * dt * Math.PI / 180;
-    rawlog("rotation step: dt=",dt ," angle_rad=", angle_rad)
+    // rawlog("rotation step: dt=",dt ," angle_rad=", angle_rad)
     this.rotate_ship(b,f,t,avOffset,angle_rad)
   
     this.ships[b + ts_offset] = now;
@@ -538,15 +538,15 @@ export class SSSBoard {
   
     // this.ships[b + ts_offset] = now;
 
-    dlog(true, "ROTATION STAMP")
-    if (DEVLOG) devlog(
-      `fvx:${this.ships[b + S.FVX]}`,
-      `fvy:${this.ships[b + S.FVY]}`,
-      `fvz:${this.ships[b + S.FVZ]}`,
-      `tvx:${this.ships[b + S.TVX]}`,
-      `tvy:${this.ships[b + S.TVY]}`,
-      `tvz:${this.ships[b + S.TVZ]}`,
-    )
+    // dlog(true, "ROTATION STAMP")
+    // if (DEVLOG) devlog(
+    //   `fvx:${this.ships[b + S.FVX]}`,
+    //   `fvy:${this.ships[b + S.FVY]}`,
+    //   `fvz:${this.ships[b + S.FVZ]}`,
+    //   `tvx:${this.ships[b + S.TVX]}`,
+    //   `tvy:${this.ships[b + S.TVY]}`,
+    //   `tvz:${this.ships[b + S.TVZ]}`,
+    // )
   }
 
   rotate_ship(

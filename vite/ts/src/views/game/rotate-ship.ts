@@ -98,12 +98,12 @@ export function check_rotations_metadata(ship_box:BABYLON.TransformNode, now: nu
       /* additional check to rotate, closer to final expected rotation */
       if (now > top_tsend){ /* need rotate up to equal condition */
         const fake_dt = (top_tsend - meta_top.ts) / 1000
-        console.log(
-          "\nts:", meta_top.ts,
-          "\ntsend:", meta_top.tsend,
-          "\nnow:", now,
-          "\nfake_dt:", fake_dt
-        )
+        // console.log(
+        //   "\nts:", meta_top.ts,
+        //   "\ntsend:", meta_top.tsend,
+        //   "\nnow:", now,
+        //   "\nfake_dt:", fake_dt
+        // )
         ship_box.metadata.topRotation.ts = now // commented since metadata will be removed anyways
         const axisend = ship_box.getChildren().find(c => c.name === "topDot") as BABYLON.Mesh;
         const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship_box.absolutePosition.asArray(), axisend.absolutePosition.asArray()))
