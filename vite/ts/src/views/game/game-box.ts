@@ -64,7 +64,7 @@ function create_game_box() {
     trash.dispose()
 
     
-    const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000 }, scene);//warning //todo consider to bind lazer length to this
+    const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 10000 }, scene);//warning //todo consider to bind lazer length to this
     const skyboxMaterial = new BABYLON.StandardMaterial("skyBoxMaterial", scene);
     skyboxMaterial.backFaceCulling = false; // Ensure the back faces are rendered
     skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("./textures/1", scene);

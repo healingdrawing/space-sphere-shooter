@@ -55,8 +55,8 @@ export const parse_limits = (nick:string):{
 
   // todo implement on client side
   const mass = 1000 + sum_nick // [kg] also will be radius of core sphere [mm]
-  const max_lvelo = 10 + (sum_nick + sum_others) / 1000 // [m/s]
-  const max_avelo = 20 + (sum_nick - sum_others) / 1000 // [deg/s]
+  const max_lvelo = 30 + (sum_nick + sum_others) / 1000 // [m/s]
+  const max_avelo = 30 + (sum_nick - sum_others) / 1000 // [deg/s]
   const maccel = 1 * 1000 / mass * (1+sum_others)/(1+sum_nick) // [m/(s*s)]
   const daccel = 10 * 1000 / mass * (1+sum_nick)/(1+sum_others) // [deg/(s*s)]
   const fr = (mass + sum_consonants * dscale) /1000 // [m]
