@@ -4,6 +4,7 @@ import { syncOrientation } from "./sync-orientation";
 
 export const front_rotation = (data: FrontRotation) => {
   const ship_box = game_box.ship_boxes[data.uuid]!;
+  /* raw stop previous rotations */
   delete ship_box.metadata.sideRotation;
   delete ship_box.metadata.topRotation;
   syncOrientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
@@ -12,8 +13,10 @@ export const front_rotation = (data: FrontRotation) => {
 
 export const top_rotation = (data: TopRotation) => {
   const ship_box = game_box.ship_boxes[data.uuid]!;
+  /* raw stop previous rotations */
   delete ship_box.metadata.frontRotation;
   delete ship_box.metadata.sideRotation;
+
   //warning //bug syncO...
   // console.log("TOP_ROTATION call:", {
   //   avt: data.avt,  // angular velocity
@@ -28,6 +31,7 @@ export const top_rotation = (data: TopRotation) => {
 
 export const side_rotation = (data: SideRotation) => {
   const ship_box = game_box.ship_boxes[data.uuid]!;
+  /* raw stop previous rotations */
   delete ship_box.metadata.topRotation;
   delete ship_box.metadata.frontRotation;
 

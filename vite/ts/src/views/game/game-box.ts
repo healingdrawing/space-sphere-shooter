@@ -117,22 +117,19 @@ function create_game_box() {
         if (ship.metadata.sideRotation){
           const dt = (now - ship.metadata.sideRotation.ts ) / 1000
           ship.metadata.sideRotation.ts = now
-          const axisend = ship.getChildren().find(c => c.name === "sideDot") as BABYLON.Mesh;
-          const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship.absolutePosition.asArray(), axisend.absolutePosition.asArray())).negate()
+          const axis = ship.getDirection(BABYLON.Vector3.Left())
           rotate_around_axis(ship, axis, ship.metadata.sideRotation, dt);
         }
         if (ship.metadata.frontRotation){
           const dt = (now - ship.metadata.frontRotation.ts ) / 1000
           ship.metadata.frontRotation.ts = now
-          const axisend = ship.getChildren().find(c => c.name === "frontDot") as BABYLON.Mesh;
-          const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship.absolutePosition.asArray(), axisend.absolutePosition.asArray()))
+          const axis = ship.getDirection(BABYLON.Vector3.Forward())
           rotate_around_axis(ship, axis, ship.metadata.frontRotation, dt);
         }
         if (ship.metadata.topRotation){
           const dt = (now - ship.metadata.topRotation.ts ) / 1000
           ship.metadata.topRotation.ts = now
-          const axisend = ship.getChildren().find(c => c.name === "topDot") as BABYLON.Mesh;
-          const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship.absolutePosition.asArray(), axisend.absolutePosition.asArray()))
+          const axis = ship.getDirection(BABYLON.Vector3.Up())
           rotate_around_axis(ship, axis, ship.metadata.topRotation, dt);
         }
         
