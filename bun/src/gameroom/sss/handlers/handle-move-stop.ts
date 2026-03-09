@@ -6,7 +6,7 @@ import { rts } from "../../../utils/basetime";
 import type { GameRoomResponseMessage } from "../../base";
 import { SOFF } from "../gameboard/enums";
 
-export function handle_stop_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array): GameRoomResponseMessage[] {
+export function handle_move_stop(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array): GameRoomResponseMessage[] {
   devlog("handle_stop_move() execution.")
 
   const result: GameRoomResponseMessage[] = [];

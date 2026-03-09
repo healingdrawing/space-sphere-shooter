@@ -10,7 +10,7 @@ import { mm } from "../../../manage/message";
 import type { LazerBeam } from "../types";
 import { gemm } from "../gameboard/non-autistic-math/gemm";
 
-export function handle_front_shot(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
+export function handle_shot_front(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
   devlog("handle_front_shot() execution.")
 
   const result:GameRoomResponseMessage[] = []

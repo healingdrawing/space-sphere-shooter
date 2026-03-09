@@ -4,7 +4,7 @@ import { SSSBoard } from "./gameboard/board";
 
 import { USERS_MAX_NUMBER } from "../../ram/consts";
 import { MT } from "../../enums/mt";
-import { handle_back_shot, handle_ccw_move, handle_cw_move, handle_down_move, handle_down_shot, handle_join, handle_exit, handle_front_move, handle_front_shot, handle_left_move, handle_left_shot, handle_right_move, handle_right_shot, handle_stop_move, handle_target_move, handle_top_move, handle_top_shot } from "./handlers/game";
+import { handle_shot_back, handle_move_ccw, handle_move_cw, handle_move_down, handle_shot_down, handle_join, handle_exit, handle_move_front, handle_shot_front, handle_move_left, handle_shot_left, handle_move_right, handle_shot_right, handle_move_stop, handle_move_target, handle_move_top, handle_shot_top } from "./handlers/game";
 import { CCR } from "../../manage/close";
 import type { WebSocketData } from "../..";
 import { parse_guns, parse_limits } from "./ship/limits";
@@ -203,45 +203,45 @@ export class SSSGameRoom implements GameRoom {
 
       case MT.EXIT: handle_exit(ws, msg); break
     
-      case MT.FRONTSHOT: return handle_front_shot(ws, msg);
+      case MT.FRONTSHOT: return handle_shot_front(ws, msg);
     
       case MT.LEFTSHOT:
-        handle_left_shot(ws, msg);
+        handle_shot_left(ws, msg);
         break;
     
       case MT.RIGHTSHOT:
-        handle_right_shot(ws, msg);
+        handle_shot_right(ws, msg);
         break;
     
       case MT.BACKSHOT:
-        handle_back_shot(ws, msg);
+        handle_shot_back(ws, msg);
         break;
     
       case MT.TOPSHOT:
-        handle_top_shot(ws, msg);
+        handle_shot_top(ws, msg);
         break;
     
       case MT.DOWNSHOT:
-        handle_down_shot(ws, msg);
+        handle_shot_down(ws, msg);
         break;
     
-      case MT.FRONTMOVE: return handle_front_move(ws, msg);
-      case MT.STOPMOVE: return handle_stop_move(ws, msg);
+      case MT.FRONTMOVE: return handle_move_front(ws, msg);
+      case MT.STOPMOVE: return handle_move_stop(ws, msg);
     
-      case MT.LEFTMOVE: return handle_left_move(ws, msg);
+      case MT.LEFTMOVE: return handle_move_left(ws, msg);
     
-      case MT.RIGHTMOVE: return handle_right_move(ws, msg);
+      case MT.RIGHTMOVE: return handle_move_right(ws, msg);
     
-      case MT.TOPMOVE: return handle_top_move(ws, msg);
+      case MT.TOPMOVE: return handle_move_top(ws, msg);
     
-      case MT.DOWNMOVE: return handle_down_move(ws, msg);
+      case MT.DOWNMOVE: return handle_move_down(ws, msg);
     
-      case MT.CWMOVE: return handle_cw_move(ws, msg);
+      case MT.CWMOVE: return handle_move_cw(ws, msg);
     
-      case MT.CCWMOVE: return handle_ccw_move(ws, msg);
+      case MT.CCWMOVE: return handle_move_ccw(ws, msg);
     
       case MT.TARGETMOVE:
-        handle_target_move(ws, msg);
+        handle_move_target(ws, msg);
         break;
     
       default:

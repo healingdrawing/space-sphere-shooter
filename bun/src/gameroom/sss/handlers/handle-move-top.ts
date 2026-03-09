@@ -7,10 +7,10 @@ import { vec3 } from "gl-matrix";
 import { SOFF } from "../gameboard/enums";
 import { rts } from "../../../utils/basetime";
 import { mm } from "../../../manage/message";
-import type { TopRotation } from "../types";
+import type { SideRotation, TopRotation } from "../types";
 
-export function handle_left_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
-  devlog("handle_left_move() execution.")
+export function handle_move_top(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
+  devlog("handle_top_move() execution.")
 
   const result:GameRoomResponseMessage[] = []
 
@@ -19,11 +19,11 @@ export function handle_left_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: Ui
   try {
     obj = mm.u8aobj(msg) as {code:number, power:number}
     if(!obj.power){
-      errlog("incorrect left move message from client(no obj.power)")
+      errlog("incorrect top move message from client(no obj.power)")
       return result
   }
   } catch (e) {
-    errlog("incorrect left move message from client","mm.u8aobj(msg) parsing fail")
+    errlog("incorrect top move message from client","mm.u8aobj(msg) parsing fail")
     return result
   }
 
@@ -46,22 +46,28 @@ export function handle_left_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: Ui
   }
   const power = obj.power // 0-100% -> 90 deg
   /* *-1 before send to client. to rotate CCW. need check babylonjs(client) VS gl-matrix(server)  */
-  // const avt = Math.sign(power) * ship.max_avelo // +-[deg/s]. avoid accel at the moment
-  const avt = 45
-  const duration_s = Math.abs(power/avt)
+  // const avs = Math.sign(power) * ship.max_avelo // +-[deg/s]. avoid accel at the moment
+  const avs = 45
+  const duration_s = Math.abs(power/avs)
   const now = rts()
-  const avt_tsend =  now + duration_s*1000
-  b.set_avt(uuid, avt)
-  b.set_avt_ts(uuid, now) // start timestamp
-  b.set_avt_tsend(uuid, avt_tsend) //final timestamp
+  const avs_tsend =  now + duration_s*1000
+
+  /* raw stop previous rotations */
+  b.set_avf(uuid, 0)
+  b.set_avt(uuid, 0)
+
+  /* set new rotation */
+  b.set_avs(uuid, avs)
+  b.set_avs_ts(uuid, now) // start timestamp
+  b.set_avs_tsend(uuid, avs_tsend) //final timestamp
 
   result.push({
-    mt: MT.LEFTMOVE,
+    mt: MT.TOPMOVE,
     msg: {
-      uuid, avt:avt, avt_ts:now, avt_tsend,
+      uuid, avs:avs, avs_ts:now, avs_tsend,
       fvx:ship.fvx, fvy:ship.fvy, fvz:ship.fvz,
       tvx:ship.tvx,tvy:ship.tvy,tvz:ship.tvz,      
-    } as TopRotation,
+    } as SideRotation,
     ms: 0,
     uuids: [0]
   })

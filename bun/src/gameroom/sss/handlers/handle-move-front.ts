@@ -8,7 +8,7 @@ import { vec3 } from "gl-matrix";
 import { SOFF } from "../gameboard/enums";
 import { rts } from "../../../utils/basetime";
 
-export function handle_front_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
+export function handle_move_front(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
   devlog("handle_front_move() execution.")
 
   const result:GameRoomResponseMessage[] = []

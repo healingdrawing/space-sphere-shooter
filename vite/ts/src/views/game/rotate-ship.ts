@@ -4,39 +4,40 @@ import { syncOrientation } from "./sync-orientation";
 
 export const front_rotation = (data: FrontRotation) => {
   const ship_box = game_box.ship_boxes[data.uuid]!;
+  delete ship_box.metadata.sideRotation;
+  delete ship_box.metadata.topRotation;
   syncOrientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
   ship_box.metadata.frontRotation = {av: data.avf, ts: data.avf_ts, tsend: data.avf_tsend};
 };
 
 export const top_rotation = (data: TopRotation) => {
   const ship_box = game_box.ship_boxes[data.uuid]!;
+  delete ship_box.metadata.frontRotation;
+  delete ship_box.metadata.sideRotation;
   //warning //bug syncO...
-  console.log("TOP_ROTATION call:", {
-    avt: data.avt,  // angular velocity
-    avt_ts: data.avt_ts,  // start time
-    avt_tsend: data.avt_tsend,  // end time
-    duration: data.avt_tsend - data.avt_ts,
-    fvx: data.fvx, fvy: data.fvy, fvz: data.fvz, tvx: data.tvx, tvy: data.tvy, tvz: data.tvz,    
-  });
-  
-  // warning. glitching. very raw(possibly comment). must sync with server data before each rotation starts
+  // console.log("TOP_ROTATION call:", {
+  //   avt: data.avt,  // angular velocity
+  //   avt_ts: data.avt_ts,  // start time
+  //   avt_tsend: data.avt_tsend,  // end time
+  //   duration: data.avt_tsend - data.avt_ts,
+  //   fvx: data.fvx, fvy: data.fvy, fvz: data.fvz, tvx: data.tvx, tvy: data.tvy, tvz: data.tvz,    
+  // });
   syncOrientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
-  
-  
-
   ship_box.metadata.topRotation = {av: data.avt, ts: data.avt_ts, tsend: data.avt_tsend};
 };
 
 export const side_rotation = (data: SideRotation) => {
   const ship_box = game_box.ship_boxes[data.uuid]!;
+  delete ship_box.metadata.topRotation;
+  delete ship_box.metadata.frontRotation;
 
-  console.log("SIDE_ROTATION called:", {
-    avs: data.avs,  // angular velocity
-    avs_ts: data.avs_ts,  // start time
-    avs_tsend: data.avs_tsend,  // end time
-    duration: data.avs_tsend - data.avs_ts,
-    vectors: { fvx: data.fvx, fvy: data.fvy, fvz: data.fvz, tvx: data.tvx, tvy: data.tvy, tvz: data.tvz },
-  });
+  // console.log("SIDE_ROTATION called:", {
+  //   avs: data.avs,  // angular velocity
+  //   avs_ts: data.avs_ts,  // start time
+  //   avs_tsend: data.avs_tsend,  // end time
+  //   duration: data.avs_tsend - data.avs_ts,
+  //   vectors: { fvx: data.fvx, fvy: data.fvy, fvz: data.fvz, tvx: data.tvx, tvy: data.tvy, tvz: data.tvz },
+  // });
 
   syncOrientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
   ship_box.metadata.sideRotation = {av: data.avs, ts: data.avs_ts, tsend: data.avs_tsend};

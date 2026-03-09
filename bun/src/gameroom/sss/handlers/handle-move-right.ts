@@ -7,10 +7,10 @@ import { vec3 } from "gl-matrix";
 import { SOFF } from "../gameboard/enums";
 import { rts } from "../../../utils/basetime";
 import { mm } from "../../../manage/message";
-import type { FrontRotation } from "../types";
+import type { TopRotation } from "../types";
 
-export function handle_ccw_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
-  devlog("handle_ccw_move() execution.")
+export function handle_move_right(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
+  devlog("handle_right_move() execution.")
 
   const result:GameRoomResponseMessage[] = []
 
@@ -19,11 +19,11 @@ export function handle_ccw_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uin
   try {
     obj = mm.u8aobj(msg) as {code:number, power:number}
     if(!obj.power){
-      errlog("incorrect ccw move message from client(no obj.power)")
+      errlog("incorrect right move message from client(no obj.power)")
       return result
   }
   } catch (e) {
-    errlog("incorrect ccw move message from client","mm.u8aobj(msg) parsing fail")
+    errlog("incorrect right move message from client","mm.u8aobj(msg) parsing fail")
     return result
   }
 
@@ -46,22 +46,28 @@ export function handle_ccw_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uin
   }
   const power = obj.power // 0-100% -> 90 deg
   
-  // const avf = Math.sign(power) * ship.max_avelo // +-[deg/s]. avoid accel at the moment
-  const avf = -45
-  const duration_s = Math.abs(power/avf)
+  // const avt = Math.sign(power) * ship.max_avelo // +-[deg/s]. avoid accel at the moment
+  const avt = -45
+  const duration_s = Math.abs(power/avt)
   const now = rts()
-  const avf_tsend =  now + duration_s*1000
-  b.set_avf(uuid, avf)
-  b.set_avf_ts(uuid, now) // start timestamp
-  b.set_avf_tsend(uuid, avf_tsend) //final timestamp
+  const avt_tsend =  now + duration_s*1000
+
+  /* raw stop previous rotations */
+  b.set_avf(uuid, 0)
+  b.set_avs(uuid, 0)
+
+  /* set new rotation */
+  b.set_avt(uuid, avt)
+  b.set_avt_ts(uuid, now) // start timestamp
+  b.set_avt_tsend(uuid, avt_tsend) //final timestamp
 
   result.push({
-    mt: MT.CWMOVE,
+    mt: MT.RIGHTMOVE,
     msg: {
-      uuid, avf:avf, avf_ts:now, avf_tsend,
+      uuid, avt:avt, avt_ts:now, avt_tsend,
       fvx:ship.fvx, fvy:ship.fvy, fvz:ship.fvz,
       tvx:ship.tvx,tvy:ship.tvy,tvz:ship.tvz,      
-    } as FrontRotation,
+    } as TopRotation,
     ms: 0,
     uuids: [0]
   })

@@ -1,5 +1,5 @@
 import type { WebSocketData } from "../../..";
 
-export function handle_left_shot(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array) {
+export function handle_shot_left(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array) {
   console.log("Function not implemented.")
 }

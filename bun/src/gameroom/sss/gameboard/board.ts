@@ -460,6 +460,9 @@ export class SSSBoard {
   }
   
   private applyAngularVelocity(b: number, avOffset: number, now: number): void {
+    const av = this.ships[b + avOffset]!;
+    if (av === 0) return;
+
     const ts_offset    = avOffset + 1;   // *_TS   (last update time)
     const tsend_offset = avOffset + 2;   // *_TSEND (end time)
   
@@ -477,8 +480,6 @@ export class SSSBoard {
     /** front vector */
     let f = [this.ships[b + S.FVX]!, this.ships[b + S.FVY]!, this.ships[b + S.FVZ]!]
     
-    const av = this.ships[b + avOffset]!;
-    if (av === 0) return;
     
     if (now >= tsend){
       /* case of small rotation still need to be to satisfy the ... "plan" */
@@ -490,7 +491,7 @@ export class SSSBoard {
         this.rotate_ship(b,f,t,avOffset,angle_rad)
       }
       this.ships[b + avOffset] = 0;
-      this.ships[b + tsend_offset] = now;
+      // this.ships[b + tsend_offset] = 0;
       return;
     }
 

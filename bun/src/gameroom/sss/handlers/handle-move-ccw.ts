@@ -9,8 +9,8 @@ import { rts } from "../../../utils/basetime";
 import { mm } from "../../../manage/message";
 import type { FrontRotation } from "../types";
 
-export function handle_cw_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
-  devlog("handle_cw_move() execution.")
+export function handle_move_ccw(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
+  devlog("handle_ccw_move() execution.")
 
   const result:GameRoomResponseMessage[] = []
 
@@ -19,11 +19,11 @@ export function handle_cw_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint
   try {
     obj = mm.u8aobj(msg) as {code:number, power:number}
     if(!obj.power){
-      errlog("incorrect cw move message from client(no obj.power)")
+      errlog("incorrect ccw move message from client(no obj.power)")
       return result
   }
   } catch (e) {
-    errlog("incorrect cw move message from client","mm.u8aobj(msg) parsing fail")
+    errlog("incorrect ccw move message from client","mm.u8aobj(msg) parsing fail")
     return result
   }
 
@@ -47,10 +47,16 @@ export function handle_cw_move(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint
   const power = obj.power // 0-100% -> 90 deg
   
   // const avf = Math.sign(power) * ship.max_avelo // +-[deg/s]. avoid accel at the moment
-  const avf = 45
+  const avf = -45
   const duration_s = Math.abs(power/avf)
   const now = rts()
   const avf_tsend =  now + duration_s*1000
+
+  /* raw stop previous rotations */
+  b.set_avt(uuid, 0)
+  b.set_avs(uuid, 0)
+
+  /* set new rotation */
   b.set_avf(uuid, avf)
   b.set_avf_ts(uuid, now) // start timestamp
   b.set_avf_tsend(uuid, avf_tsend) //final timestamp
