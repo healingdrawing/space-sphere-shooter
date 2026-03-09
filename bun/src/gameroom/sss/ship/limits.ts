@@ -55,7 +55,7 @@ export const parse_limits = (nick:string):{
 
   // todo implement on client side
   const mass = 1000 + sum_nick // [kg] also will be radius of core sphere [mm]
-  const max_lvelo = 1 + (sum_nick + sum_others) / 1000 // [m/s]
+  const max_lvelo = 10 + (sum_nick + sum_others) / 1000 // [m/s]
   const max_avelo = 20 + (sum_nick - sum_others) / 1000 // [deg/s]
   const maccel = 1 * 1000 / mass * (1+sum_others)/(1+sum_nick) // [m/(s*s)]
   const daccel = 10 * 1000 / mass * (1+sum_nick)/(1+sum_others) // [deg/(s*s)]
@@ -75,10 +75,7 @@ export const parse_limits = (nick:string):{
  * @param power 
  * @returns 
  */
-export const calc_av = ( max_avelo:number, power:number ) =>{
-  devlog("calc_av [deg/s]", max_avelo*(1/5+4/5*power**2)) // todo remove
-  return max_avelo*(1/5+4/5*power**2)
-}
+export const calc_av = ( max_avelo:number, power:number ) => max_avelo*(1/5+4/5*power**2)
 
 /**
  * calculate duration [s] of angular rotation 
@@ -86,7 +83,4 @@ export const calc_av = ( max_avelo:number, power:number ) =>{
  * @param power 
  * @returns 
  */
-export const calc_duration = ( av:number, power:number ) =>{
-  devlog("calc_duration [s]", 90*(1/5+4/5*power**2)/av)
-  return 90*power/av
-}
+export const calc_duration = ( av:number, power:number ) => 90*power/av

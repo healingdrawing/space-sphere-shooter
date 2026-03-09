@@ -10,19 +10,12 @@ export const send_client_action = (ws:WebSocket, action:MT) => {
   }
   console.log("released button. KeyCode:", action);//todo remove
 
-  let power = 0 //warning. polish check since server raise error if power 0
-  if (action === MT.LEFTMOVE) power = 30 //degrees dev gap //todo implement with press - hold - release - value
-  else if (action === MT.RIGHTMOVE) power = 30
-  else if (action === MT.TOPMOVE) power = 30
-  else if (action === MT.DOWNMOVE) power = 30
-  else if (action === MT.CWMOVE) power = 30
-  else if (action === MT.CCWMOVE) power = 30
-  // frotmove and stopmove work different at the moment. Just +delta move and fullstop.
-
-  /* shot section */
-  else if (action){}
-
+  let power = 0 //warning. power should be implemented from >0 to 100 (%) uses press(keydown) -> accumulate (keyhold) -> release (power set to value , then will be sent from here to server) 
+  
   switch(action){
+    case MT.FRONTMOVE: power = 100; break
+    case MT.STOPMOVE: power = 100; break
+
     case MT.LEFTMOVE: power = 100; break
     case MT.RIGHTMOVE: power = 100; break
     case MT.TOPMOVE: power = 100; break
@@ -42,7 +35,7 @@ export const send_client_action = (ws:WebSocket, action:MT) => {
     default: break
   }
 
-  const dummy = { code: action, power }
+  const dummy = { code: action, power } //todo properly remove code parameter, since not used
   
   // add message type
   const with_mt = mm.keyu8a(action, mm.obju8a(dummy))
@@ -65,7 +58,7 @@ export const manage_client_actions = (ws:WebSocket, view:HTMLDivElement) => {
      pressed.add(e.code);
      const action = KEYMAP[e.code]
      console.log('DOWN', e.code, 'KEYMAP[e.code]:', action);  // todo remove
-     // send_client_action(ws, action)
+     // send_client_action(ws, action) //warning //todo not send, accumulate some way 0-100% uses ui widgets and keydown -> keyhold -> accumulate
    };
  
    const onKeyUp = (e: KeyboardEvent) => {
