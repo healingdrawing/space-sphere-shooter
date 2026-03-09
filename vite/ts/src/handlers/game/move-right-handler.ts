@@ -1,12 +1,12 @@
 import { mm, type TopRotation } from "../../tunnel"
 import { game_box } from "../../views/game/game-box"
 
-export const rightmove_handler = (text:string) => {
+export const move_right_handler = (text:string) => {
   console.log("rightmove_handler() text:", text) //todo remove
   try {
     const obj = mm.parse(text) as TopRotation
     //todo check
-    game_box.rightmove_ship(obj)
+    game_box.move_right_ship(obj)
   } catch (e) {
     console.error("wrong rightmove data received:",e)
   }

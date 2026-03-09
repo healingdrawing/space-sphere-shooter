@@ -1,12 +1,12 @@
 import { mm, type FrontRotation } from "../../tunnel"
 import { game_box } from "../../views/game/game-box"
 
-export const cwmove_handler = (text:string) => {
+export const move_cw_handler = (text:string) => {
   console.log("cwmove_handler() text:", text) //todo remove
   try {
     const obj = mm.parse(text) as FrontRotation
     //todo check
-    game_box.cwmove_ship(obj)
+    game_box.move_cw_ship(obj)
   } catch (e) {
     console.error("wrong cwmove data received:",e)
   }

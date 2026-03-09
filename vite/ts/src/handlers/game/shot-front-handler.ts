@@ -3,7 +3,7 @@ import { game_box } from "../../views/game/game-box"
 import { type LazerBeam } from "../../tunnel"
 
 
-export const frontshot_handler = (text:string) => {
+export const shot_front_handler = (text:string) => {
   console.log("frontshot_handler() text:", text) //todo remove
   try {
     const obj = mm.parse(text) as LazerBeam

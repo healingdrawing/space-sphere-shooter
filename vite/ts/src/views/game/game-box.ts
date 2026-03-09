@@ -1,21 +1,21 @@
 import { store, ws_atom } from "../../atoms"
 import { ram } from "../../ram";
-import { gemm, type Ship } from "../../tunnel"
+import { type Ship } from "../../tunnel"
 import { add_ship } from "./add-ship";
 import { manage_client_actions } from "./client-actions";
 import { add_exit_button_to_game_view } from "./exit-button";
 import { view_html_div } from "./html-view";
 import { remove_ship } from "./remove-ship";
 import { check_move_metadata, move_ship } from "./move-ship";
-import { leftmove_ship } from "./leftmove-ship";
-import { rightmove_ship } from "./rightmove-ship";
+import { move_left_ship } from "./move-left-ship";
+import { move_right_ship } from "./move-right-ship";
 import { crts } from "../../handlers/utils";
 import { check_rotations_metadata, rotate_around_axis } from "./rotate-ship";
-import { topmove_ship } from "./topmove-ship";
+import { move_top_ship } from "./move-top-ship";
 import { xyz_dev } from "./xyz";
-import { downmove_ship } from "./downmove-ship";
-import { cwmove_ship } from "./cwmove-ship";
-import { ccwmove_ship } from "./ccwmove-ship";
+import { move_down_ship } from "./move-down-ship";
+import { move_cw_ship } from "./move-cw-ship";
+import { move_ccw_ship } from "./move-ccw-ship";
 import { lazer_shot } from "./lazer-shot";
 
 
@@ -180,7 +180,7 @@ function create_game_box() {
   }
   
   
-  return { view, initGameView, add_ship, remove_ship, game_over, get_scene, ship_boxes, move_ship, leftmove_ship, rightmove_ship, topmove_ship, downmove_ship, cwmove_ship, ccwmove_ship, get_glow_box, lazer_shot, animated_lazer_beams };
+  return { view, initGameView, add_ship, remove_ship, game_over, get_scene, ship_boxes, move_ship, move_left_ship, move_right_ship, move_top_ship, move_down_ship, move_cw_ship, move_ccw_ship, get_glow_box, lazer_shot, animated_lazer_beams };
 }
 
 export const game_box = create_game_box();

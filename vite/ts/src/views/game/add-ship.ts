@@ -22,22 +22,11 @@ export const add_ship = async (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BAB
   box.position.set(ship.cx, ship.cy, ship.cz);
   box.metadata = {} // warning this needed, or metadata is null and check of subprops is not straight
 
-  // const ship_mesh = BABYLON.MeshBuilder.CreateSphere(`ship-mesh-${idx}`, {
-  //   diameterX:  (ship.sr * 2) * scale,
-  //   diameterY: (ship.vr * 2) * scale,
-  //   diameterZ:  (ship.fr + ship.br) * scale // front + back radius  
-  // }, scene);
-  // const offset = (ship.fr - ship.br) / 2 * scale;
-  // ship_mesh.position.set(offset * ship.fvx, offset * ship.fvy, offset * ship.fvz); // relative offset i hope
-  // ship_mesh.parent = box; // warning do not use box.addChild() , produces weird result for move/rotate move
-
   const {hull, core} = await createRawShipHull(ship, scene, scale)
   hull.parent = box
   hull.position = BABYLON.Vector3.Zero();   // reset local pos after baking, attempt to fix displacement after async CSG2 implemented
   core.parent = box
-  // Position at center
-  // ship_mesh.position.set(ship.cx, ship.cy, ship.cz);
-
+  
   // Material
   const mat = new BABYLON.StandardMaterial(`ship-mat-${idx}`, scene);
   mat.diffuseColor = new BABYLON.Color3(ship.r/255, ship.g/255, ship.b/255);
@@ -55,7 +44,7 @@ export const add_ship = async (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BAB
 
   const dot_size = ship.br / 2 * scale;
 
-  /* todo these dots are needed, only hide them from visuals later, keep for orientation */
+  /* todo these dots are not needed, just visual markers */
   const f_dot = BABYLON.MeshBuilder.CreateSphere("frontDot", { diameter: dot_size }, scene);
   f_dot.position = new BABYLON.Vector3(0, 0, ship.fr * 2 * scale);
   f_dot.parent = box;
