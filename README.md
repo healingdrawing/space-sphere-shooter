@@ -1,5 +1,6 @@
-# online-ws-game
-Multiplayer online browser game. TypeScript client. TypeScript server.  
+# SPACE SPHERE SHOOTER
+Multiplayer online browser game. TypeScript client. TypeScript server.
+![space sphere shooter demo](demo.webp)
 
 ## Development environment
 
