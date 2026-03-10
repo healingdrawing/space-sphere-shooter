@@ -9,6 +9,7 @@ import { rts } from "../../../utils/basetime";
 import { mm } from "../../../manage/message";
 import type { LazerBeam } from "../types";
 import { gemm } from "../gameboard/non-autistic-math/gemm";
+import { CCR } from "../../../manage/close";
 
 export function handle_shot_front(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
   devlog("handle_shot_front() execution.")
@@ -16,13 +17,17 @@ export function handle_shot_front(ws: Bun.ServerWebSocket<WebSocketData>, msg: U
   const result:GameRoomResponseMessage[] = []
 
   let obj:{code:number, power:number}
-
+  let power = 0
   try {
     obj = mm.u8aobj(msg) as {code:number, power:number}
-    if(!obj.power){
+    power = obj.power/100
+    if(!power){
       errlog("incorrect front shot message from client(no obj.power)")
       return result
-  }
+    } else if (power < 0 || power > 1){
+      errlog("front shot power outside of allowed range. Hijacking")
+      ws.close(CCR.HIJACKING.code, CCR.HIJACKING.reason)
+    }
   } catch (e) {
     errlog("incorrect front shot message from client","mm.u8aobj(msg) parsing fail")
     return result
@@ -38,6 +43,7 @@ export function handle_shot_front(ws: Bun.ServerWebSocket<WebSocketData>, msg: U
   // check impossibility to shot
   if (!a) return [{ mt: MT.S, msg: { alert_text:"your ship does not have front gun, ... buddy", }, ms: 0, uuids: [uuid] }]
 
+  /** distance from ship hull */
   const d = s.fr
   
   /* beam start position */
@@ -62,9 +68,6 @@ export function handle_shot_front(ws: Bun.ServerWebSocket<WebSocketData>, msg: U
 
   let max_en = s.max_en
   let en = s.en
-  
-  // todo consider ban if power is outside 0-100. hijacking
-  const power = obj.power // 0-100% -> manage later some way. In case of shot as % of max_en but <= en
   
   const damage_messages = b.lazer_shot( uuid, a, power, en, max_en, vx, vy, vz, nx, ny, nz, cx,cy,cz )
   
