@@ -1,4 +1,19 @@
 # CLIENT
+
+# bun
+
+To install dependencies:
+
+```bash
+bun i
+```
+
+To run:
+
+```bash
+bun run dev
+```
+
 Created using bun 1.2.21:
 - `cd vite`
 - `bun create vite` name:**ts** -> framework:**vanilla** -> variant:**TypeScript**

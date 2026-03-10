@@ -5,7 +5,7 @@
 To install dependencies:
 
 ```bash
-bun install
+bun i
 ```
 
 To run:
@@ -16,4 +16,4 @@ bun run dev
 
 This project was created using `bun init` in bun v1.2.21. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
 
-The **.env.production** file used to configure server.
+The **.env.dev** file used to configure development server.
