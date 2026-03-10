@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Remove container and then image, to be sure environment is fresh
-docker container rm -f the_zangame_client_container
-docker rmi -f the_zangame_client_image
+docker container rm -f the_sss_client_container
+docker rmi -f the_sss_client_image
 
 # Build image
-docker build -t the_zangame_client_image .
+docker build -t the_sss_client_image .
 
 cd bun
 # Load the .env file properly (ignores comments and empty lines)
@@ -21,7 +21,7 @@ fi
 cd ..
 
 # Echo the resolved command for verification
-echo "Running: docker run -d -p ${VITE_CLIENT_PORT}:${VITE_CLIENT_PORT} --name the_zangame_client_container the_zangame_client_image"
+echo "Running: docker run -d -p ${VITE_CLIENT_PORT}:${VITE_CLIENT_PORT} --name the_sss_client_container the_sss_client_image"
 
 # Run container. 443 is required in onrender.com for https, according to support response
-docker run -d -p ${VITE_CLIENT_PORT}:${VITE_CLIENT_PORT} --name the_zangame_client_container the_zangame_client_image
+docker run -d -p ${VITE_CLIENT_PORT}:${VITE_CLIENT_PORT} --name the_sss_client_container the_sss_client_image

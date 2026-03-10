@@ -4,7 +4,7 @@ import { SSSBoard } from "./gameboard/board";
 
 import { USERS_MAX_NUMBER } from "../../ram/consts";
 import { MT } from "../../enums/mt";
-import { handle_back_shot, handle_ccw_move, handle_cw_move, handle_down_move, handle_down_shot, handle_join, handle_exit, handle_front_move, handle_front_shot, handle_left_move, handle_left_shot, handle_right_move, handle_right_shot, handle_stop_move, handle_target_move, handle_top_move, handle_top_shot } from "./handlers/game";
+import { handle_shot_back, handle_move_ccw, handle_move_cw, handle_move_down, handle_shot_down, handle_join, handle_exit, handle_move_front, handle_shot_front, handle_move_left, handle_shot_left, handle_move_right, handle_shot_right, handle_move_stop, handle_move_target, handle_move_top, handle_shot_top } from "./handlers/game";
 import { CCR } from "../../manage/close";
 import type { WebSocketData } from "../..";
 import { parse_guns, parse_limits } from "./ship/limits";
@@ -75,8 +75,11 @@ export class SSSGameRoom implements GameRoom {
       max_en: max_en, en: max_en, en_ts: 0,
       max_hp: max_hp, hp: max_hp, hp_ts: 0, //warning at the moment do not plan recover
 
-      //todo randomise without collision damage some way
-      cx: 0, cy: 0, cz: 0,
+      //todo randomise with check to avoid collision damage some way. Now it is just random position
+      cx: b.ship_initial_random_coordinate(),
+      cy: b.ship_initial_random_coordinate(),
+      cz: b.ship_initial_random_coordinate(),
+      
       fvx: 0, fvy: 0, fvz: 1, //z is front axis default (babylonjs default way)
       tvx: 0, tvy: 1, tvz: 0, // y is top/vertical axis default (babylonjs default way)
       vvx: 0, vvy: 0, vvz: 0, v_ts: 0,
@@ -131,7 +134,7 @@ export class SSSGameRoom implements GameRoom {
     let timer = this.ships_auto_update_timer
     if(!timer ) timer = setTimeout(() => {
       this.ships_auto_update()
-    }, 100);//todo consider to move 200[ms] to .env 
+    }, 10);//todo consider to move 200[ms] to .env 
   }
 
   /** update:
@@ -198,47 +201,37 @@ export class SSSGameRoom implements GameRoom {
     switch (mt) {
       case MT.JOIN: return handle_join(ws, msg);
 
-      case MT.EXIT: handle_exit(ws, msg); break
+      case MT.EXIT: handle_exit(ws, msg); break // returns nothing, just initiates ws.close() at the moment
     
-      case MT.FRONTSHOT: return handle_front_shot(ws, msg);
+      case MT.FRONTSHOT: return handle_shot_front(ws, msg);
     
-      case MT.LEFTSHOT:
-        handle_left_shot(ws, msg);
-        break;
+      case MT.LEFTSHOT: return handle_shot_left(ws, msg);
     
-      case MT.RIGHTSHOT:
-        handle_right_shot(ws, msg);
-        break;
+      case MT.RIGHTSHOT: return handle_shot_right(ws, msg);
     
-      case MT.BACKSHOT:
-        handle_back_shot(ws, msg);
-        break;
+      case MT.BACKSHOT: return handle_shot_back(ws, msg);
     
-      case MT.TOPSHOT:
-        handle_top_shot(ws, msg);
-        break;
+      case MT.TOPSHOT: return handle_shot_top(ws, msg);
     
-      case MT.DOWNSHOT:
-        handle_down_shot(ws, msg);
-        break;
+      case MT.DOWNSHOT: return handle_shot_down(ws, msg);
     
-      case MT.FRONTMOVE: return handle_front_move(ws, msg);
-      case MT.STOPMOVE: return handle_stop_move(ws, msg);
+      case MT.FRONTMOVE: return handle_move_front(ws, msg);
+      case MT.STOPMOVE: return handle_move_stop(ws, msg);
     
-      case MT.LEFTMOVE: return handle_left_move(ws, msg);
+      case MT.LEFTMOVE: return handle_move_left(ws, msg);
     
-      case MT.RIGHTMOVE: return handle_right_move(ws, msg);
+      case MT.RIGHTMOVE: return handle_move_right(ws, msg);
     
-      case MT.TOPMOVE: return handle_top_move(ws, msg);
+      case MT.TOPMOVE: return handle_move_top(ws, msg);
     
-      case MT.DOWNMOVE: return handle_down_move(ws, msg);
+      case MT.DOWNMOVE: return handle_move_down(ws, msg);
     
-      case MT.CWMOVE: return handle_cw_move(ws, msg);
+      case MT.CWMOVE: return handle_move_cw(ws, msg);
     
-      case MT.CCWMOVE: return handle_ccw_move(ws, msg);
+      case MT.CCWMOVE: return handle_move_ccw(ws, msg);
     
       case MT.TARGETMOVE:
-        handle_target_move(ws, msg);
+        handle_move_target(ws, msg); // todo consider to one shot target direction to closest object, (not implemented).
         break;
     
       default:

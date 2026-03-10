@@ -23,7 +23,7 @@ export const CCR = {
   BADINVITE: { code: 4006, reason: 'Invitation process has signs of hijacking' },
   /** message has prohibited type for client */
   SERVERTYPE: { code: 4007, reason: 'Message has prohibited type for client' },
-  /** signs of activity that prohibited on server side, by client filtering */
+  /** signs of activity that prohibited on server side, by client side filtering */
   HIJACKING: { code: 4008, reason: 'Hijacking activity signs' },
   /** server not able to manage data properly, but data looks correct */
   SEVERISSUE: { code: 4009, reason: 'Server side issue' },

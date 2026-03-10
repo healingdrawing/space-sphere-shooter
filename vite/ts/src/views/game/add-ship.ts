@@ -1,7 +1,8 @@
 import { ram } from "../../ram";
 import { type Ship } from "../../tunnel";
+import { createRawShipHull } from "./ship-mesh";
 
-export const add_ship = (ship: Ship, scene: BABYLON.Scene, ships:(BABYLON.Mesh | null)[]) => {
+export const add_ship = async (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BABYLON.TransformNode | null)[]) => {
   console.log("add_ship data:", ship)
 
   const idx = ship.idx;
@@ -10,46 +11,43 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ships:(BABYLON.Mesh |
     return null
   }
 
-  if (ships[idx]){
-    console.warn("attempt to rewrite already present ship. Expectable for join moment") //todo remove
+  if (ship_boxes[idx]){
+    console.warn("attempt to rewrite already present ship. idx: "+idx+" ships[idx]: ",ship_boxes[idx]) //todo remove
     return null //todo implement. Raw skip the already present ship
   }
 
-  const scale = 1 / 1000;  // common factor
+  const scale = 1;  // common factor //warning change it to potentially ruin collisions etc
 
-  // warning // todo the center must be displaced. The depth property grows proportionally to two sides
-  const ship_mesh = BABYLON.MeshBuilder.CreateBox(`ship-${idx}`, {
-    width:  (ship.sr * 2) * scale,
-    height: (ship.vr * 2) * scale,
-    depth:  (ship.fr + ship.br) * scale // front + back radius  
-  }, scene);
+  const box = new BABYLON.TransformNode(`ship-box-${idx}`, scene);
+  box.position.set(ship.cx, ship.cy, ship.cz);
+  box.metadata = {} // warning this needed, or metadata is null and check of subprops is not straight
+
+  const {hull, core} = await createRawShipHull(ship, scene, scale)
+  hull.parent = box
+  hull.position = BABYLON.Vector3.Zero();   // reset local pos after baking, attempt to fix displacement after async CSG2 implemented
+  core.parent = box
   
-  // Position at center
-  ship_mesh.position.set(ship.cx, ship.cy, ship.cz);
-
   // Material
   const mat = new BABYLON.StandardMaterial(`ship-mat-${idx}`, scene);
   mat.diffuseColor = new BABYLON.Color3(ship.r/255, ship.g/255, ship.b/255);
   mat.emissiveColor = new BABYLON.Color3(ship.r * 0.3/255, ship.g * 0.3/255, ship.b * 0.3/255);
   mat.alpha = 1.0; // Make sure it's fully opaque
   mat.backFaceCulling = true; // Cull back faces
-  ship_mesh.material = mat;
+  hull.material = mat;
 
   // Orientation using front + top vectors
   const front = new BABYLON.Vector3(ship.fvx, ship.fvy, ship.fvz);
   // const top = new BABYLON.Vector3(ship.tvx, ship.tvy, ship.tvz);
-  ship_mesh.lookAt(ship_mesh.position.add(front));
+  hull.lookAt(hull.position.add(front));
   
-  // Store reference for later updates
-  ship_mesh.metadata = { shipIndex: idx };
+  ship_boxes[idx] = box
 
-  ships[idx] = ship_mesh
+  const dot_size = ship.br / 2 * scale;
 
-  const dot_size = ship.br / 1000;  // adjust divisor for visibility
-
+  /* todo these dots are not needed, just visual markers */
   const f_dot = BABYLON.MeshBuilder.CreateSphere("frontDot", { diameter: dot_size }, scene);
-  f_dot.position = new BABYLON.Vector3(0, 0, ship.fr * 4 * scale);
-  f_dot.parent = ship_mesh;
+  f_dot.position = new BABYLON.Vector3(0, 0, ship.fr * 2 * scale);
+  f_dot.parent = box;
   const f_mat = new BABYLON.StandardMaterial("blue", scene);
   f_mat.diffuseColor = BABYLON.Color3.Blue();
   f_mat.alpha = 1.0; // Make sure it's fully opaque
@@ -60,7 +58,7 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ships:(BABYLON.Mesh |
 
   const t_dot = BABYLON.MeshBuilder.CreateSphere("topDot", { diameter: dot_size }, scene);
   t_dot.position = new BABYLON.Vector3(0, ship.vr * 2 * scale, 0);
-  t_dot.parent = ship_mesh;
+  t_dot.parent = box;
   const t_mat = new BABYLON.StandardMaterial("green", scene);
   t_mat.diffuseColor = BABYLON.Color3.Green();
   t_mat.alpha = 1.0; // Make sure it's fully opaque
@@ -70,18 +68,18 @@ export const add_ship = (ship: Ship, scene: BABYLON.Scene, ships:(BABYLON.Mesh |
 
   const s_dot = BABYLON.MeshBuilder.CreateSphere("sideDot", { diameter: dot_size }, scene);
   s_dot.position = new BABYLON.Vector3(ship.sr * 2 * scale, 0,0);
-  s_dot.parent = ship_mesh;
+  s_dot.parent = box;
   const s_mat = new BABYLON.StandardMaterial("blue", scene);
   s_mat.diffuseColor = BABYLON.Color3.Red();
   s_mat.alpha = 1.0; // Make sure it's fully opaque
   s_mat.backFaceCulling = true; // Cull back faces
   s_dot.material = s_mat;
 
-  ship_mesh.showBoundingBox = true; //todo remove. test
+  hull.showBoundingBox = true; //todo remove. test
   const axes = new BABYLON.Debug.AxesViewer(scene, 10)
-  axes.xAxis.parent = ship_mesh;
-  axes.yAxis.parent = ship_mesh;
-  axes.zAxis.parent = ship_mesh;
+  axes.xAxis.parent = box;
+  axes.yAxis.parent = box;
+  axes.zAxis.parent = box;
 
-  return ship_mesh;
+  return box;
 }

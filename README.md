@@ -1,5 +1,6 @@
-# online-ws-game
-Multiplayer online browser game. TypeScript client. TypeScript server.  
+# SPACE SPHERE SHOOTER
+Multiplayer online browser game. TypeScript client. TypeScript server.
+![space sphere shooter demo](demo.webp)
 
 ## Development environment
 
@@ -31,7 +32,20 @@ Yes, the client and the server are separated, and executed using the same comman
 
 Standalone build and Dockerfile build available.
 
-## Dockerfile build
+## Dockerfile development build
+
+[Docker](https://www.docker.com) environment must be installed, configured and run.
+
+### Server
+
+- terminal: `cd bun`
+- terminal: `./devrun.sh`
+
+### Client
+
+- terminal: `./devrun.sh`
+
+## Dockerfile deployment build
 
 [Docker](https://www.docker.com) environment must be installed, configured and run.
 
@@ -80,7 +94,6 @@ Standalone build and Dockerfile build available.
 - - - **Check Connection** - check the client not banned (at the moment no alert if server is dead, but naturally visible in console).
 - - - **Connect to WebSocket** - establish ws connection to server.
 - - **everything in ram**(no db used).
-- - **autobalanced server load using .env file**. Maximum clients limited. When clients number changed, limits for chat changed(nickname length, message length, delays).
 - - **nickname duplication** is possible.
 - - **temporary ban** by ip (hardcoded for one hour), in case of signs of hijacking.
 - - **(wip)**CORS managing from .env file, for multiple client domains.
@@ -88,11 +101,6 @@ Standalone build and Dockerfile build available.
 **CLIENT**:
 - [Vite](https://vite.dev) + [TypeScript](https://www.typescriptlang.org) client([Jotai](https://jotai.org) as ws state manager, [Babylon](https://www.babylonjs.com) for 3D).
 - - Dockerfile.
-- - **nickname can be changed** any time, according to current limits. Nickname must be shorten if limits were changed accordingly.
-- - **chat messages always visible for all**. **(wip)**Chat styling and filtering.
-- - chat history includes invitation icons **"VS" button**, to invite another user to 1 vs 1 match.
-- - **chat.html** file button **Show game_view** for dev needs, will be removed later.
-- - **minor error** - jump to chat
 - - **critical error** - jump to home page, with closing connection
 - - **(wip, minor)**compile to solid executable if possible using electrobun.dev or electron, to promote/distribute in Steam for free.
 
@@ -111,20 +119,16 @@ Implement next:
 - Bun server.
 - - dockerized
 - - everything using ws connection, except first call to server using get method to establish ws.
-- - limited on the fly ws message using .env file, everything in ram(no db used).
-- - (only plans)CORS managing from .env file, for multiple client domains.
+- - everything in ram(no db used).
 - - nickname duplication is possible, use uuid on time of managing nickname.
+- - (only plans)CORS managing from .env file, for multiple client domains.
 
 **CLIENT**:
-- vite + typescript client(jotai as state manager).
+- vite + typescript client(jotai as state manager, babylonjs for 3d demo view).
 - - first screen just connect button.
 - - manage nickname.
-- - jump into chat view.
-- - chat history includes invitation icons, to try to invite another user to 1 vs 1 match
-- - after press invitation icon, the list of available to invite games/matches appears
-- - jump to game view, if invite has accepted and both users are connected
-- - jump back to chat view when match is over
-- - minor error - jump to chat
+- - jump to game view.
+- - jump back to home page view when game is over.
 - - critical error - jump to home page, with closing connection
 - - able to be deployed as github page.
 - - (minor)dockerized to deploy in cloud services.

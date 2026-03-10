@@ -13,7 +13,6 @@
     "dev": "bun run --env-file=./.env.dev ./src/index.ts"
   },
   "dependencies": {
-    "gl-matrix": "^3.4.4",
-    "valibot": "^1.1.0"
+    "gl-matrix": "^3.4.4"
   }
 }

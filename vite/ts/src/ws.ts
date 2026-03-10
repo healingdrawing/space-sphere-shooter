@@ -12,7 +12,7 @@ export const init_ws = (url: string) => {
       console.warn("KEY ARRIVED. text:",bar, " ram.key:", ram.key) //todo remove
       return
     }
-    const mt = bar[0]//todo refactor properly. here it is no a key, and not keysigned, since sent by server. so mt is first byte
+    const mt = bar[0]//warning here it is not a key, bacause not keysigned, since sent by server. so mt is first byte
     const text:string = mm.decode(bar.subarray(1));
     console.log('Converted text:', text, ' mt:',MT_NAME[mt as keyof typeof MT_NAME]) //todo remove
   

@@ -1,21 +1,21 @@
 import { store, ws_atom } from "../../atoms"
 import { ram } from "../../ram";
-import { gemm, type Ship } from "../../tunnel"
+import { type Ship } from "../../tunnel"
 import { add_ship } from "./add-ship";
 import { manage_client_actions } from "./client-actions";
 import { add_exit_button_to_game_view } from "./exit-button";
 import { view_html_div } from "./html-view";
 import { remove_ship } from "./remove-ship";
 import { check_move_metadata, move_ship } from "./move-ship";
-import { leftmove_ship } from "./leftmove-ship";
-import { rightmove_ship } from "./rightmove-ship";
+import { move_left_ship } from "./move-left-ship";
+import { move_right_ship } from "./move-right-ship";
 import { crts } from "../../handlers/utils";
-import { check_rotations_metadata, rotateAxis as rotate_around_Axis } from "./rotate-ship";
-import { topmove_ship } from "./topmove-ship";
+import { check_rotations_metadata, rotate_around_axis } from "./rotate-ship";
+import { move_top_ship } from "./move-top-ship";
 import { xyz_dev } from "./xyz";
-import { downmove_ship } from "./downmove-ship";
-import { cwmove_ship } from "./cwmove-ship";
-import { ccwmove_ship } from "./ccwmove-ship";
+import { move_down_ship } from "./move-down-ship";
+import { move_cw_ship } from "./move-cw-ship";
+import { move_ccw_ship } from "./move-ccw-ship";
 import { lazer_shot } from "./lazer-shot";
 
 
@@ -33,9 +33,9 @@ function create_game_box() {
 
   /* to avoid quaternion injection, since it is bugged in edge case(reported, confirmed on forum) */
   const animated_lazer_beams: BABYLON.Mesh[] = [];
-  const ships: (BABYLON.Mesh | null)[] = new Array(ram.umn).fill(null);
+  const ship_boxes: (BABYLON.TransformNode | null)[] = new Array(ram.umn).fill(null);
   
-  let animationId: number | null = null;
+  // let animationId: number | null = null;
   
   async function initGameView(ship:Ship) {
     console.log("dummy init game view executed")
@@ -64,49 +64,48 @@ function create_game_box() {
     trash.dispose()
 
     
-    const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000 }, scene);//warning //todo consider to bind lazer length to this
+    const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 10000 }, scene);//warning //todo consider to bind lazer length to this
     const skyboxMaterial = new BABYLON.StandardMaterial("skyBoxMaterial", scene);
     skyboxMaterial.backFaceCulling = false; // Ensure the back faces are rendered
     skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("./textures/1", scene);
     skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+    skyboxMaterial.disableLighting = true;
     skybox.material = skyboxMaterial;
     skybox.infiniteDistance = true; // Prevent the skybox from scaling with the camera
 
-    const ship_mesh = add_ship(ship, scene, ships)
+    const ship_box = await add_ship(ship, scene, ship_boxes)
     
-    xyz_dev(ship, scene)
+    
+    xyz_dev(scene)
 
-    if(!ship_mesh) return
+    if(!ship_box) return
     const camera = new BABYLON.ArcRotateCamera(
       "camera",
       0,//Math.PI,           // Alpha (angle around target)
       Math.PI / 2,//.5,     // Beta (elevation)
       ship.br / 40, // Radius
-      ship_mesh.position,
+      ship_box.position,
       scene
     );
     
-    const cameraParent = new BABYLON.TransformNode("camParent", scene);
-    
-    camera.position = new BABYLON.Vector3(0, ship.vr/200, -ship.br /80);
-    camera.setTarget(BABYLON.Vector3.Zero());  // local origin
+    camera.position = new BABYLON.Vector3(0, ship.vr * 4, -ship.br * 10);
+    camera.setTarget(new BABYLON.Vector3(0,0,1000));  // local origin
 
-    camera.parent = cameraParent;
-    cameraParent.parent = ship_mesh;
+    camera.parent = ship_box;
     
-    const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 1), scene);
-    light.intensity = 0.5;//todo test
+    // const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 1), scene);
+    // light.intensity = 0.5;//todo test
 
 
     function animate() {
       if (!engine || !scene) return;
       const now = crts();
       
-      for (const ship of game_box.ships) {
+      for (const ship of game_box.ship_boxes) {
         if (!ship) continue
         
         check_move_metadata(ship)
-        if (ship.metadata?.velocity) {
+        if (ship.metadata.velocity) {
           const v = ship.metadata.velocity as {x:number,y:number,z:number,vts:number}
           const dt = (now - v.vts)/1000; // Delta in seconds
           const vec = new BABYLON.Vector3(v.x, v.y, v.z)
@@ -119,23 +118,20 @@ function create_game_box() {
         if (ship.metadata.sideRotation){
           const dt = (now - ship.metadata.sideRotation.ts ) / 1000
           ship.metadata.sideRotation.ts = now
-          const axisend = ship.getChildren().find(c => c.name === "sideDot") as BABYLON.Mesh;
-          const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship.absolutePosition.asArray(), axisend.absolutePosition.asArray())).negate()
-          rotate_around_Axis(ship, axis, ship.metadata.sideRotation, dt);
+          const axis = ship.getDirection(BABYLON.Vector3.Left())
+          rotate_around_axis(ship, axis, ship.metadata.sideRotation, dt);
         }
         if (ship.metadata.frontRotation){
           const dt = (now - ship.metadata.frontRotation.ts ) / 1000
           ship.metadata.frontRotation.ts = now
-          const axisend = ship.getChildren().find(c => c.name === "frontDot") as BABYLON.Mesh;
-          const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship.absolutePosition.asArray(), axisend.absolutePosition.asArray()))
-          rotate_around_Axis(ship, axis, ship.metadata.frontRotation, dt);
+          const axis = ship.getDirection(BABYLON.Vector3.Forward())
+          rotate_around_axis(ship, axis, ship.metadata.frontRotation, dt);
         }
         if (ship.metadata.topRotation){
           const dt = (now - ship.metadata.topRotation.ts ) / 1000
           ship.metadata.topRotation.ts = now
-          const axisend = ship.getChildren().find(c => c.name === "topDot") as BABYLON.Mesh;
-          const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship.absolutePosition.asArray(), axisend.absolutePosition.asArray()))
-          rotate_around_Axis(ship, axis, ship.metadata.topRotation, dt);
+          const axis = ship.getDirection(BABYLON.Vector3.Up())
+          rotate_around_axis(ship, axis, ship.metadata.topRotation, dt);
         }
         
       }
@@ -167,7 +163,8 @@ function create_game_box() {
       // scene.meshes.forEach(m => console.log("  -", m.name));
 
       scene.render();
-      animationId = requestAnimationFrame(animate);
+      // animationId = requestAnimationFrame(animate);
+      requestAnimationFrame(animate);
     }
     animate();
   }
@@ -184,7 +181,7 @@ function create_game_box() {
   }
   
   
-  return { view, initGameView, add_ship, remove_ship, game_over, get_scene, ships, move_ship, leftmove_ship, rightmove_ship, topmove_ship, downmove_ship, cwmove_ship, ccwmove_ship, get_glow_box, lazer_shot, animated_lazer_beams };
+  return { view, initGameView, add_ship, remove_ship, game_over, get_scene, ship_boxes, move_ship, move_left_ship, move_right_ship, move_top_ship, move_down_ship, move_cw_ship, move_ccw_ship, get_glow_box, lazer_shot, animated_lazer_beams };
 }
 
 export const game_box = create_game_box();

@@ -1,10 +1,9 @@
-import { quat, vec3 } from "gl-matrix";
-import { DEVLOG, devlog, dlog, errlog, rawlog } from "../../../debug/debug";
+import { devlog, errlog, rawlog } from "../../../debug/debug";
 import { USERS_MAX_NUMBER } from "../../../ram/consts";
 import type { Ship } from "../types";
 import { SOFF as S, SOFFSIZE } from "./enums";
 import { gemm } from "./non-autistic-math/gemm";
-import { gameroom, users } from "../../../ram/storage";
+import { gameroom } from "../../../ram/storage";
 import type { GameRoomResponseMessage } from "../../base";
 import { MT } from "../../../enums/mt";
 import { two_ships_collision } from "./collide/obb";
@@ -346,8 +345,7 @@ export class SSSBoard {
       const t = this.read_ship(i)
       
       /** raw distance from ship center to count damage. //todo implement Ellipsoid. Not implemented */
-      //warning /1000 because of client side division by 1000 at the moment
-      const r = ( Math.min( t.br, t.sr, t.vr, t.fr ) / 1000 )
+      const r = ( Math.min( t.br, t.sr, t.vr, t.fr ) )
       /** max distance from target ship center when target ship affected by beam */
       const dmax = (2*r*r)**0.5
       
@@ -461,33 +459,63 @@ export class SSSBoard {
   }
   
   private applyAngularVelocity(b: number, avOffset: number, now: number): void {
-    const tsOffset    = avOffset + 1;   // *_TS   (last update time)
-    const tsendOffset = avOffset + 2;   // *_TSEND (end time)
-  
-    const lastTs = this.ships[b + tsOffset]!;
-    const endTs  = this.ships[b + tsendOffset]!;
-  
-    if (endTs <= now || lastTs > now) return;
-  
     const av = this.ships[b + avOffset]!;
     if (av === 0) return;
-  
-    const dt = (now - lastTs) / 1000;
-    if (dt <= 0) return;
-  
-    const angleRad = av * dt * Math.PI / 180;
 
+    const ts_offset    = avOffset + 1;   // *_TS   (last update time)
+    const tsend_offset = avOffset + 2;   // *_TSEND (end time)
+  
+    const last_ts = this.ships[b + ts_offset]!;
+    const tsend  = this.ships[b + tsend_offset]!;
+  
+    if (last_ts >= now){
+      errlog("applyAngularVelocity() last_ts > now. should not happen")
+      return
+    }// hypotetical case of some wrong data and also the first moment
+
+    
     /** top vector */
     let t = [this.ships[b + S.TVX]!, this.ships[b + S.TVY]!, this.ships[b + S.TVZ]!]
     /** front vector */
     let f = [this.ships[b + S.FVX]!, this.ships[b + S.FVY]!, this.ships[b + S.FVZ]!]
+    
+    
+    if (now >= tsend){
+      /* case of small rotation still need to be to satisfy the ... "plan" */
+      if (now > tsend){
+        // rotation to difference of time
+        const dt = (tsend - last_ts) / 1000;
+        const angle_rad = av * dt * Math.PI / 180;
+        rawlog("rotation last step: dt=",dt ," angle_rad=", angle_rad)
+        this.rotate_ship(b,f,t,avOffset,angle_rad)
+      }
+      this.ships[b + avOffset] = 0;
+      // this.ships[b + tsend_offset] = 0;
+      return;
+    }
+
+    const dt = (now - last_ts) / 1000;
+    
+    const angle_rad = av * dt * Math.PI / 180;
+    // rawlog("rotation step: dt=",dt ," angle_rad=", angle_rad)
+    this.rotate_ship(b,f,t,avOffset,angle_rad)
   
+    this.ships[b + ts_offset] = now;
+  }
+
+  rotate_ship(
+    b:number,
+    f:number[],
+    t:number[],
+    avOffset:number,
+    angle_rad:number,    
+  ){
     switch (avOffset) {
       case S.AVS:
         /** side vector */
         const s = gemm.vec3Dnormal(f,t)
-        t = gemm.vec3Drotate(t, s, angleRad, true)
-        f = gemm.vec3Drotate(f, s, angleRad, true)
+        f = gemm.vecXDone(gemm.vec3Drotate(f, s, angle_rad, true)) // rotated + scaled to one
+        t = gemm.vec3Dnormal(s,f) // scaled to one under the hood
 
         this.ships[b + S.TVX] = t[0]!;
         this.ships[b + S.TVY] = t[1]!;
@@ -498,14 +526,14 @@ export class SSSBoard {
 
         break;
       case S.AVF:
-        t = gemm.vec3Drotate(t, f, angleRad, true);
+        t = gemm.vecXDone(gemm.vec3Drotate(t, f, angle_rad, true));
         this.ships[b + S.TVX] = t[0]!;
         this.ships[b + S.TVY] = t[1]!;
         this.ships[b + S.TVZ] = t[2]!;
 
         break;
       case S.AVT:
-        f = gemm.vec3Drotate(f, t, angleRad, true);
+        f = gemm.vecXDone(gemm.vec3Drotate(f, t, angle_rad, true));
         this.ships[b + S.FVX] = f[0]!;
         this.ships[b + S.FVY] = f[1]!;
         this.ships[b + S.FVZ] = f[2]!;
@@ -515,59 +543,62 @@ export class SSSBoard {
         return;
     }
   
-    this.ships[b + tsOffset] = now;
-  
-    dlog(true, "ROTATION STAMP")
-    if (DEVLOG) devlog(
-      `fvx:${this.ships[b + S.FVX]}`,
-      `fvy:${this.ships[b + S.FVY]}`,
-      `fvz:${this.ships[b + S.FVZ]}`,
-      `tvx:${this.ships[b + S.TVX]}`,
-      `tvy:${this.ships[b + S.TVY]}`,
-      `tvz:${this.ships[b + S.TVZ]}`,
-    )
-
-    if (now >= endTs) {
-      this.ships[b + avOffset] = 0;
-      this.ships[b + tsendOffset] = now;
-    }
+    
   }
 
   /** all ships collision detection, without 26 zones around etc.
- * Simplified to box, not a asymmetrical ellipsoid etc
- * */
-raw_ships_collider() {
-  // console.log("raw_ships_collider() executed")
-  const s = this.ships
-  const lens = this.players.length
-  
-  for (let i = 1; i < lens; i++) {
-    // const b = this.base(i) // calculated inside readship
+   * Simplified to box, not a asymmetrical ellipsoid etc
+   * */
+  raw_ships_collider() {
+    // console.log("raw_ships_collider() executed")
+    const s = this.ships
+    const lens = this.players.length
+    
+    for (let i = 1; i < lens; i++) {
+      // const b = this.base(i) // calculated inside readship
 
-    if (!s[i * SOFFSIZE]) continue;
-    const s1 = this.read_ship(i) // todo refactor without read_ship and getters/setters to speedup
+      if (!s[i * SOFFSIZE]) continue;
+      const s1 = this.read_ship(i) // todo refactor without read_ship and getters/setters to speedup
 
-    for (let j = i + 1; j < lens; j++) {
-      if (!s[j * SOFFSIZE]) continue;
-      const s2 = this.read_ship(j)
+      for (let j = i + 1; j < lens; j++) {
+        if (!s[j * SOFFSIZE]) continue;
+        const s2 = this.read_ship(j)
 
-      if (two_ships_collision(
-        s1.cx, s1.cy, s1.cz,
-        s1.fvx, s1.fvy, s1.fvz,
-        s1.tvx, s1.tvy, s1.tvz,
-        s1.fr/1000, s1.br/1000, s1.sr/1000, s1.vr/1000,
-        
-        s2.cx, s2.cy, s2.cz,
-        s2.fvx, s2.fvy, s2.fvz,
-        s2.tvx, s2.tvy, s2.tvz,
-        s2.fr/1000, s2.br/1000, s2.sr/1000, s2.vr/1000,
-      )) {
-        // collision happened
-        console.log(`Collision: ${s1.idx} ↔ ${s2.idx}`);
-        // add your logic: damage, explode, push apart, etc.
-      }else console.log("no collision")
+        if (two_ships_collision(
+          s1.cx, s1.cy, s1.cz,
+          s1.fvx, s1.fvy, s1.fvz,
+          s1.tvx, s1.tvy, s1.tvz,
+          s1.fr, s1.br, s1.sr, s1.vr,
+          
+          s2.cx, s2.cy, s2.cz,
+          s2.fvx, s2.fvy, s2.fvz,
+          s2.tvx, s2.tvy, s2.tvz,
+          s2.fr, s2.br, s2.sr, s2.vr,
+        )) {
+          const s1hp = s1.hp
+          const s2hp = s2.hp
+          // rawlog("collision: ",s1.idx, " ", s2.idx)
+          if (s1hp > s2hp){
+            this.set_hp(s1.idx, s1hp-s2hp)
+            gameroom.remove_client(s2.idx, true)
+          } else if (s2hp > s1hp){
+            this.set_hp(s2.idx, s2hp-s1hp)
+            gameroom.remove_client(s1.idx, true)
+          } else {
+            gameroom.remove_client(s1.idx, true)
+            gameroom.remove_client(s2.idx, true)
+          }
+
+        }
+      }
     }
   }
-}
+
+  /** random coordinate for ship spawn between 100 and 200  // todo consider implement check to avoid initial collision */
+  ship_initial_random_coordinate(){
+    const c = 100*(1 + Math.random()) * (Math.random()<0.5?-1:1)
+    devlog("new ship random coordinate", c)
+    return c
+  }
 
 }

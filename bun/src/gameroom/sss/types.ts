@@ -25,13 +25,13 @@ export interface Ship {
   side_guns:    number;
   vert_guns:    number;
   engines: number;
-  /** front radius */
+  /** front radius [m], finally desided to /1000 in init process to shorten client/server calcs */
   fr:           number;
-  /** back radius */
+  /** back radius [m], finally desided to /1000 in init process to shorten client/server calcs */
   br:           number;
-  /** side radius */
+  /** side radius [m], finally desided to /1000 in init process to shorten client/server calcs */
   sr:           number;
-  /** vertical radius */
+  /** vertical radius [m], finally desided to / 1000 in init process to shorten client/server calcs */
   vr:           number;
   /** max energy */
   max_en:       number;
@@ -124,6 +124,8 @@ export type LazerBeam = {
   uuid:number,
   /** angle degrees of the laser beam precision. The 1+. More angle less damage(but client only draw) */
   a: number,
+  /** displacement radius from center of ship, to visualize shot not from inside the ship model, but from distance */
+  d: number,
 
   /** x coordinate of the distanted by 1000 lazer beam, used to manage delay visually */
   x:number,
@@ -137,6 +139,5 @@ export type LazerBeam = {
   /** vector y coordinate of the normal to lazer beam direction, (to calc cross beams independently of ship mesh position) */
   ny:number,
   /** vector z coordinate of the normal to lazer beam direction, (to calc cross beams independently of ship mesh position) */
-  nz:number,
-  
+  nz:number,  
 }

@@ -35,6 +35,37 @@ function create_home_box(){
     <button id="download-assets">Download assets</button>
     <button id="check-connection">Check Connection</button>
     <button id="connect-websocket">Connect to WebSocket</button>
+
+    <div style="margin-top: 2rem; line-height: 1.5;">
+      <strong>Controls (Keyboard)</strong><br>
+      Hold longer = stronger action (max 100% ~2 sec)<br>
+      Release = send action<br><br>
+
+      <strong>Move</strong><br>
+      [Z / Numpad1]: Forward<br>
+      [A / Numpad2]: Stop<br><br>
+      
+      <strong>Rotate(around center)</strong><br>
+      [Q / Numpad4]: Left (spin)<br>
+      [C / Numpad6]: Right (spin)<br>
+      [E / Numpad8]: Pitch up<br>
+      [S / Numpad5]: Pitch down<br>
+      [W / Numpad7]: CCW (drill)<br>
+      [D / Numpad9]: CW (drill)<br>
+      <strike>[X / Numpad3]: Toward target</strike>(in dev)<br><br>
+
+      <strong>Shoot</strong><br>
+      [F / Numpad0]: Front<br>
+      [N / ←]: Left<br>
+      [L / →]: Right<br>
+      [K / Numpad Enter]: Back<br>
+      [J / ↑]: Top<br>
+      [M / ↓]: Bottom<br><br>
+
+      <strong>Other</strong><br>
+      [O / Numpad -]: Exit
+    </div>
+    
   `;
 
   /** raw return nick name of user from html input //todo sanitaze */
