@@ -201,7 +201,7 @@ export class SSSGameRoom implements GameRoom {
     switch (mt) {
       case MT.JOIN: return handle_join(ws, msg);
 
-      case MT.EXIT: handle_exit(ws, msg); break
+      case MT.EXIT: handle_exit(ws, msg); break // returns nothing, just initiates ws.close() at the moment
     
       case MT.FRONTSHOT: return handle_shot_front(ws, msg);
     
@@ -231,7 +231,7 @@ export class SSSGameRoom implements GameRoom {
       case MT.CCWMOVE: return handle_move_ccw(ws, msg);
     
       case MT.TARGETMOVE:
-        handle_move_target(ws, msg);
+        handle_move_target(ws, msg); // todo consider to one shot target direction to closest object, (not implemented).
         break;
     
       default:
