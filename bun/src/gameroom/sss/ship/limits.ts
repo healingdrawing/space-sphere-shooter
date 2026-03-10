@@ -51,7 +51,7 @@ export const parse_limits = (nick:string):{
   
   const sum_nick = sum_digits + sum_vowels + sum_consonants + sum_others //sum of nick char values
 
-  const dscale = 1 // warning bugged to increase the difference in ship sizes, wrong proportions
+  const dscale = 1 // warning bugged to increase the difference in ship sizes, wrong proportions, and collision looks like happens too in advance. But maybe just big difference with sizes visual effect.
 
   // todo implement on client side
   const mass = 1000 + sum_nick // [kg] also will be radius of core sphere [mm]
