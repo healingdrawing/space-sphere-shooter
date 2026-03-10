@@ -95,11 +95,7 @@ button:focus-visible {
   }
 }
 
-/* //todo: refactor properly. ABOVE copypastA from boilerplate.*/
-
-#chat-view {
-  min-height: 100vh;
-}
+/* //todo: refactor properly. ABOVE copypasta from boilerplate.*/
 
 #game-view{
   border: solid 1px red;

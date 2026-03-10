@@ -139,6 +139,5 @@ export type LazerBeam = {
   /** vector y coordinate of the normal to lazer beam direction, (to calc cross beams independently of ship mesh position) */
   ny:number,
   /** vector z coordinate of the normal to lazer beam direction, (to calc cross beams independently of ship mesh position) */
-  nz:number,
-  
+  nz:number,  
 }

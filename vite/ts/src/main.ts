@@ -1,6 +1,5 @@
 import * as BABYLON from 'babylonjs' // log version below prevents build error with strict requirements for typescript configuration
 import './style.css'
-import './vs-modal.css'
 import { big_box } from './views/bigbox'
 
 

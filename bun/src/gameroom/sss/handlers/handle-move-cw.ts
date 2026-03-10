@@ -1,10 +1,9 @@
 import type { WebSocketData } from "../../..";
-import { devlog, errlog, rawlog } from "../../../debug/debug";
+import { devlog, errlog } from "../../../debug/debug";
 import { MT } from "../../../enums/mt";
 import { gameroom } from "../../../ram/storage";
 import type { GameRoomResponseMessage } from "../../base";
 import { vec3 } from "gl-matrix";
-import { SOFF } from "../gameboard/enums";
 import { rts } from "../../../utils/basetime";
 import { mm } from "../../../manage/message";
 import type { FrontRotation } from "../types";
@@ -53,7 +52,7 @@ export function handle_move_cw(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint
   }
   // const power = obj.power // 0-100% -> 90 deg
   
-  // const avf = Math.sign(power) * ship.max_avelo // +-[deg/s]. avoid accel at the moment
+  // const avf +-[deg/s]. avoid accel at the moment
   
   const avf = (calc_av(ship.max_avelo, power))
   const duration_s = calc_duration(avf, power)

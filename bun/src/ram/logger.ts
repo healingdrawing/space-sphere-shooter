@@ -1,6 +1,6 @@
 import { DEVLOG, dlog, rawlog } from "../debug/debug";
 import { MT_VALUES, MT_STRINGS } from "../enums/mt";
-import { HOST, PORT, RAM_SIZE_MB, LIMIT_KB, USERS_MAX_NUMBER, VITE_CHAT_ANIMATION_MS, NICK_MAX_BYTES, TEXT_MAX_BYTES, CHAT_PAUSE_MS, SYSTEM_CHECK_MS, INVITE_EXPIRES_MS } from "./consts";
+import { HOST, PORT, RAM_SIZE_MB, LIMIT_KB, USERS_MAX_NUMBER } from "./consts";
 
 // isolated log of some constants when server starts, because Import DEVLOG requires bun runtime, crush the execution if some constants imported using tunnel.ts file of client side from consts.ts of server side.
 
@@ -13,12 +13,6 @@ export function rawlog_consts() {
     rawlog("Bun.env.RAM_SIZE_MB = ", RAM_SIZE_MB)
     rawlog("Bun.env.LIMIT_KB = ", LIMIT_KB)
     rawlog("Bun.env.USERS_MAX_NUMBER = ", USERS_MAX_NUMBER)
-    rawlog("Bun.env.VITE_CHAT_ANIMATION_MS = ", VITE_CHAT_ANIMATION_MS)
-    rawlog("Bun.env.NICK_MAX_BYTES = ", NICK_MAX_BYTES)
-    rawlog("Bun.env.TEXT_MAX_BYTES = ", TEXT_MAX_BYTES)
-    rawlog("Bun.env.CHAT_PAUSE_MS = ", CHAT_PAUSE_MS)
-    rawlog("Bun.env.SYSTEM_CHECK_MS = ", SYSTEM_CHECK_MS)
-    rawlog("Bun.env.INVITE_EXPIRES_MS = ", INVITE_EXPIRES_MS)
 
     dlog(false, "enums section. Zeros filtered to prevent if (x) fail")
     rawlog("MT_VALUES = ", MT_VALUES)

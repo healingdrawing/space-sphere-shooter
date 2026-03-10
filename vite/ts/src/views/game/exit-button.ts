@@ -8,7 +8,7 @@ export const add_exit_button_to_game_view = (ws:WebSocket, view: HTMLDivElement)
   b.addEventListener('pointerup', () => {
     b.disabled = true
     b.style.pointerEvents = 'none'
-    send_client_action(ws, MT.EXIT)
+    send_client_action(ws, MT.EXIT, 0)
   })
   view.insertBefore(b, view.firstChild);
 }

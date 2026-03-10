@@ -19,11 +19,11 @@ export function all_handler(text: string, mt:number){
     case MT.EXIT: exit_handler(text); break
     case MT.SHIP: ship_handler(text); break
     case MT.FRONTSHOT:
-    case MT.LEFTSHOT: // leftshot_handler(text); break
-    case MT.RIGHTSHOT: // rightshot_handler(text); break
-    case MT.BACKSHOT: // backshot_handler(text); break
-    case MT.TOPSHOT: // topshot_handler(text); break
-    case MT.DOWNSHOT: shot_handler(text); break// downshot_handler(text); break
+    case MT.LEFTSHOT:
+    case MT.RIGHTSHOT:
+    case MT.BACKSHOT:
+    case MT.TOPSHOT:
+    case MT.DOWNSHOT: shot_handler(text); break
     case MT.FRONTMOVE: move_handler(text); break
     case MT.STOPMOVE: move_handler(text); break
     case MT.LEFTMOVE: move_left_handler(text); break

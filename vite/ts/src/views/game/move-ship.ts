@@ -3,10 +3,11 @@ import { game_box } from "./game-box";
 
 export const move_ship = (data: Frontmove) => {
   const ship_box = game_box.ship_boxes[data.uuid]!
+  // todo remove logs
   console.log("ship_box.position:", ship_box.position, "server position:", data.cx, data.cy, data.cz)
   ship_box.position.set(data.cx, data.cy, data.cz);
   ship_box.metadata.velocity = {x:data.vvx, y:data.vvy, z:data.vvz, vts:data.vts}
-  console.log('move_ship called, velocity set to:', ship_box.metadata.velocity,'data:',data); // DEBUG
+  console.log('move_ship called, velocity set to:', ship_box.metadata.velocity,'data:',data);
   console.log("ship_box.position",ship_box.position)
 }
 

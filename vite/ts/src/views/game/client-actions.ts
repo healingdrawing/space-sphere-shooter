@@ -15,31 +15,8 @@ export const send_client_action = (ws:WebSocket, action:MT, power:number) => {
   }
   console.log("released button. KeyCode:", action);//todo remove
 
-  //warning. power should be implemented from >0 to 100 (%) uses press(keydown) -> accumulate (keyhold) -> release (power set to value , then will be sent from here to server) 
+  // power implemented from >0 to 100 (%) uses press(keydown) -> accumulate (keyhold) -> release (power set to value , then will be sent from here to server) 
   
-  // switch(action){
-  //   case MT.FRONTMOVE: power = 100; break
-  //   case MT.STOPMOVE: power = 100; break
-
-  //   case MT.LEFTMOVE: power = 40; break
-  //   case MT.RIGHTMOVE: power = 40; break
-  //   case MT.TOPMOVE: power = 40; break
-  //   case MT.DOWNMOVE: power = 40; break
-  //   case MT.CWMOVE: power = 40; break
-  //   case MT.CCWMOVE: power = 40; break
-    
-  //   /* shot section */
-    
-  //   case MT.FRONTSHOT: power = 50; break //warning at the moment the power is not used on server side, for shot
-  //   case MT.LEFTSHOT: power = 50; break
-  //   case MT.RIGHTSHOT: power = 50; break
-  //   case MT.BACKSHOT: power = 50; break
-  //   case MT.TOPSHOT: power = 50; break
-  //   case MT.DOWNSHOT: power = 50; break
-    
-  //   default: break
-  // }
-
   const dummy = { code: action, power } //todo properly remove code parameter, since not used
   
   // add message type

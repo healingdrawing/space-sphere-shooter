@@ -65,7 +65,7 @@ export const side_rotation = (data: SideRotation) => {
 
 
 
-export function rotate_around_axis(ship: BABYLON.TransformNode, axis: BABYLON.Vector3, rot: {av: number, ts: number, tsend: number}, dt: number) {
+export function rotate_around_axis(ship: BABYLON.TransformNode, axis: BABYLON.Vector3, rot: {av: number}, dt: number) {
   const angleRad = rot.av * dt * Math.PI / 180;
   ship.rotateAround(ship.absolutePosition ,axis, angleRad);
 }
@@ -81,8 +81,6 @@ export function check_rotations_metadata(ship_box:BABYLON.TransformNode, now: nu
       if (now > side_tsend){ /* need rotate up to equal condition */
         const fake_dt = (side_tsend - meta_side.ts) / 1000
         // meta_side.ts = now // commented since metadata will be removed anyways
-        // const axisend = ship_box.getChildren().find(c => c.name === "sideDot") as BABYLON.Mesh;
-        // const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship_box.absolutePosition.asArray(), axisend.absolutePosition.asArray())).negate()
         const axis = ship_box.getDirection(BABYLON.Vector3.Left())
         rotate_around_axis(ship_box, axis, meta_side, fake_dt);
       }
@@ -99,8 +97,6 @@ export function check_rotations_metadata(ship_box:BABYLON.TransformNode, now: nu
       if (now > front_tsend){ /* need rotate up to equal condition */
         const fake_dt = (front_tsend - meta_front.ts) / 1000
         // meta_front.ts = now // commented since metadata will be removed anyways
-        // const axisend = ship_box.getChildren().find(c => c.name === "frontDot") as BABYLON.Mesh;
-        // const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship_box.absolutePosition.asArray(), axisend.absolutePosition.asArray()))
         const axis = ship_box.getDirection(BABYLON.Vector3.Forward())
         rotate_around_axis(ship_box, axis, meta_front, fake_dt);
       }
@@ -122,9 +118,7 @@ export function check_rotations_metadata(ship_box:BABYLON.TransformNode, now: nu
         //   "\nnow:", now,
         //   "\nfake_dt:", fake_dt
         // )
-        ship_box.metadata.topRotation.ts = now // commented since metadata will be removed anyways
-        // const axisend = ship_box.getChildren().find(c => c.name === "topDot") as BABYLON.Mesh;
-        // const axis = BABYLON.Vector3.FromArray(gemm.vecXD(ship_box.absolutePosition.asArray(), axisend.absolutePosition.asArray()))
+        // ship_box.metadata.topRotation.ts = now // commented since metadata will be removed anyways
         const axis = ship_box.getDirection(BABYLON.Vector3.Up())
         rotate_around_axis(ship_box, axis, meta_top, fake_dt);
       }
@@ -136,20 +130,9 @@ export function check_rotations_metadata(ship_box:BABYLON.TransformNode, now: nu
 }
 
 function log_orientation(ship_box:BABYLON.TransformNode){
-  const box_top_end = ship_box.getChildren().find(c => c.name === "topDot") as BABYLON.Mesh;
-  const box_front_end = ship_box.getChildren().find(c => c.name === "frontDot") as BABYLON.Mesh;
-  const center_dot = ship_box.absolutePosition.asArray()
+  const t = ship_box.getDirection(BABYLON.Vector3.Up()).asArray()
+  const f = ship_box.getDirection(BABYLON.Vector3.Forward()).asArray()
   
-  /* create vector to rotate mesh to server sent orientation */
-  
-  /** correct mesh orientation top axis */
-  const top_dot = box_top_end.absolutePosition.asArray()
-  const t = gemm.vecXDone(gemm.vecXD(center_dot,top_dot))
-    
-  /** correct front axis */
-  const front_dot = box_front_end.absolutePosition.asArray()
-  const f = gemm.vecXDone(gemm.vecXD(center_dot,front_dot))
-
   console.log(
     "\nfvx:", f[0]
     ,"\nfvy:", f[1]

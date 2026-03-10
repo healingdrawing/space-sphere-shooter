@@ -1,13 +1,12 @@
 import type { WebSocketData } from "../../..";
-import { devlog, errlog, rawlog } from "../../../debug/debug";
+import { devlog, errlog } from "../../../debug/debug";
 import { MT } from "../../../enums/mt";
 import { gameroom } from "../../../ram/storage";
 import type { GameRoomResponseMessage } from "../../base";
 import { vec3 } from "gl-matrix";
-import { SOFF } from "../gameboard/enums";
 import { rts } from "../../../utils/basetime";
 import { mm } from "../../../manage/message";
-import type { SideRotation, TopRotation } from "../types";
+import type { SideRotation } from "../types";
 import { CCR } from "../../../manage/close";
 import { calc_av, calc_duration } from "../ship/limits";
 
@@ -53,7 +52,7 @@ export function handle_move_top(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uin
   }
   // const power = obj.power // 0-100% -> 90 deg
   
-  // const avs = Math.sign(power) * ship.max_avelo // +-[deg/s]. avoid accel at the moment
+  // const avs +-[deg/s]. avoid accel at the moment
   const avs = (calc_av(ship.max_avelo, power))
   const duration_s = calc_duration(avs, power)
   const now = rts()

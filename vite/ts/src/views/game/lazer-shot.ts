@@ -13,7 +13,7 @@ export const lazer_shot = (data: LazerBeam) => {
   
   const start = s.absolutePosition
   console.log("s.absxyz", start)
-  const end = new BABYLON.Vector3(data.x, data.y, data.z)
+  const end = new BABYLON.Vector3(data.x, data.y, data.z) //warning //todo here server sent d1000 as end of lazer beam, so it is limited in screen less than skybox that is 10000. Maybe consider sent from server increased length, or recalculate here(bad patch + extra calcs) uses gemm.dotXDoffset(...9000...)
   /* start dot */
   const sdot = [start.x, start.y, start.z]
   /* end dot */

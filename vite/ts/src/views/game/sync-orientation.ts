@@ -1,36 +1,31 @@
 import { gemm } from "../../tunnel";
 
-export function syncOrientation(mesh: BABYLON.TransformNode, fvx: number, fvy: number, fvz: number, tvx: number, tvy: number, tvz: number) {
+export function syncOrientation(ship_box: BABYLON.TransformNode, fvx: number, fvy: number, fvz: number, tvx: number, tvy: number, tvz: number) {
   
   /** read the mesh orientation */
-  const mesh_top_end = mesh.getChildren().find(c => c.name === "topDot") as BABYLON.Mesh;
-  const mesh_front_end = mesh.getChildren().find(c => c.name === "frontDot") as BABYLON.Mesh;
-  const mcv  = mesh.absolutePosition
-  const center_dot = mcv.asArray()
+  const mcv  = ship_box.absolutePosition
   
   /* create vector to rotate mesh to server sent orientation */
   
   /** correct mesh orientation top axis */
-  const top_dot = mesh_top_end.absolutePosition.asArray()
-  const mesh_top_v = gemm.vecXD(center_dot,top_dot)
+  const mesh_top_v = ship_box.getDirection(BABYLON.Vector3.Up()).asArray()
   const server_top_v = [tvx,tvy,tvz]
   const raw_t_axis = gemm.vec3Dnormal(mesh_top_v, server_top_v)
   const fix_t_axis = BABYLON.Vector3.FromArray(raw_t_axis)
   const fix_t_angle = Math.acos(gemm.vecXDcos(mesh_top_v, server_top_v))
-  console.warn("BEFORE SYNC: server_top_v", server_top_v, "mesh_top_v", mesh_top_v, "fix_t_axis", fix_t_axis, "fix_t_angle", fix_t_angle)
-  if(fix_t_angle && gemm.vecXDnorm(raw_t_axis)) mesh.rotateAround(mcv, fix_t_axis, fix_t_angle)
+  console.warn("BEFORE SYNC: server_top_v", server_top_v, "mesh_top_v", mesh_top_v, "fix_t_axis", fix_t_axis, "fix_t_angle", fix_t_angle)// todo remove
+  if(fix_t_angle && gemm.vecXDnorm(raw_t_axis)) ship_box.rotateAround(mcv, fix_t_axis, fix_t_angle)
   
-  const mesh_top_v2 = gemm.vecXD(mesh.absolutePosition.asArray(),mesh_top_end.absolutePosition.asArray())
-  console.warn("AFTER SYNC: server_top_v", server_top_v, "mesh_top_v", mesh_top_v2)
+  const mesh_top_v2 = ship_box.getDirection(BABYLON.Vector3.Up()).asArray()
+  console.warn("AFTER SYNC: server_top_v", server_top_v, "mesh_top_v", mesh_top_v2)// todo remove
   
   /** correct front axis */
-  const front_dot = mesh_front_end.absolutePosition.asArray()
-  const mesh_front_v = gemm.vecXD(center_dot,front_dot)
+  const mesh_front_v = ship_box.getDirection(BABYLON.Vector3.Forward()).asArray()
   const server_front_v = [fvx,fvy,fvz]
   const raw_f_axis = gemm.vec3Dnormal(mesh_front_v, server_front_v)
   const fix_f_axis = BABYLON.Vector3.FromArray(raw_f_axis)
   const fix_f_angle = Math.acos(gemm.vecXDcos(mesh_front_v, server_front_v))
   console.log("fix_f_axis", fix_f_axis, "fix_f_angle", fix_f_angle)
-  if(fix_f_angle && gemm.vecXDnorm(raw_f_axis)) mesh.rotateAround(mcv, fix_f_axis, fix_f_angle)
+  if(fix_f_angle && gemm.vecXDnorm(raw_f_axis)) ship_box.rotateAround(mcv, fix_f_axis, fix_f_angle)
   
 }

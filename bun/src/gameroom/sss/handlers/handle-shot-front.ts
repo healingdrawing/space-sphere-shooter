@@ -1,11 +1,8 @@
 import type { WebSocketData } from "../../..";
-import { DEVLOG, devlog, errlog, rawlog } from "../../../debug/debug";
+import { DEVLOG, devlog, errlog } from "../../../debug/debug";
 import { MT } from "../../../enums/mt";
 import { gameroom } from "../../../ram/storage";
 import type { GameRoomResponseMessage } from "../../base";
-import { vec3 } from "gl-matrix";
-import { SOFF } from "../gameboard/enums";
-import { rts } from "../../../utils/basetime";
 import { mm } from "../../../manage/message";
 import type { LazerBeam } from "../types";
 import { gemm } from "../gameboard/non-autistic-math/gemm";

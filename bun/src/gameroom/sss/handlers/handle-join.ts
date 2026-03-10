@@ -15,10 +15,10 @@ export function handle_join(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Ar
   rawlog(rgb,nick)
 
   if(rgb && nick){ //proper join request
-    ws.data.nick = nick.substring(0,15) //warning //todo not sanitized
+    ws.data.nick = nick.substring(0,15) //warning //todo not sanitized, consider implement client filtering, and ban if hijacking attempt
     const uuid = ws.data.uuid
     const ship = gameroom.join_game(uuid, nick, rgb)
-    //todo consider to convert ship object to float32array or 64, encode as {s:arr},add type JOIN, return as message object. Then on client side parse respectively, to decrease net data transfer.
+    //todo consider to refactor ship object to float32array or 64, encode as {s:arr},add type JOIN, return as message object. Then on client side parse respectively, to decrease net data transfer. It huge stuff, do not touch without needs.
     
     // send order to join game. init add new(controllable) ship etc
     result.push({
@@ -41,7 +41,7 @@ export function handle_join(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Ar
         })
       }
     }
-    // send new ship to old clients(//WARNING manage on client side the uuid client, because this case ship is already arrived)
+    // send new ship to old clients(//WARNING manage(managed uses console.warn), on client side the uuid client, because this case ship is already arrived)
     result.push({
       mt: MT.SHIP,
       msg: ship,
