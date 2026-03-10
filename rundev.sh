@@ -5,16 +5,16 @@ docker container rm -f the_sss_client_container
 docker rmi -f the_sss_client_image
 
 # Build image
-docker build -t the_sss_client_image .
+docker build -t the_sss_client_image -f ./Dockerfile.dev .
 
 cd bun
-# Load the .env file properly (ignores comments and empty lines)
-if [ -f .env ]; then
+# Load the .env.dev file properly (ignores comments and empty lines)
+if [ -f .env.dev ]; then
     # Use grep to filter valid KEY=VALUE lines, then sed to trim whitespace, and xargs to export
-    export $(grep -E '^[A-Z_][A-Z_0-9]*=.*$' .env | sed 's/^ *//;s/ *$//' | xargs)
-    echo "Loaded .env variables successfully."
+    export $(grep -E '^[A-Z_][A-Z_0-9]*=.*$' .env.dev | sed 's/^ *//;s/ *$//' | xargs)
+    echo "Loaded .env.dev variables successfully."
 else
-    echo "Warning: .env file not found. Using default PORT=5000."
+    echo "Warning: .env.dev file not found. Using default PORT=5000."
     PORT=5000
 fi
 

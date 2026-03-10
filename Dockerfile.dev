@@ -1,0 +1,16 @@
+FROM oven/bun:1.3.8 AS builder
+
+COPY ./bun /app/bun
+RUN cd /app/bun && bun install --no-cache
+
+COPY ./vite/ts /app/vite/ts
+RUN cd /app/vite/ts && bun install --no-cache
+
+COPY ./bun/.env.dev /app/bun/.env
+RUN cd /app/vite/ts && bun run build
+
+FROM nginx:alpine AS runner
+COPY ./vite/ts/nginx.conf /etc/nginx/nginx.conf
+COPY --from=builder /app/vite/ts/dist /usr/share/nginx/html
+
+CMD ["nginx", "-g", "daemon off;"]

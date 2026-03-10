@@ -1,5 +1,5 @@
 import { crts } from "../../handlers/utils";
-import { gemm, type FrontRotation, type SideRotation, type TopRotation } from "../../tunnel";
+import { type FrontRotation, type SideRotation, type TopRotation } from "../../tunnel";
 import { game_box } from "./game-box";
 import { syncOrientation } from "./sync-orientation";
 
