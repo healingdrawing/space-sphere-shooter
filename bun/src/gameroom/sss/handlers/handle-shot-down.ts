@@ -41,7 +41,7 @@ export function handle_shot_down(ws: Bun.ServerWebSocket<WebSocketData>, msg: Ui
   const a = s.vert_guns
 
   // check impossibility to shot
-  if (!a) return [{ mt: MT.S, msg: { alert_text:"your ship does not have top gun, ... buddy", }, ms: 0, uuids: [uuid] }]
+  if (!a) return [{ mt: MT.S, msg: { alert_text:"your ship does not have down gun, ... buddy", }, ms: 0, uuids: [uuid] }]
 
   /** distance from ship hull */
   const d = s.vr
