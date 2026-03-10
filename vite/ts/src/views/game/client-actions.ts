@@ -16,12 +16,12 @@ export const send_client_action = (ws:WebSocket, action:MT) => {
     case MT.FRONTMOVE: power = 100; break
     case MT.STOPMOVE: power = 100; break
 
-    case MT.LEFTMOVE: power = 100; break
-    case MT.RIGHTMOVE: power = 100; break
-    case MT.TOPMOVE: power = 100; break
-    case MT.DOWNMOVE: power = 100; break
-    case MT.CWMOVE: power = 100; break
-    case MT.CCWMOVE: power = 100; break
+    case MT.LEFTMOVE: power = 40; break
+    case MT.RIGHTMOVE: power = 40; break
+    case MT.TOPMOVE: power = 40; break
+    case MT.DOWNMOVE: power = 40; break
+    case MT.CWMOVE: power = 40; break
+    case MT.CCWMOVE: power = 40; break
     
     /* shot section */
     

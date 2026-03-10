@@ -57,6 +57,15 @@ function create_game_box() {
     scene.useRightHandedSystem = true //warning crucial line, and also on forum some crap in quaternions announced and confirmed in case of this. Creatures made left hand system default when the most planet (math and opengl) manage right hand system. It is ... mental. Now they drown in bugs and patches with advanced custom cameras. Felitaziones!
     scene.clearColor = new BABYLON.Color4(0, 0, 0, 1); // Set background to black
 
+    /* to remove some extra/default light on ships */
+    // scene.environmentTexture = null;
+    // scene.environmentIntensity = 0;
+    // scene.ambientColor = new BABYLON.Color3(0, 0, 0);
+    // scene.defaultMaterial = new BABYLON.StandardMaterial("", scene); // or PBR if using PBR
+    // scene.lights.forEach(light => {
+    //   light.setEnabled(false); // kill hidden defaults
+    // });
+
     glow_box = new BABYLON.GlowLayer("beams_glow_box", scene)
     /* //warning: patch for default glow for all meshes, before first call .addIncludedOnlyMesh. Set methods were removed in some reasons. Maybe remastering of the lib architecture in progress. Or i miss somehting. */
     const trash = BABYLON.MeshBuilder.CreateLines("trash", {points:[BABYLON.Vector3.Zero()]})
@@ -69,6 +78,7 @@ function create_game_box() {
     skyboxMaterial.backFaceCulling = false; // Ensure the back faces are rendered
     skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("./textures/1", scene);
     skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+    skyboxMaterial.disableLighting = true;
     skybox.material = skyboxMaterial;
     skybox.infiniteDistance = true; // Prevent the skybox from scaling with the camera
 
@@ -92,8 +102,8 @@ function create_game_box() {
 
     camera.parent = ship_box;
     
-    const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 1), scene);
-    light.intensity = 0.5;//todo test
+    // const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 1), scene);
+    // light.intensity = 0.5;//todo test
 
 
     function animate() {
