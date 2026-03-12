@@ -504,7 +504,7 @@ export class SSSBoard {
       return
     }// hypotetical case of some wrong data
     if (last_ts === now){
-      if(DEVLOG) errlog("applyAngularVelocity() last_ts === now", last_ts, now)
+      // if(DEVLOG) errlog("applyAngularVelocity() last_ts === now", last_ts, now) // commented because of lags. Read below apply_angular_velocity() comments
       return
     }// case of the first moment. 
 
@@ -651,12 +651,12 @@ export class SSSBoard {
       return
     }// hypotetical case of some wrong data
 
-    // rawlog("raw_now:", rts(), "last_ts:", last_ts); // warning detected repeatedly returned the same timestamp based on Date.now() . Desided just ignore it. The performance.now() is laggs and ruining everything, with huge negative numbers. It works like prealpha, so no.
+    // rawlog("raw_now:", rts(), "last_ts:", last_ts);
+    // warning detected repeatedly returned the same timestamp based on Date.now() . Desided just ignore it. The performance.now() is laggs and ruining everything, with huge negative numbers. It works like prealpha, so no. Integer part of performance.now() often the same, that means settimeouts ignores pauses. and setinterval can ruin the server flow under heavy loading. settimeouts will just delay, without queue. So delay + ignore is better than overload. Especially for free tier account.
     if (last_ts === now){
-      if(DEVLOG) errlog("apply_angular_velocity() last_ts === now", last_ts, now)
+      // if(DEVLOG) errlog("apply_angular_velocity() last_ts === now", last_ts, now) //todo remove
       return
-    }// case of the first moment. 
-    // warning idn wth is going on here. Weird that errlog above fired several times(7-10) for one move, and when i separated the if statements from (last_ts >= now) to (last_ts > now) + (last_ts === now) (two separated if statements), the lags disappeared suddenly. it is really weird.
+    }// case of the first moment. ... and more as described above
 
     if (now >= tsend){
       /* case of small rotation still need to be to satisfy the ... "plan" */
