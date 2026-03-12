@@ -498,10 +498,14 @@ export class SSSBoard {
     const last_ts = this.ships[b + ts_offset]!;
     const tsend  = this.ships[b + tsend_offset]!;
   
-    if (last_ts >= now){
-      errlog("applyAngularVelocity() last_ts > now. should not happen",last_ts, now)
+    if (last_ts > now){
+      errlog("applyAngularVelocity() last_ts > now. should not happen", last_ts, now)
       return
-    }// hypotetical case of some wrong data and also the first moment
+    }// hypotetical case of some wrong data
+    if (last_ts === now){
+      if(DEVLOG) errlog("applyAngularVelocity() last_ts === now", last_ts, now)
+      return
+    }// case of the first moment. 
 
     
     /** top vector */
@@ -641,10 +645,15 @@ export class SSSBoard {
     const last_ts = this.ships[b + ts_offset]!;
     const tsend  = this.ships[b + tsend_offset]!;
   
-    if (last_ts >= now){
+    if (last_ts > now){
       errlog("apply_angular_velocity() last_ts > now. should not happen", last_ts, now)
       return
-    }// hypotetical case of some wrong data and also the first moment
+    }// hypotetical case of some wrong data
+    if (last_ts === now){
+      if(DEVLOG) errlog("apply_angular_velocity() last_ts === now", last_ts, now)
+      return
+    }// case of the first moment. 
+    // warning idn wth is going on here. Weird that errlog above fired several times(7-10) for one move, and when i separated the if statements from (last_ts >= now) to (last_ts > now) + (last_ts === now) (two separated if statements), the lags disappeared suddenly. it is really weird.
 
     if (now >= tsend){
       /* case of small rotation still need to be to satisfy the ... "plan" */
@@ -682,34 +691,34 @@ export class SSSBoard {
     const axis = [this.ships[b + S.AVX]!, this.ships[b + S.AVY]!, this.ships[b + S.AVZ]!]
 
     switch (avOffset) {
-      case S.AVS:
-        /** side vector */
-        const s = gemm.vec3Dnormal(f,t)
-        f = gemm.vecXDone(gemm.vec3Drotate(f, s, angle_rad, true)) // rotated + scaled to one
-        t = gemm.vec3Dnormal(s,f) // scaled to one under the hood
+      // case S.AVS:
+      //   /** side vector */
+      //   const s = gemm.vec3Dnormal(f,t)
+      //   f = gemm.vecXDone(gemm.vec3Drotate(f, s, angle_rad, true)) // rotated + scaled to one
+      //   t = gemm.vec3Dnormal(s,f) // scaled to one under the hood
 
-        this.ships[b + S.TVX] = t[0]!;
-        this.ships[b + S.TVY] = t[1]!;
-        this.ships[b + S.TVZ] = t[2]!;
-        this.ships[b + S.FVX] = f[0]!;
-        this.ships[b + S.FVY] = f[1]!;
-        this.ships[b + S.FVZ] = f[2]!;
+      //   this.ships[b + S.TVX] = t[0]!;
+      //   this.ships[b + S.TVY] = t[1]!;
+      //   this.ships[b + S.TVZ] = t[2]!;
+      //   this.ships[b + S.FVX] = f[0]!;
+      //   this.ships[b + S.FVY] = f[1]!;
+      //   this.ships[b + S.FVZ] = f[2]!;
 
-        break;
-      case S.AVF:
-        t = gemm.vecXDone(gemm.vec3Drotate(t, f, angle_rad, true));
-        this.ships[b + S.TVX] = t[0]!;
-        this.ships[b + S.TVY] = t[1]!;
-        this.ships[b + S.TVZ] = t[2]!;
+      //   break;
+      // case S.AVF:
+      //   t = gemm.vecXDone(gemm.vec3Drotate(t, f, angle_rad, true));
+      //   this.ships[b + S.TVX] = t[0]!;
+      //   this.ships[b + S.TVY] = t[1]!;
+      //   this.ships[b + S.TVZ] = t[2]!;
 
-        break;
-      case S.AVT:
-        f = gemm.vecXDone(gemm.vec3Drotate(f, t, angle_rad, true));
-        this.ships[b + S.FVX] = f[0]!;
-        this.ships[b + S.FVY] = f[1]!;
-        this.ships[b + S.FVZ] = f[2]!;
+      //   break;
+      // case S.AVT:
+      //   f = gemm.vecXDone(gemm.vec3Drotate(f, t, angle_rad, true));
+      //   this.ships[b + S.FVX] = f[0]!;
+      //   this.ships[b + S.FVY] = f[1]!;
+      //   this.ships[b + S.FVZ] = f[2]!;
 
-        break;
+      //   break;
       case S.AV:
         
         f = gemm.vecXDone(gemm.vec3Drotate(f, axis, angle_rad, true)) // rotated + scaled to one
