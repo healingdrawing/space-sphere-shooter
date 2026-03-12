@@ -7,7 +7,6 @@ import { gameroom } from "../../../ram/storage";
 import type { GameRoomResponseMessage } from "../../base";
 import { MT } from "../../../enums/mt";
 import { two_ships_collision } from "./collide/obb";
-import { rts } from "../../../utils/basetime";
 
 export class SSSBoard {
   

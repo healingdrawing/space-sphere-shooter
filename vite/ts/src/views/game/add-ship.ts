@@ -42,44 +42,43 @@ export const add_ship = async (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BAB
   
   ship_boxes[idx] = box
 
-  const dot_size = ship.br / 2 * scale;
-
-  /* todo these dots are not needed, just visual markers */
-  const f_dot = BABYLON.MeshBuilder.CreateSphere("frontDot", { diameter: dot_size }, scene);
-  f_dot.position = new BABYLON.Vector3(0, 0, ship.fr * 2 * scale);
-  f_dot.parent = box;
-  const f_mat = new BABYLON.StandardMaterial("blue", scene);
-  f_mat.diffuseColor = BABYLON.Color3.Blue();
-  f_mat.alpha = 1.0; // Make sure it's fully opaque
-  f_mat.backFaceCulling = true; // Cull back faces
-  f_dot.material = f_mat;
-
-
-
-  const t_dot = BABYLON.MeshBuilder.CreateSphere("topDot", { diameter: dot_size }, scene);
-  t_dot.position = new BABYLON.Vector3(0, ship.vr * 2 * scale, 0);
-  t_dot.parent = box;
-  const t_mat = new BABYLON.StandardMaterial("green", scene);
-  t_mat.diffuseColor = BABYLON.Color3.Green();
-  t_mat.alpha = 1.0; // Make sure it's fully opaque
-  t_mat.backFaceCulling = true; // Cull back faces
-  t_dot.material = t_mat;
+  
+  /* todo these dots are not needed, just visual markers. f_dot, t_dot, s_dot */
+  // const dot_size = ship.br / 2 * scale;
+  // const f_dot = BABYLON.MeshBuilder.CreateSphere("frontDot", { diameter: dot_size }, scene);
+  // f_dot.position = new BABYLON.Vector3(0, 0, ship.fr * 2 * scale);
+  // f_dot.parent = box;
+  // const f_mat = new BABYLON.StandardMaterial("blue", scene);
+  // f_mat.diffuseColor = BABYLON.Color3.Blue();
+  // f_mat.alpha = 1.0; // Make sure it's fully opaque
+  // f_mat.backFaceCulling = true; // Cull back faces
+  // f_dot.material = f_mat;
 
 
-  const s_dot = BABYLON.MeshBuilder.CreateSphere("sideDot", { diameter: dot_size }, scene);
-  s_dot.position = new BABYLON.Vector3(ship.sr * 2 * scale, 0,0);
-  s_dot.parent = box;
-  const s_mat = new BABYLON.StandardMaterial("blue", scene);
-  s_mat.diffuseColor = BABYLON.Color3.Red();
-  s_mat.alpha = 1.0; // Make sure it's fully opaque
-  s_mat.backFaceCulling = true; // Cull back faces
-  s_dot.material = s_mat;
+  // const t_dot = BABYLON.MeshBuilder.CreateSphere("topDot", { diameter: dot_size }, scene);
+  // t_dot.position = new BABYLON.Vector3(0, ship.vr * 2 * scale, 0);
+  // t_dot.parent = box;
+  // const t_mat = new BABYLON.StandardMaterial("green", scene);
+  // t_mat.diffuseColor = BABYLON.Color3.Green();
+  // t_mat.alpha = 1.0; // Make sure it's fully opaque
+  // t_mat.backFaceCulling = true; // Cull back faces
+  // t_dot.material = t_mat;
 
-  hull.showBoundingBox = true; //todo remove. test
-  const axes = new BABYLON.Debug.AxesViewer(scene, 10)
-  axes.xAxis.parent = box;
-  axes.yAxis.parent = box;
-  axes.zAxis.parent = box;
+
+  // const s_dot = BABYLON.MeshBuilder.CreateSphere("sideDot", { diameter: dot_size }, scene);
+  // s_dot.position = new BABYLON.Vector3(ship.sr * 2 * scale, 0,0);
+  // s_dot.parent = box;
+  // const s_mat = new BABYLON.StandardMaterial("blue", scene);
+  // s_mat.diffuseColor = BABYLON.Color3.Red();
+  // s_mat.alpha = 1.0; // Make sure it's fully opaque
+  // s_mat.backFaceCulling = true; // Cull back faces
+  // s_dot.material = s_mat;
+
+  // hull.showBoundingBox = true; //todo remove. test
+  // const axes = new BABYLON.Debug.AxesViewer(scene, 10)
+  // axes.xAxis.parent = box;
+  // axes.yAxis.parent = box;
+  // axes.zAxis.parent = box;
 
   return box;
 }
