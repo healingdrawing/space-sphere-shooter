@@ -9,8 +9,8 @@ export { mm }
 import { spip } from '../../../bun/src/utils/safe'
 export { spip }
 
-import type { Ship, Frontmove, FrontRotation, TopRotation, SideRotation, LazerBeam } from '../../../bun/src/gameroom/sss/types'
-export type { Ship, Frontmove, FrontRotation, TopRotation, SideRotation, LazerBeam }
+import type { Ship, Frontmove, FrontRotation, TopRotation, SideRotation, LazerBeam, Rotation } from '../../../bun/src/gameroom/sss/types'
+export type { Ship, Frontmove, FrontRotation, TopRotation, SideRotation, LazerBeam, Rotation }
 
 import { gemm } from '../../../bun/src/gameroom/sss/gameboard/non-autistic-math/gemm'
 export { gemm }

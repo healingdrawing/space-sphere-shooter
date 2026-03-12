@@ -1,5 +1,5 @@
 import { crts } from "../../handlers/utils";
-import { type FrontRotation, type SideRotation, type TopRotation } from "../../tunnel";
+import { type FrontRotation, type Rotation, type SideRotation, type TopRotation } from "../../tunnel";
 import { game_box } from "./game-box";
 import { syncOrientation } from "./sync-orientation";
 
@@ -63,7 +63,33 @@ export const side_rotation = (data: SideRotation) => {
   ship_box.metadata.sideRotation = {av: data.avs, ts: data.avs_ts, tsend: data.avs_tsend};
 };
 
+export const target_rotation = (data: Rotation) => {
+  const ship_box = game_box.ship_boxes[data.uuid]!;
+  /* raw stop previous rotations */
+  const now = crts()
+  /* patch to force function rotate to present timestamp */
+  if(ship_box.metadata.topRotation) ship_box.metadata.topRotation.tsend = now;
+  if(ship_box.metadata.frontRotation) ship_box.metadata.frontRotation.tsend = now;
+  if(ship_box.metadata.sideRotation) ship_box.metadata.sideRotation.tsend = now;
+  check_rotations_metadata(ship_box, now+1)
+  delete ship_box.metadata.topRotation;
+  delete ship_box.metadata.frontRotation;
+  delete ship_box.metadata.sideRotation;
 
+  // console.warn("target_rotation() call:", {
+  //   avs: data.avs,  // angular velocity
+  //   avs_ts: data.avs_ts,  // start time
+  //   avs_tsend: data.avs_tsend,  // end time
+  //   duration: data.avs_tsend - data.avs_ts,
+  //   vectors: { fvx: data.fvx, fvy: data.fvy, fvz: data.fvz, tvx: data.tvx, tvy: data.tvy, tvz: data.tvz },
+  // });
+
+  syncOrientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
+  ship_box.metadata.targetRotation = {
+    av: data.av, ts: data.av_ts, tsend: data.av_tsend,
+    avx: data.avx,avy: data.avy,avz: data.avz,
+  };
+};
 
 export function rotate_around_axis(ship: BABYLON.TransformNode, axis: BABYLON.Vector3, rot: {av: number}, dt: number) {
   const angleRad = rot.av * dt * Math.PI / 180;
@@ -127,6 +153,28 @@ export function check_rotations_metadata(ship_box:BABYLON.TransformNode, now: nu
       log_orientation(ship_box)
     }
   }
+
+  if (meta.targetRotation) {
+    const meta_target = meta.targetRotation
+    const target_tsend = meta_target.tsend
+    if (now >= target_tsend) {
+      /* additional check to rotate, closer to final expected rotation */
+      if (now > target_tsend){ /* need rotate up to equal condition */
+        const fake_dt = (target_tsend - meta_target.ts) / 1000
+        // meta_target.ts = now // commented since metadata will be removed anyways
+        const axis = new BABYLON.Vector3(
+          meta_target.avx,
+          meta_target.avy,
+          meta_target.avz
+        )
+        rotate_around_axis(ship_box, axis, meta_target, fake_dt);
+      }
+      delete ship_box.metadata.targetRotation;
+      console.warn("TARGET ROTATION END")
+      log_orientation(ship_box)
+    }
+  }
+
 }
 
 function log_orientation(ship_box:BABYLON.TransformNode){

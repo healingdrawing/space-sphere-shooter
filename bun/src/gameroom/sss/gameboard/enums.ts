@@ -67,6 +67,7 @@ export enum SOFF {
 
   FVX, FVY, FVZ,        // front vector
   TVX, TVY, TVZ,        // top vector
+  AVX, AVY, AVZ,        // angular velocity/rotation axis vector // todo consider refactor all to this
 
   VVX, VVY, VVZ,        // linear velocity [m/s]
   /** velocity timestamp [ms] */
@@ -92,6 +93,13 @@ export enum SOFF {
   AVS_TS,
   /** angular velocity SIDE END timestamp [ms] */
   AVS_TSEND,
+  
+  /** angular velocity [deg/s] */
+  AV,
+  /** angular velocity timestamp [ms] */
+  AV_TS,
+  /** angular velocity END timestamp [ms] */
+  AV_TSEND,
 
 };
 

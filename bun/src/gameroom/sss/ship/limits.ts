@@ -81,6 +81,7 @@ export const calc_av = ( max_avelo:number, power:number ) => max_avelo*(1/5+4/5*
  * calculate duration [s] of angular rotation 
  * @param av 
  * @param power 
+ * @param angle_deg optional angle of rotation in degrees, 90 default. but for target rotation can be greater
  * @returns 
  */
-export const calc_duration = ( av:number, power:number ) => 90*power/av
+export const calc_duration = ( av:number, power:number, angle_deg=90 ) => angle_deg*power/av

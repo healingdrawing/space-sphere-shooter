@@ -17,6 +17,7 @@ import { move_down_ship } from "./move-down-ship";
 import { move_cw_ship } from "./move-cw-ship";
 import { move_ccw_ship } from "./move-ccw-ship";
 import { lazer_shot } from "./lazer-shot";
+import { move_target_ship } from "./move-target-ship";
 
 
 function create_game_box() {
@@ -133,7 +134,16 @@ function create_game_box() {
           const axis = ship.getDirection(BABYLON.Vector3.Up())
           rotate_around_axis(ship, axis, ship.metadata.topRotation, dt);
         }
-        
+        if (ship.metadata.targetRotation){
+          const dt = (now - ship.metadata.targetRotation.ts ) / 1000
+          ship.metadata.targetRotation.ts = now
+          const axis = new BABYLON.Vector3(
+            ship.metadata.targetRotation.avx,
+            ship.metadata.targetRotation.avy,
+            ship.metadata.targetRotation.avz
+          )
+          rotate_around_axis(ship, axis, ship.metadata.targetRotation, dt);
+        }
       }
 
       for (let i = game_box.animated_lazer_beams.length - 1; i >= 0; i--) {
@@ -181,7 +191,13 @@ function create_game_box() {
   }
   
   
-  return { view, initGameView, add_ship, remove_ship, game_over, get_scene, ship_boxes, move_ship, move_left_ship, move_right_ship, move_top_ship, move_down_ship, move_cw_ship, move_ccw_ship, get_glow_box, lazer_shot, animated_lazer_beams };
+  return {
+    view, initGameView, add_ship, remove_ship, game_over, get_scene, ship_boxes,
+    move_ship, move_target_ship,
+    move_left_ship, move_right_ship,
+    move_top_ship, move_down_ship,
+    move_cw_ship, move_ccw_ship,
+    get_glow_box, lazer_shot, animated_lazer_beams };
 }
 
 export const game_box = create_game_box();

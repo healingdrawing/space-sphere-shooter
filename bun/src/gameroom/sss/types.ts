@@ -62,6 +62,14 @@ export interface Ship {
   tvy:          number;
   /**  top vector coo */
   tvz:          number;
+  // todo consider to refactor as common case for any rotation
+  /**  angular velocity vector coo */
+  avx:          number;
+  /**  angular velocity vector coo */
+  avy:          number;
+  /**  angular velocity vector coo */
+  avz:          number;
+
   /** linear velocity vector coo */
   vvx:          number;
   /** linear velocity vector coo */
@@ -91,6 +99,13 @@ export interface Ship {
   avs_ts: number;
   /** angular velocity SIDE END timestamp [ms] */
   avs_tsend:number;
+  
+  /** angular velocity [deg/s] */
+  av: number;
+  /** angular velocity timestamp [ms] */
+  av_ts: number;
+  /** angular velocity END timestamp [ms] */
+  av_tsend:number;
 }
 
 export type Frontmove = {
@@ -100,22 +115,33 @@ export type Frontmove = {
 /** rotation around front vector */
 export type FrontRotation = {
   uuid:number, avf:number, avf_ts:number, avf_tsend: number,
-  fvx:number, fvy:number, fvz:number,
-  tvx:number,tvy:number,tvz:number,      
+  fvx:number, fvy:number, fvz:number, // data for synchronisation client to server orientation
+  tvx:number,tvy:number,tvz:number, // data for synchronisation client to server orientation
+  avx:number,avy:number,avz:number, // axis vector x y z
 }
 
 /** rotation around top vector */
 export type TopRotation = {
   uuid:number, avt:number, avt_ts:number, avt_tsend: number,
-  fvx:number, fvy:number, fvz:number,
-  tvx:number,tvy:number,tvz:number,      
+  fvx:number, fvy:number, fvz:number, // data for synchronisation client to server orientation
+  tvx:number,tvy:number,tvz:number, // data for synchronisation client to server orientation
+  avx:number,avy:number,avz:number, // axis vector x y z
 }
 
 /** rotation around side vector */
 export type SideRotation = {
   uuid:number, avs:number, avs_ts:number, avs_tsend: number,
-  fvx:number, fvy:number, fvz:number,
-  tvx:number,tvy:number,tvz:number,      
+  fvx:number, fvy:number, fvz:number, // data for synchronisation client to server orientation
+  tvx:number,tvy:number,tvz:number, // data for synchronisation client to server orientation
+  avx:number,avy:number,avz:number, // axis vector x y z
+}
+
+/** rotation around av(x/y/z) vector */
+export type Rotation = {
+  uuid:number, av:number, av_ts:number, av_tsend: number,
+  fvx:number, fvy:number, fvz:number, // data for synchronisation client to server orientation
+  tvx:number,tvy:number,tvz:number, // data for synchronisation client to server orientation
+  avx:number,avy:number,avz:number, // axis vector x y z, case of free axis
 }
 
 /** lazer gun shot beam. Separatedly sent with full coordinates, to manage the delay effect */
