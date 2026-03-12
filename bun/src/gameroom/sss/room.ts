@@ -82,11 +82,14 @@ export class SSSGameRoom implements GameRoom {
       
       fvx: 0, fvy: 0, fvz: 1, //z is front axis default (babylonjs default way)
       tvx: 0, tvy: 1, tvz: 0, // y is top/vertical axis default (babylonjs default way)
+      avx: 0, avy: 0, avz: 0, // target rotation vector. Specifically for target move
+
       vvx: 0, vvy: 0, vvz: 0, v_ts: 0,
       
       avf: 0, avf_ts:0, avf_tsend:0,
       avt: 0, avt_ts:0, avt_tsend:0,
       avs: 0, avs_ts:0, avs_tsend:0,
+      av: 0, av_ts:0, av_tsend:0,
     };
     b.write_ship(i, ship)
 
@@ -230,9 +233,7 @@ export class SSSGameRoom implements GameRoom {
     
       case MT.CCWMOVE: return handle_move_ccw(ws, msg);
     
-      case MT.TARGETMOVE:
-        handle_move_target(ws, msg); // todo consider to one shot target direction to closest object, (not implemented).
-        break;
+      case MT.TARGETMOVE: return handle_move_target(ws, msg); // todo consider to one shot target direction to closest object, (not implemented).
     
       default:
         ws.close(CCR.BROKENTYPE.code, CCR.BROKENTYPE.reason);

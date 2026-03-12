@@ -1,4 +1,4 @@
-import { devlog, errlog, rawlog } from "../../../debug/debug";
+import { DEVLOG, devlog, errlog, rawlog } from "../../../debug/debug";
 import { USERS_MAX_NUMBER } from "../../../ram/consts";
 import type { Ship } from "../types";
 import { SOFF as S, SOFFSIZE } from "./enums";
@@ -7,6 +7,7 @@ import { gameroom } from "../../../ram/storage";
 import type { GameRoomResponseMessage } from "../../base";
 import { MT } from "../../../enums/mt";
 import { two_ships_collision } from "./collide/obb";
+import { rts } from "../../../utils/basetime";
 
 export class SSSBoard {
   
@@ -106,10 +107,16 @@ export class SSSBoard {
   set_tvx = (i: number, v: number) => this.set(i, S.TVX, v);
   set_tvy = (i: number, v: number) => this.set(i, S.TVY, v);
   set_tvz = (i: number, v: number) => this.set(i, S.TVZ, v);
+  
+  set_avx = (i: number, v: number) => this.set(i, S.AVX, v);
+  set_avy = (i: number, v: number) => this.set(i, S.AVY, v);
+  set_avz = (i: number, v: number) => this.set(i, S.AVZ, v);
+
   set_vvx = (i: number, v: number) => this.set(i, S.VVX, v);
   set_vvy = (i: number, v: number) => this.set(i, S.VVY, v);
   set_vvz = (i: number, v: number) => this.set(i, S.VVZ, v);
   set_vts = (i: number, v: number) => this.set(i, S.V_TS, v);
+  
   set_avf = (i: number, v:number) => this.set(i, S.AVF, v);
   set_avf_ts = (i: number, v:number) => this.set(i, S.AVF_TS, v);
   set_avf_tsend = (i: number, v:number) => this.set(i, S.AVF_TSEND, v);
@@ -119,6 +126,10 @@ export class SSSBoard {
   set_avs = (i: number, v:number) => this.set(i, S.AVS, v);
   set_avs_ts = (i: number, v:number) => this.set(i, S.AVS_TS, v);
   set_avs_tsend = (i: number, v:number) => this.set(i, S.AVS_TSEND, v);
+
+  set_av = (i: number, v:number) => this.set(i, S.AV, v);
+  set_av_ts = (i: number, v:number) => this.set(i, S.AV_TS, v);
+  set_av_tsend = (i: number, v:number) => this.set(i, S.AV_TSEND, v);
 
   log_ship(i: number) {
     const b = this.base(i);
@@ -208,6 +219,11 @@ export class SSSBoard {
       tvx:           this.ships[b + S.TVX]!,
       tvy:           this.ships[b + S.TVY]!,
       tvz:           this.ships[b + S.TVZ]!,
+      
+      avx:           this.ships[b + S.AVX]!,
+      avy:           this.ships[b + S.AVY]!,
+      avz:           this.ships[b + S.AVZ]!,
+
       vvx:           this.ships[b + S.VVX]!,
       vvy:           this.ships[b + S.VVY]!,
       vvz:           this.ships[b + S.VVZ]!,
@@ -222,6 +238,10 @@ export class SSSBoard {
       avs: this.ships[b + S.AVS]!,
       avs_ts: this.ships[b + S.AVS_TS]!,
       avs_tsend: this.ships[b + S.AVS_TSEND]!,
+
+      av: this.ships[b + S.AV]!,
+      av_ts: this.ships[b + S.AV_TS]!,
+      av_tsend: this.ships[b + S.AV_TSEND]!,
 
     };
   }
@@ -261,6 +281,11 @@ export class SSSBoard {
     this.ships[b + S.TVX] = data.tvx;
     this.ships[b + S.TVY] = data.tvy;
     this.ships[b + S.TVZ] = data.tvz;
+    
+    this.ships[b + S.AVX] = data.avx;
+    this.ships[b + S.AVY] = data.avy;
+    this.ships[b + S.AVZ] = data.avz;
+
     this.ships[b + S.VVX] = data.vvx;
     this.ships[b + S.VVY] = data.vvy;
     this.ships[b + S.VVZ] = data.vvz;
@@ -275,6 +300,10 @@ export class SSSBoard {
     this.ships[b + S.AVS]! = data.avs;
     this.ships[b + S.AVS_TS]! = data.avs_ts;
     this.ships[b + S.AVS_TSEND]! = data.avs_tsend;
+
+    this.ships[b + S.AV]! = data.av;
+    this.ships[b + S.AV_TS]! = data.av_ts;
+    this.ships[b + S.AV_TSEND]! = data.av_tsend;
   }
 
   /** Reset one ship slot when player exit or destroyed */
@@ -316,8 +345,9 @@ export class SSSBoard {
   {
     const result:GameRoomResponseMessage[] = []
 
+    if(DEVLOG) devlog("power en guns",power+" "+en+" "+guns) // todo remove
     /* damage value */
-    const damage = power/100 * en / guns * 0.5 // * 0.5 to satisfy density 0-2
+    const damage = power * en / guns * 0.5 // * 0.5 to satisfy density 0-2
 
     // todo refactor to not use getters/read_ship to speedup
     const s = this.read_ship(uuid)
@@ -394,7 +424,7 @@ export class SSSBoard {
 
       if (!density) continue
       const thp = t.hp - damage*density
-      devlog("thp t.hp damage density", thp, t.hp, damage, density)
+      devlog("thp t.hp damage*density density", thp, t.hp, damage*density, density)
 
       if(thp >0){
         this.set_hp(i, thp)
@@ -452,6 +482,7 @@ export class SSSBoard {
         this.applyAngularVelocity(b, S.AVS, now);
         this.applyAngularVelocity(b, S.AVF, now);
         this.applyAngularVelocity(b, S.AVT, now);
+        this.apply_angular_velocity(b, S.AV, now);
       }
     } catch {
       errlog("update_ship_rotations error");
@@ -468,10 +499,14 @@ export class SSSBoard {
     const last_ts = this.ships[b + ts_offset]!;
     const tsend  = this.ships[b + tsend_offset]!;
   
-    if (last_ts >= now){
-      errlog("applyAngularVelocity() last_ts > now. should not happen")
+    if (last_ts > now){
+      errlog("applyAngularVelocity() last_ts > now. should not happen", last_ts, now)
       return
-    }// hypotetical case of some wrong data and also the first moment
+    }// hypotetical case of some wrong data
+    if (last_ts === now){
+      // if(DEVLOG) errlog("applyAngularVelocity() last_ts === now", last_ts, now) // commented because of lags. Read below apply_angular_velocity() comments
+      return
+    }// case of the first moment. 
 
     
     /** top vector */
@@ -599,6 +634,111 @@ export class SSSBoard {
     const c = 100*(1 + Math.random()) * (Math.random()<0.5?-1:1)
     devlog("new ship random coordinate", c)
     return c
+  }
+
+  private apply_angular_velocity(b: number, avOffset: number, now: number): void {
+    const av = this.ships[b + avOffset]!;
+    if (av === 0) return;
+
+    const ts_offset    = avOffset + 1;   // *_TS   (last update time)
+    const tsend_offset = avOffset + 2;   // *_TSEND (end time)
+  
+    const last_ts = this.ships[b + ts_offset]!;
+    const tsend  = this.ships[b + tsend_offset]!;
+  
+    if (last_ts > now){
+      errlog("apply_angular_velocity() last_ts > now. should not happen", last_ts, now)
+      return
+    }// hypotetical case of some wrong data
+
+    // rawlog("raw_now:", rts(), "last_ts:", last_ts);
+    // warning detected repeatedly returned the same timestamp based on Date.now() . Desided just ignore it. The performance.now() is laggs and ruining everything, with huge negative numbers. It works like prealpha, so no. Integer part of performance.now() often the same, that means settimeouts ignores pauses. and setinterval can ruin the server flow under heavy loading. settimeouts will just delay, without queue. So delay + ignore is better than overload. Especially for free tier account.
+    if (last_ts === now){
+      // if(DEVLOG) errlog("apply_angular_velocity() last_ts === now", last_ts, now) //todo remove
+      return
+    }// case of the first moment. ... and more as described above
+
+    if (now >= tsend){
+      /* case of small rotation still need to be to satisfy the ... "plan" */
+      if (now > tsend){
+        // rotation to difference of time
+        const dt = (tsend - last_ts) / 1000;
+        const angle_rad = av * dt * Math.PI / 180;
+        rawlog("rotation last step: dt=",dt ," angle_rad=", angle_rad)
+        this.rotate_ship_around(b,avOffset,angle_rad)
+      }
+      this.ships[b + avOffset] = 0;
+      // this.ships[b + tsend_offset] = 0;
+      return;
+    }
+
+    const dt = (now - last_ts) / 1000;
+    
+    const angle_rad = av * dt * Math.PI / 180;
+    // rawlog("rotation step: dt=",dt ," angle_rad=", angle_rad)
+    this.rotate_ship_around(b,avOffset,angle_rad)
+  
+    this.ships[b + ts_offset] = now;
+  }
+
+  rotate_ship_around(
+    b:number,
+    avOffset:number,
+    angle_rad:number,
+  ){
+    /** top vector */
+    let t = [this.ships[b + S.TVX]!, this.ships[b + S.TVY]!, this.ships[b + S.TVZ]!]
+    /** front vector */
+    let f = [this.ships[b + S.FVX]!, this.ships[b + S.FVY]!, this.ships[b + S.FVZ]!]
+    /** rotation axis */
+    const axis = [this.ships[b + S.AVX]!, this.ships[b + S.AVY]!, this.ships[b + S.AVZ]!]
+
+    switch (avOffset) {
+      // case S.AVS:
+      //   /** side vector */
+      //   const s = gemm.vec3Dnormal(f,t)
+      //   f = gemm.vecXDone(gemm.vec3Drotate(f, s, angle_rad, true)) // rotated + scaled to one
+      //   t = gemm.vec3Dnormal(s,f) // scaled to one under the hood
+
+      //   this.ships[b + S.TVX] = t[0]!;
+      //   this.ships[b + S.TVY] = t[1]!;
+      //   this.ships[b + S.TVZ] = t[2]!;
+      //   this.ships[b + S.FVX] = f[0]!;
+      //   this.ships[b + S.FVY] = f[1]!;
+      //   this.ships[b + S.FVZ] = f[2]!;
+
+      //   break;
+      // case S.AVF:
+      //   t = gemm.vecXDone(gemm.vec3Drotate(t, f, angle_rad, true));
+      //   this.ships[b + S.TVX] = t[0]!;
+      //   this.ships[b + S.TVY] = t[1]!;
+      //   this.ships[b + S.TVZ] = t[2]!;
+
+      //   break;
+      // case S.AVT:
+      //   f = gemm.vecXDone(gemm.vec3Drotate(f, t, angle_rad, true));
+      //   this.ships[b + S.FVX] = f[0]!;
+      //   this.ships[b + S.FVY] = f[1]!;
+      //   this.ships[b + S.FVZ] = f[2]!;
+
+      //   break;
+      case S.AV:
+        
+        f = gemm.vecXDone(gemm.vec3Drotate(f, axis, angle_rad, true)) // rotated + scaled to one
+        t = gemm.vecXDone(gemm.vec3Drotate(t, axis, angle_rad, true))
+
+        this.ships[b + S.TVX] = t[0]!;
+        this.ships[b + S.TVY] = t[1]!;
+        this.ships[b + S.TVZ] = t[2]!;
+        this.ships[b + S.FVX] = f[0]!;
+        this.ships[b + S.FVY] = f[1]!;
+        this.ships[b + S.FVZ] = f[2]!;
+        break;
+      default:
+        return;
+    }
+  
+    
   }
 
 }

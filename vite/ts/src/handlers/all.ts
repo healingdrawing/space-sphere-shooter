@@ -11,6 +11,7 @@ import { move_down_handler } from "./game/move-down-handler";
 import { move_cw_handler } from "./game/move-cw-handler";
 import { move_ccw_handler } from "./game/move-ccw-handler";
 import { shot_handler } from "./game/shot-handler";
+import { move_target_handler } from "./game/move-target-handler";
 
 /** handle all messages(by type t:MT). Upper level manager/router */
 export function all_handler(text: string, mt:number){
@@ -32,7 +33,7 @@ export function all_handler(text: string, mt:number){
     case MT.DOWNMOVE: move_down_handler(text); break
     case MT.CWMOVE: move_cw_handler(text); break
     case MT.CCWMOVE: move_ccw_handler(text); break
-    // case MT.TARGETMOVE: targetmove_handler(text); break
+    case MT.TARGETMOVE: move_target_handler(text); break
     case MT.S: system_handler(text); break
 
     default: console.error("all_handler() switch default: wrong message type received", mt)
