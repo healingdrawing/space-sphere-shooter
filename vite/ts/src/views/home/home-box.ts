@@ -39,7 +39,7 @@ function create_home_box(){
     <div style="margin-top: 2rem; line-height: 1.5;">
       <strong>Controls (Keyboard)</strong><br>
       Hold longer = stronger action (max 100% ~2 sec)<br>
-      Release = send action<br><br>
+      Release = execute action<br><br>
 
       <strong>Move</strong><br>
       [Z / Numpad1]: Forward<br>
@@ -52,7 +52,7 @@ function create_home_box(){
       [S / Numpad5]: Pitch down<br>
       [W / Numpad7]: CCW (drill)<br>
       [D / Numpad9]: CW (drill)<br>
-      <strike>[X / Numpad3]: Toward target</strike>(in dev)<br><br>
+      [X / Numpad3]: Toward target<br><br>
 
       <strong>Shoot</strong><br>
       [F / Numpad0]: Front<br>
