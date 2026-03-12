@@ -7,6 +7,7 @@ import { gameroom } from "../../../ram/storage";
 import type { GameRoomResponseMessage } from "../../base";
 import { MT } from "../../../enums/mt";
 import { two_ships_collision } from "./collide/obb";
+import { rts } from "../../../utils/basetime";
 
 export class SSSBoard {
   
@@ -649,6 +650,8 @@ export class SSSBoard {
       errlog("apply_angular_velocity() last_ts > now. should not happen", last_ts, now)
       return
     }// hypotetical case of some wrong data
+
+    // rawlog("raw_now:", rts(), "last_ts:", last_ts); // warning detected repeatedly returned the same timestamp based on Date.now() . Desided just ignore it. The performance.now() is laggs and ruining everything, with huge negative numbers. It works like prealpha, so no.
     if (last_ts === now){
       if(DEVLOG) errlog("apply_angular_velocity() last_ts === now", last_ts, now)
       return
