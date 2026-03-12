@@ -1,5 +1,5 @@
 export function xyz_dev(scene: BABYLON.Scene){
-  new BABYLON.Debug.AxesViewer(scene, 15)
+  // new BABYLON.Debug.AxesViewer(scene, 15)
 
   const sun = BABYLON.MeshBuilder.CreateSphere("sun", {diameter: 100}, scene);
   const mat = new BABYLON.StandardMaterial("sunPbr", scene);
