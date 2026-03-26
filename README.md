@@ -96,13 +96,13 @@ Standalone build and Dockerfile build available.
 - - **everything in ram**(no db used).
 - - **nickname duplication** is possible.
 - - **temporary ban** by ip (hardcoded for one hour), in case of signs of hijacking.
-- - **(wip)**CORS managing from .env file, for multiple client domains.
+- - **(wip)** CORS managing from .env file, for multiple client domains.
 
 **CLIENT**:
 - [Vite](https://vite.dev) + [TypeScript](https://www.typescriptlang.org) client([Jotai](https://jotai.org) as ws state manager, [Babylon](https://www.babylonjs.com) for 3D).
 - - Dockerfile.
 - - **critical error** - jump to home page, with closing connection
-- - **(wip, minor)**compile to solid executable if possible using electrobun.dev or electron, to promote/distribute in Steam for free.
+- - **(wip, minor)** compile to solid executable if possible using electrobun.dev or electron, to promote/distribute in Steam for free.
 
 
 ## Raw plan
