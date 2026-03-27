@@ -44,29 +44,32 @@ export function handle_shot_front(ws: Bun.ServerWebSocket<WebSocketData>, msg: U
   const d = s.fr
   
   /* beam start position */
-  let cx = s.cx
-  let cy = s.cy
-  let cz = s.cz
+  const d3 = new Float32Array([s.cx, s.cy, s.cz])
   /* beam direction vector */
-  let vx = s.fvx
-  let vy = s.fvy
-  let vz = s.fvz
+  const v3 = new Float32Array([s.fvx, s.fvy, s.fvz])
 
   /* distanted dot on lazer beam */
-  const b1000 = gemm.dotXDoffset([cx,cy,cz],[vx,vy,vz],1000)
-  const x = b1000[0]! //warning unsafe speed
-  const y = b1000[1]!
-  const z = b1000[2]!
+  const b1000 = new Float32Array(d3)
+  gemm.d3offset_mut(b1000,v3,1000)
+  const x = b1000[0] //warning can be undefined
+  const y = b1000[1]
+  const z = b1000[2]
 
   /* normal vector to beam, to calc sides */
   let nx = s.tvx
   let ny = s.tvy
   let nz = s.tvz
+  const v3n = new Float32Array([s.tvx, s.tvy, s.tvz])
 
   let max_en = s.max_en
   let en = s.en
   
-  const damage_messages = b.lazer_shot( uuid, a, power, en, max_en, vx, vy, vz, nx, ny, nz, cx,cy,cz )
+  const damage_messages = b.lazer_shot(
+    uuid, a, power, en, max_en,
+    v3,
+    v3n,
+    d3
+  )
   
   result.push({
     mt: MT.FRONTSHOT,
