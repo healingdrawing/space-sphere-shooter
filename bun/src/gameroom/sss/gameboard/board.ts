@@ -381,7 +381,7 @@ export class SSSBoard {
       const tc = [t.cx, t.cy, t.cz]
 
       /** vertical plane of the cross styled beam */
-      const vp = gemm.plane3D_dot3Dnormal(bs,bsv)
+      const vp = gemm.plane3D_dot3Dnormal(bs,bnv)
       /** horizontal plane of the cross styled beam */
       const hp = gemm.plane3D_dot3Dnormal(bs,bsv)
 
