@@ -7,9 +7,10 @@ import { mm } from "../../../manage/message";
 import type { LazerBeam } from "../types";
 import { gemm } from "../gameboard/non-autistic-math/gemm";
 import { CCR } from "../../../manage/close";
+import { SOFF as S } from "../gameboard/enums";
 
 export function handle_shot_down(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
-  devlog("handle_shot_down() execution.")
+  if(DEVLOG) devlog("handle_shot_down() execution.")
 
   const result:GameRoomResponseMessage[] = []
 
@@ -31,40 +32,37 @@ export function handle_shot_down(ws: Bun.ServerWebSocket<WebSocketData>, msg: Ui
   }
 
   const uuid = ws.data.uuid
-  const b = gameroom.board
-  //todo refactor without getters/setters and read_ship object. to speedup
-  const s = b.read_ship(uuid)
-
-  const a = s.vert_guns
-
+  const gb = gameroom.board
+  
+  const b = gb.base(uuid)
+  const a = gb.ships[b + S.VERT_GUNS]!
+  
   // check impossibility to shot
   if (!a) return [{ mt: MT.S, msg: { alert_text:"your ship does not have down gun, ... buddy", }, ms: 0, uuids: [uuid] }]
 
   /** distance from ship hull */
-  const d = s.vr
+  const d = gb.ships[b+S.VR]!
   
   /* beam start position */
-  const d3 = new Float32Array([s.cx, s.cy, s.cz])
+  const d3 = gb.ships.subarray(b + S.CX, b + S.CX + 3)
+  
   /* beam direction vector */
-  const v3 = new Float32Array([-s.tvx, -s.tvy, -s.tvz])
+  const v3 = gb.ships.slice(b + S.TVX, b + S.TVX + 3)
+  gemm.v3back_mut(v3)
 
   /* distanted dot on lazer beam */
-  const b1000 = new Float32Array(d3)
+  const b1000 = d3.slice()
+
   gemm.d3offset_mut(b1000,v3,1000)
-  const x = b1000[0] //warning can be undefined
-  const y = b1000[1]
-  const z = b1000[2]
-
-  /* normal vector to beam, to calc sides */
-  let nx = s.fvx
-  let ny = s.fvy
-  let nz = s.fvz
-  const v3n = new Float32Array([s.fvx, s.fvy, s.fvz])
-
-  let max_en = s.max_en
-  let en = s.en
   
-  const damage_messages = b.lazer_shot(
+  /* normal vector to beam, to calc sides */
+  const v3n = gb.ships.subarray(b + S.FVX, b + S.FVX + 3)
+  
+  let max_en = gb.ships[b + S.MAX_EN]!
+  
+  let en = gb.ships[b + S.EN]!
+  
+  const damage_messages = gb.lazer_shot(
     uuid, a, power, en, max_en,
     v3,
     v3n,
@@ -74,13 +72,15 @@ export function handle_shot_down(ws: Bun.ServerWebSocket<WebSocketData>, msg: Ui
   result.push({
     mt: MT.DOWNSHOT,
     msg: {
-      uuid, a, d, x, y, z, nx, ny, nz     
+      uuid, a, d,
+      x:b1000[0], y:b1000[1], z:b1000[2],
+      nx:v3n[0], ny:v3n[1], nz:v3n[2]     
     } as LazerBeam,
     ms: 0,
     uuids: [0]
   })
   
-  if(DEVLOG) devlog("damage_messages",damage_messages) //todo remove
+  if(DEVLOG) devlog("damage_messages", mm.logobj(damage_messages)) //todo remove
   result.push(...damage_messages)
   
   return result
