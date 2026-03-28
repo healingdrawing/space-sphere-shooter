@@ -4,8 +4,7 @@ import type { Frontmove } from "../types";
 import { DEVLOG, devlog, errlog, rawlog } from "../../../debug/debug";
 import { MT } from "../../../enums/mt";
 import { gameroom } from "../../../ram/storage";
-import { vec3 } from "gl-matrix";
-import { SOFF } from "../gameboard/enums";
+import { SOFF as S } from "../gameboard/enums";
 import { rts } from "../../../utils/basetime";
 import { mm } from "../../../manage/message";
 import { CCR } from "../../../manage/close";
@@ -34,53 +33,66 @@ export function handle_move_front(ws: Bun.ServerWebSocket<WebSocketData>, msg: U
   }
 
   const uuid = ws.data.uuid
-  //todo refactor without getters/setters and Ship object. to speedup
-  const b = gameroom.board
-  const ship = b.read_ship(uuid)
-  let front = vec3.fromValues(ship.fvx, ship.fvy, ship.fvz);
-  const lenSq = vec3.squaredLength(front);
+  const gb = gameroom.board
+  const b = gb.base(uuid)
 
-  if (lenSq === 0){
-    errlog("zero front vector", front)
+  const bfv = b+S.FVX
+  const mag = Math.sqrt(
+    gb.ships[bfv]!*gb.ships[bfv]!
+    + gb.ships[bfv+1]!*gb.ships[bfv+1]!
+    + gb.ships[bfv+2]!*gb.ships[bfv+2]!
+  )
+  
+  if (mag === 0){
+    errlog("zero front vector")
     return result;
   }
-  if (lenSq !== 1) front = vec3.normalize(front, front);// warning check
+  if (mag !== 1){
+    gb.ships[bfv]! /= mag
+    gb.ships[bfv+1]! /= mag
+    gb.ships[bfv+2]! /= mag
+  }
+  
+  const accel = gb.ships[b+S.MACCEL]! * power * 30 //warning *30 is dev gap
 
-  const accel =  ship.maccel * power *30 //warning *30 is dev gap
-
-  ship.vvx += front[0] * accel;
-  ship.vvy += front[1] * accel;
-  ship.vvz += front[2] * accel;
-
+  const bvv = b+S.VVX
+  gb.ships[bvv]! += gb.ships[bfv]! * accel;
+  gb.ships[bvv + 1]! += gb.ships[bfv+1]! * accel;
+  gb.ships[bvv + 2]! += gb.ships[bfv+2]! * accel;
+  
   // speed clamp
-  const speed = (ship.vvx**2 + ship.vvy**2 + ship.vvz**2)**0.5;
-  const max_lvelo = ship.max_lvelo
+  const speed = Math.sqrt(
+    gb.ships[bvv]! * gb.ships[bvv]!
+    + gb.ships[bvv + 1]! * gb.ships[bvv + 1]!
+    + gb.ships[bvv + 2]! * gb.ships[bvv + 2]!
+  )
+  
+  const max_lvelo = gb.ships[b+S.MAX_LVELO]!
+  
   if (speed > max_lvelo ) {
-    const scale = max_lvelo  / speed;
+    const scale = max_lvelo / speed;
     if(DEVLOG) rawlog("speed downscale: max_lvelo:", max_lvelo," speed:",speed, " scale:",scale)
-    ship.vvx *= scale;
-    ship.vvy *= scale;
-    ship.vvz *= scale;
+    gb.ships[bvv]! *= scale
+    gb.ships[bvv + 1]! *= scale
+    gb.ships[bvv + 2]! *= scale
   }
   
   const now = rts()
-  if(DEVLOG) rawlog("fmove now:",now,
-    "cx:", ship.cx, " ships[i].cx", b.ships[b.base(uuid)+SOFF.CX],
-    " ship.vvx:", ship.vvx, " ship.fvx:", ship.fvx)
-
-  b.set_vvx(uuid, ship.vvx)
-  b.set_vvy(uuid, ship.vvy)
-  b.set_vvz(uuid, ship.vvz)
-  // b.set_vts(uuid, now)
-  b.ships[b.base(uuid) + SOFF.V_TS] = now
-  if(DEVLOG) rawlog("front ship.vvx:",ship.vvx,"vs record ships[i].vvx:",b.ships[b.base(uuid)+SOFF.VVX]!)
-
+  const bcx = b+S.CX
+  
+  gb.ships[b + S.V_TS] = now
+  
   result.push({
     mt: MT.FRONTMOVE,
-    msg:  {uuid:uuid,
-      cx:ship.cx, cy:ship.cy, cz:ship.cz,
-      vvx:ship.vvx, vvy:ship.vvy, vvz:ship.vvz, vts:now
-    } as Frontmove,
+    msg: {uuid,
+      cx:gb.ships[bcx]!,
+      cy:gb.ships[bcx+1]!,
+      cz:gb.ships[bcx+2]!,
+      vvx:gb.ships[bvv]!,
+      vvy:gb.ships[bvv + 1]!,
+      vvz:gb.ships[bvv + 2]!,
+      vts:now
+    } as Frontmove, // todo assertion can be commented too, it only highlight fields
     ms: 0,
     uuids: [0]
   })
