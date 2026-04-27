@@ -59,7 +59,7 @@ export function handle_move_left(ws: Bun.ServerWebSocket<WebSocketData>, msg: Ui
   const avt_tsend =  now + duration_s*1000
 
   /* raw stop previous rotations */
-  b.update_ship_rotations(now)
+  b.update_ship_rotations(now) // warning todo check properly. It updates all but need only one uuid based, or just nothing. Possibly multifail, for all cases except -move-stop and -move-front
   b.set_avf(uuid, 0)
   b.set_avs(uuid, 0)
 
