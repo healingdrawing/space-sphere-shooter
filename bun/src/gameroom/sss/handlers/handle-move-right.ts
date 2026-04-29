@@ -3,7 +3,6 @@ import { devlog, errlog } from "../../../debug/debug";
 import { MT } from "../../../enums/mt";
 import { gameroom } from "../../../ram/storage";
 import type { GameRoomResponseMessage } from "../../base";
-import { vec3 } from "gl-matrix";
 import { rts } from "../../../utils/basetime";
 import { mm } from "../../../manage/message";
 import type { TopRotation } from "../types";
@@ -35,7 +34,6 @@ export function handle_move_right(ws: Bun.ServerWebSocket<WebSocketData>, msg: U
   }
 
   const uuid = ws.data.uuid
-  //todo refactor without getters/setters and Ship object. to speedup
   const gb = gameroom.board
   const ships = gb.ships
   const b = gb.base(uuid)
@@ -68,15 +66,10 @@ export function handle_move_right(ws: Bun.ServerWebSocket<WebSocketData>, msg: U
 
   /* raw stop previous rotations */
   gb.update_one_ship_rotations(uuid, now)
-  // gb.set_avf(uuid, 0)
-  // gb.set_avs(uuid, 0)
   ships[b + S.AVF] = 0
   ships[b + S.AVS] = 0
 
   /* set new rotation */
-  // gb.set_avt(uuid, avt)
-  // gb.set_avt_ts(uuid, now) // start timestamp
-  // gb.set_avt_tsend(uuid, avt_tsend) //final timestamp
   ships[b + S.AVT] = avt
   ships[b + S.AVT_TS] = now
   ships[b + S.AVT_TSEND] = avt_tsend

@@ -34,7 +34,6 @@ export function handle_move_left(ws: Bun.ServerWebSocket<WebSocketData>, msg: Ui
   }
 
   const uuid = ws.data.uuid
-  //todo refactor without getters/setters and Ship object. to speedup
   const gb = gameroom.board
   const ships = gb.ships
   const b = gb.base(uuid)
@@ -66,16 +65,11 @@ export function handle_move_left(ws: Bun.ServerWebSocket<WebSocketData>, msg: Ui
   const avt_tsend =  now + duration_s*1000
 
   /* raw stop previous rotations */
-  gb.update_one_ship_rotations(uuid, now) // warning todo check properly. It updates all but need only one uuid based, or just nothing. Possibly multifail, for all cases except -move-stop and -move-front
-  // gb.set_avf(uuid, 0)
-  // gb.set_avs(uuid, 0)
+  gb.update_one_ship_rotations(uuid, now)
   ships[b + S.AVF] = 0
   ships[b + S.AVS] = 0
 
   /* set new rotation */
-  // gb.set_avt(uuid, avt)
-  // gb.set_avt_ts(uuid, now) // start timestamp
-  // gb.set_avt_tsend(uuid, avt_tsend) //final timestamp
   ships[b + S.AVT] = avt
   ships[b + S.AVT_TS] = now
   ships[b + S.AVT_TSEND] = avt_tsend

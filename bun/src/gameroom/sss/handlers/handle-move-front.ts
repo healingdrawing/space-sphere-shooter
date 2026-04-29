@@ -34,13 +34,14 @@ export function handle_move_front(ws: Bun.ServerWebSocket<WebSocketData>, msg: U
 
   const uuid = ws.data.uuid
   const gb = gameroom.board
+  const ships = gb.ships
   const b = gb.base(uuid)
 
   const bfv = b+S.FVX
   const mag = Math.sqrt(
-    gb.ships[bfv]!*gb.ships[bfv]!
-    + gb.ships[bfv+1]!*gb.ships[bfv+1]!
-    + gb.ships[bfv+2]!*gb.ships[bfv+2]!
+    ships[bfv]!*ships[bfv]!
+    + ships[bfv+1]!*ships[bfv+1]!
+    + ships[bfv+2]!*ships[bfv+2]!
   )
   
   if (mag === 0){
@@ -48,49 +49,49 @@ export function handle_move_front(ws: Bun.ServerWebSocket<WebSocketData>, msg: U
     return result;
   }
   if (mag !== 1){
-    gb.ships[bfv]! /= mag
-    gb.ships[bfv+1]! /= mag
-    gb.ships[bfv+2]! /= mag
+    ships[bfv]! /= mag
+    ships[bfv+1]! /= mag
+    ships[bfv+2]! /= mag
   }
   
-  const accel = gb.ships[b+S.MACCEL]! * power * 30 //warning *30 is dev gap
+  const accel = ships[b+S.MACCEL]! * power * 30 //warning *30 is dev gap
 
   const bvv = b+S.VVX
-  gb.ships[bvv]! += gb.ships[bfv]! * accel;
-  gb.ships[bvv + 1]! += gb.ships[bfv+1]! * accel;
-  gb.ships[bvv + 2]! += gb.ships[bfv+2]! * accel;
+  ships[bvv]! += ships[bfv]! * accel;
+  ships[bvv + 1]! += ships[bfv+1]! * accel;
+  ships[bvv + 2]! += ships[bfv+2]! * accel;
   
   // speed clamp
   const speed = Math.sqrt(
-    gb.ships[bvv]! * gb.ships[bvv]!
-    + gb.ships[bvv + 1]! * gb.ships[bvv + 1]!
-    + gb.ships[bvv + 2]! * gb.ships[bvv + 2]!
+    ships[bvv]! * ships[bvv]!
+    + ships[bvv + 1]! * ships[bvv + 1]!
+    + ships[bvv + 2]! * ships[bvv + 2]!
   )
   
-  const max_lvelo = gb.ships[b+S.MAX_LVELO]!
+  const max_lvelo = ships[b+S.MAX_LVELO]!
   
   if (speed > max_lvelo ) {
     const scale = max_lvelo / speed;
     if(DEVLOG) rawlog("speed downscale: max_lvelo:", max_lvelo," speed:",speed, " scale:",scale)
-    gb.ships[bvv]! *= scale
-    gb.ships[bvv + 1]! *= scale
-    gb.ships[bvv + 2]! *= scale
+    ships[bvv]! *= scale
+    ships[bvv + 1]! *= scale
+    ships[bvv + 2]! *= scale
   }
   
   const now = rts()
   const bcx = b+S.CX
   
-  gb.ships[b + S.V_TS] = now
+  ships[b + S.V_TS] = now
   
   result.push({
     mt: MT.FRONTMOVE,
     msg: {uuid,
-      cx:gb.ships[bcx]!,
-      cy:gb.ships[bcx+1]!,
-      cz:gb.ships[bcx+2]!,
-      vvx:gb.ships[bvv]!,
-      vvy:gb.ships[bvv + 1]!,
-      vvz:gb.ships[bvv + 2]!,
+      cx:ships[bcx]!,
+      cy:ships[bcx+1]!,
+      cz:ships[bcx+2]!,
+      vvx:ships[bvv]!,
+      vvy:ships[bvv + 1]!,
+      vvz:ships[bvv + 2]!,
       vts:now
     } as Frontmove, // todo assertion can be commented too, it only highlight fields
     ms: 0,

@@ -1,5 +1,5 @@
 import type { WebSocketData } from "../../..";
-import { devlog, errlog, rawlog } from "../../../debug/debug";
+import { devlog, errlog } from "../../../debug/debug";
 import { MT } from "../../../enums/mt";
 import { CCR } from "../../../manage/close";
 import { mm } from "../../../manage/message";
@@ -33,26 +33,27 @@ export function handle_move_stop(ws: Bun.ServerWebSocket<WebSocketData>, msg: Ui
 
   const uuid = ws.data.uuid
   const gb = gameroom.board
+  const ships = gb.ships
   const b = gb.base(uuid)
 
   const bvv = b+S.VVX
   const scale = 1 - power
 
-  gb.ships[bvv]! *= scale
-  gb.ships[bvv + 1]! *= scale
-  gb.ships[bvv + 2]! *= scale
+  ships[bvv]! *= scale
+  ships[bvv + 1]! *= scale
+  ships[bvv + 2]! *= scale
 
   const now = rts()
   const bcx = b+S.CX
 
-  gb.ships[b + S.V_TS] = now
+  ships[b + S.V_TS] = now
 
   result.push({
     mt: MT.STOPMOVE,
     msg: {
       uuid,
-      cx: gb.ships[bcx], cy: gb.ships[bcx+1], cz: gb.ships[bcx+2],
-      vvx: gb.ships[bvv], vvy: gb.ships[bvv + 1], vvz: gb.ships[bvv + 2],
+      cx: ships[bcx], cy: ships[bcx+1], cz: ships[bcx+2],
+      vvx: ships[bvv], vvy: ships[bvv + 1], vvz: ships[bvv + 2],
       vts: now
     },
     ms: 0,
