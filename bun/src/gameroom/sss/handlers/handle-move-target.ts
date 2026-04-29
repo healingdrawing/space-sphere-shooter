@@ -1,16 +1,16 @@
 import type { WebSocketData } from "../../..";
-import { devlog, dlog, errlog, rawlog } from "../../../debug/debug";
+import { DEVLOG, devlog, errlog, rawlog } from "../../../debug/debug";
 import { MT } from "../../../enums/mt";
 import { gameroom } from "../../../ram/storage";
 import type { GameRoomResponseMessage } from "../../base";
-import { vec3 } from "gl-matrix";
 import { rts } from "../../../utils/basetime";
 import { mm } from "../../../manage/message";
-import type { Rotation, SideRotation } from "../types";
+import type { Rotation } from "../types";
 import { CCR } from "../../../manage/close";
 import { calc_av, calc_duration } from "../ship/limits";
 import { gemm } from "../gameboard/non-autistic-math/gemm";
 import type { SSSBoard } from "../gameboard/board";
+import { SOFF as S } from "../gameboard/enums";
 
 export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
   devlog("handle_target_move() execution.")
@@ -37,29 +37,47 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
 
   const uuid = ws.data.uuid
   //todo refactor without getters/setters and Ship object. to speedup
-  const b = gameroom.board
-  const ship = b.read_ship(uuid)
-  let top = vec3.fromValues(ship.tvx, ship.tvy, ship.tvz);
-  const len_sq_top = vec3.squaredLength(top);
-  let front = vec3.fromValues(ship.fvx, ship.fvy, ship.fvz);
-  const len_sq_front = vec3.squaredLength(front);
+  const gb = gameroom.board
+  const ships = gb.ships
+  const b = gb.base(uuid)
 
-  if (len_sq_front === 0){
-    errlog("zero front vector", top)
+  const btv = b + S.TVX
+  const tvx = ships[btv]!
+  const tvy = ships[btv + 1]!
+  const tvz = ships[btv + 2]!
+  
+  const bfv = b + S.FVX
+  const fvx = ships[bfv]!
+  const fvy = ships[bfv + 1]!
+  const fvz = ships[bfv + 2]!
+  
+  if (fvx * fvx + fvy * fvy + fvz * fvz === 0){
+    errlog("zero front vector")
     return result;
   }
-  if (len_sq_top === 0){
-    errlog("zero top vector", top)
+  if (tvx * tvx + tvy * tvy + tvz * tvz === 0){
+    errlog("zero top vector")
     return result;
   }
   // const power = obj.power // 0-100% -> 90 deg
 
   //first without iteration as demo case use sun coordinates. so 0,0,0 as closest ship
-  const cx = ship.cx
-  const cy = ship.cy
-  const cz = ship.cz
+  const sxyz = new Float32Array(3)
+  const bcx = b + S.CX
+  sxyz[0] = ships[bcx]!
+  sxyz[1] = ships[bcx + 1]!
+  sxyz[2] = ships[bcx + 2]!
+  // const cx = ships[bcx]!
+  // const cy = ships[bcx + 1]!
+  // const cz = ships[bcx + 2]!
   
-  const target:[number, number, number] = get_closest_ship_or_sun_coordinates(b, uuid, cx,cy,cz)
+  const target = new Float32Array(3)
+  closest_ship_or_sun_coordinates(
+    gb, uuid,
+    sxyz, target
+  )
+
+  // todo continue refactor below
   /** vector to target ship */
   const vtt = gemm.vecXD([cx,cy,cz],target)
   /* first check the front vector is suitable to create rotation axis with target vector */
@@ -87,20 +105,20 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
   const av_tsend =  now + duration_s*1000
 
   /* raw stop previous rotations */
-  b.update_one_ship_rotations(uuid, now)
-  b.set_avf(uuid, 0)
-  b.set_avt(uuid, 0)
-  b.set_avs(uuid, 0)
+  gb.update_one_ship_rotations(uuid, now)
+  gb.set_avf(uuid, 0)
+  gb.set_avt(uuid, 0)
+  gb.set_avs(uuid, 0)
 
   /* set new rotation */
   
-  b.set_avx(uuid, avx)
-  b.set_avy(uuid, avy)
-  b.set_avz(uuid, avz)
+  gb.set_avx(uuid, avx)
+  gb.set_avy(uuid, avy)
+  gb.set_avz(uuid, avz)
 
-  b.set_av(uuid, av)
-  b.set_av_ts(uuid, now) // start timestamp
-  b.set_av_tsend(uuid, av_tsend) //final timestamp
+  gb.set_av(uuid, av)
+  gb.set_av_ts(uuid, now) // start timestamp
+  gb.set_av_tsend(uuid, av_tsend) //final timestamp
 
   result.push({
     mt: MT.TARGETMOVE,
@@ -117,26 +135,53 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
   return result
 }
 
-/** raw search of closest ship or sun. The 26 boxes around not implemented */
-const get_closest_ship_or_sun_coordinates = (b:SSSBoard, uuid:number, cx:number,cy:number,cz:number):[number, number, number] => {
-  const cxyz:[number, number, number] = [cx, cy, cz]
+/** raw search of closest ship or sun. The 26 boxes around not implemented
+ * @param gb gameroom.board
+ * @param sxyz ship center coordinates
+ * @param target the array to fill uses closest ship or the sun coordinates
+*/
+const closest_ship_or_sun_coordinates = (
+  gb:SSSBoard, uuid:number,
+  sxyz:Float32Array, target:Float32Array) => {
+  target.fill(Infinity)
   let result:[number, number, number] = [Infinity, Infinity, Infinity] 
 
-  
-  const players = b.players
+  /** container to each player center xyz. //todo Consider to refactor without Float32Array creation */
+  const pxyz = new Float32Array(3)
+
+  const ships = gb.ships
+  const players = gb.players
   for (let i=1;i<players.length;i++){
     if (players[i] && i !== uuid){
-      const s = b.read_ship(i)
-      const c:[number, number, number] = [s.cx,s.cy,s.cz]
-      if (gemm.vecXDnorm(gemm.vecXD(cxyz, result)) > gemm.vecXDnorm(gemm.vecXD(cxyz, c))) result = c
+      const b = gb.base(i)
+      pxyz[0] = ships[b + S.CX]!
+      pxyz[1] = ships[b + S.CX + 1]!
+      pxyz[2] = ships[b + S.CX + 2]!
+
+      if (
+        (target[0]! - sxyz[0]!) * (target[0]! - sxyz[0]!)
+        + (target[1]! - sxyz[1]!) * (target[1]! - sxyz[1]!)
+        + (target[2]! - sxyz[2]!) * (target[2]! - sxyz[2]!)
+        >
+        (ships[b + S.CX]! - sxyz[0]!) * (ships[b + S.CX]! - sxyz[0]!)
+        + (ships[b + S.CX + 1]! - sxyz[1]!) * (ships[b + S.CX + 1]! - sxyz[1]!)
+        + (ships[b + S.CX + 2]! - sxyz[2]!) * (ships[b + S.CX + 2]! - sxyz[2]!)
+      ) {
+        target[0] = ships[b + S.CX]!
+        target[1] = ships[b + S.CX + 1]!
+        target[2] = ships[b + S.CX + 2]!
+      }
+
+      // const s = gb.read_ship(i)
+      // const c:[number, number, number] = [s.cx,s.cy,s.cz]
+      // if (gemm.vecXDnorm(gemm.vecXD(sxyz, result)) > gemm.vecXDnorm(gemm.vecXD(sxyz, c))) result = c
     }
   }
 
-  if (result[0] === Infinity
-    && result [1] === Infinity
-    && result[2] === Infinity
-  ) result = [0,0,0]// zero zero zero is sun coordinates(hardcoded at the moment)
+  if (target[0] === Infinity
+    && target [1] === Infinity
+    && target[2] === Infinity
+  ) target.fill(0) // zero zero zero is sun coordinates(hardcoded at the moment)
 
-  devlog("closest target", result)
-  return result
+  if (DEVLOG) devlog("closest target", result) //todo remove
 }
