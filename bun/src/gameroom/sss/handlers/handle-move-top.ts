@@ -9,6 +9,7 @@ import { mm } from "../../../manage/message";
 import type { SideRotation } from "../types";
 import { CCR } from "../../../manage/close";
 import { calc_av, calc_duration } from "../ship/limits";
+import { SOFF as S } from "../gameboard/enums";
 
 export function handle_move_top(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
   devlog("handle_move_top() execution.")
@@ -35,45 +36,58 @@ export function handle_move_top(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uin
 
   const uuid = ws.data.uuid
   //todo refactor without getters/setters and Ship object. to speedup
-  const b = gameroom.board
-  const ship = b.read_ship(uuid)
-  let top = vec3.fromValues(ship.tvx, ship.tvy, ship.tvz);
-  const len_sq_top = vec3.squaredLength(top);
-  let front = vec3.fromValues(ship.fvx, ship.fvy, ship.fvz);
-  const len_sq_front = vec3.squaredLength(front);
+  const gb = gameroom.board
+  const ships = gb.ships
+  const b = gb.base(uuid)
 
-  if (len_sq_front === 0){
-    errlog("zero front vector", top)
+  const btv = b + S.TVX
+  const tvx = ships[btv]!
+  const tvy = ships[btv + 1]!
+  const tvz = ships[btv + 2]!
+  
+  const bfv = b + S.FVX
+  const fvx = ships[bfv]!
+  const fvy = ships[bfv + 1]!
+  const fvz = ships[bfv + 2]!
+  
+  if (fvx * fvx + fvy * fvy + fvz * fvz === 0){
+    errlog("zero front vector")
     return result;
   }
-  if (len_sq_top === 0){
-    errlog("zero top vector", top)
+  if (tvx * tvx + tvy * tvy + tvz * tvz === 0){
+    errlog("zero top vector")
     return result;
   }
   // const power = obj.power // 0-100% -> 90 deg
   
   // const avs +-[deg/s]. avoid accel at the moment
-  const avs = (calc_av(ship.max_avelo, power))
+  const avs = (calc_av(ships[b + S.MAX_AVELO]!, power))
   const duration_s = calc_duration(avs, power)
   const now = rts()
   const avs_tsend =  now + duration_s*1000
 
   /* raw stop previous rotations */
-  b.update_one_ship_rotations(uuid, now)
-  b.set_avf(uuid, 0)
-  b.set_avt(uuid, 0)
+  gb.update_one_ship_rotations(uuid, now)
+  // gb.set_avf(uuid, 0)
+  // gb.set_avt(uuid, 0)
+  ships[b + S.AVF] = 0
+  ships[b + S.AVT] = 0
+
 
   /* set new rotation */
-  b.set_avs(uuid, avs)
-  b.set_avs_ts(uuid, now) // start timestamp
-  b.set_avs_tsend(uuid, avs_tsend) //final timestamp
+  // gb.set_avs(uuid, avs)
+  // gb.set_avs_ts(uuid, now) // start timestamp
+  // gb.set_avs_tsend(uuid, avs_tsend) //final timestamp
+  ships[b + S.AVS] = avs
+  ships[b + S.AVS_TS] = now
+  ships[b + S.AVS_TSEND] = avs_tsend
 
   result.push({
     mt: MT.TOPMOVE,
     msg: {
-      uuid, avs:avs, avs_ts:now, avs_tsend,
-      fvx:ship.fvx, fvy:ship.fvy, fvz:ship.fvz,
-      tvx:ship.tvx,tvy:ship.tvy,tvz:ship.tvz,      
+      uuid, avs, avs_ts:now, avs_tsend,
+      fvx, fvy, fvz,
+      tvx,tvy,tvz,      
     } as SideRotation,
     ms: 0,
     uuids: [0]
