@@ -523,6 +523,21 @@ export class SSSBoard {
       errlog("update_ship_rotations error");
     }
   }
+
+  update_one_ship_rotations(uuid:number, now: number): void {
+    try {
+      const b = this.base(uuid);
+      if (!this.ships[b + S.HP]) return;
+      // rawlog("log_ship:", this.log_ship(i)) //todo delete
+        /** consider order around side, front, top . to provide persuit first numpad 7/8/9, then 4/6 horisontal . No quaternions. only vector rotate */
+      this.applyAngularVelocity(b, S.AVS, now);
+      this.applyAngularVelocity(b, S.AVF, now);
+      this.applyAngularVelocity(b, S.AVT, now);
+      this.apply_angular_velocity(b, S.AV, now);
+    } catch {
+      errlog("update_one_ship_rotations error");
+    }
+  }
   
   private applyAngularVelocity(b: number, avOffset: number, now: number): void {
     const av = this.ships[b + avOffset]!;
