@@ -68,6 +68,7 @@ export function handle_move_left(ws: Bun.ServerWebSocket<WebSocketData>, msg: Ui
   gb.update_one_ship_rotations(uuid, now)
   ships[b + S.AVF] = 0
   ships[b + S.AVS] = 0
+  ships[b + S.AV] = 0
 
   /* set new rotation */
   ships[b + S.AVT] = avt

@@ -68,7 +68,7 @@ export function handle_move_cw(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint
   gb.update_one_ship_rotations(uuid, now)
   ships[b + S.AVT] = 0
   ships[b + S.AVS] = 0
-
+  ships[b + S.AV] = 0
 
   /* set new rotation */
   ships[b + S.AVF] = avf
