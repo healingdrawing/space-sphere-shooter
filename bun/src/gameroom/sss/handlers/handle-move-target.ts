@@ -42,20 +42,22 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
   const b = gb.base(uuid)
 
   const btv = b + S.TVX
-  const tvx = ships[btv]!
-  const tvy = ships[btv + 1]!
-  const tvz = ships[btv + 2]!
+  const tv = new Float32Array(3)
+  tv[0] = ships[btv]!
+  tv[1] = ships[btv + 1]!
+  tv[2] = ships[btv + 2]!
   
   const bfv = b + S.FVX
-  const fvx = ships[bfv]!
-  const fvy = ships[bfv + 1]!
-  const fvz = ships[bfv + 2]!
+  const fv = new Float32Array(3)
+  fv[0] = ships[bfv]!
+  fv[0] = ships[bfv + 1]!
+  fv[0] = ships[bfv + 2]!
   
-  if (fvx * fvx + fvy * fvy + fvz * fvz === 0){
+  if (fv[0]! * fv[0]! + fv[1]! * fv[1]! + fv[2]! * fv[2]! === 0){
     errlog("zero front vector")
     return result;
   }
-  if (tvx * tvx + tvy * tvy + tvz * tvz === 0){
+  if (tv[0] * tv[0] + tv[1] * tv[1] + tv[2] * tv[2] === 0){
     errlog("zero top vector")
     return result;
   }
@@ -71,19 +73,26 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
   // const cy = ships[bcx + 1]!
   // const cz = ships[bcx + 2]!
   
-  const target = new Float32Array(3)
+  /** container. first 3d dot, then 3d vector */
+  const t3d = new Float32Array(3)
   closest_ship_or_sun_coordinates(
     gb, uuid,
-    sxyz, target
+    sxyz, t3d
   )
 
-  // todo continue refactor below
   /** vector to target ship */
-  const vtt = gemm.vecXD([cx,cy,cz],target)
-  /* first check the front vector is suitable to create rotation axis with target vector */
-  const angle_deg = gemm.degrees(Math.acos(gemm.vecXDcos([ship.fvx,ship.fvy,ship.fvz],vtt)))
-  devlog("target angle [deg]", angle_deg) // todo remove
+  t3d[0]! -= sxyz[0]
+  t3d[1]! -= sxyz[1]
+  t3d[2]! -= sxyz[2]
+  // const vtt = gemm.vecXD([cx,cy,cz],t3d)
   
+  /* first check the front vector is suitable to create rotation axis with target vector */
+  const angle_deg = gemm.degrees(Math.acos( gemm.v3v3cos(fv, t3d) ))
+  
+  // const angle_deg = gemm.degrees(Math.acos(gemm.vecXDcos([ship.fvx,ship.fvy,ship.fvz],vtt)))
+  if (DEVLOG) devlog("target angle [deg]", angle_deg) // todo remove
+  
+  // todo continue refactor below
   let axis:number[]
   if (!angle_deg || angle_deg === 180){
     axis = [ship.tvx,ship.tvy,ship.tvz]
