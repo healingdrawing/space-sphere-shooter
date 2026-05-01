@@ -41,12 +41,14 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
   const ships = gb.ships
   const b = gb.base(uuid)
 
+  /** ship top vector */
   const btv = b + S.TVX
   const tv = new Float32Array(3)
   tv[0] = ships[btv]!
   tv[1] = ships[btv + 1]!
   tv[2] = ships[btv + 2]!
   
+  /** ship front vector */
   const bfv = b + S.FVX
   const fv = new Float32Array(3)
   fv[0] = ships[bfv]!
@@ -64,78 +66,95 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
   // const power = obj.power // 0-100% -> 90 deg
 
   //first without iteration as demo case use sun coordinates. so 0,0,0 as closest ship
-  const sxyz = new Float32Array(3)
+  /** ship center coordinates */
+  const center = new Float32Array(3)
   const bcx = b + S.CX
-  sxyz[0] = ships[bcx]!
-  sxyz[1] = ships[bcx + 1]!
-  sxyz[2] = ships[bcx + 2]!
+  center[0] = ships[bcx]!
+  center[1] = ships[bcx + 1]!
+  center[2] = ships[bcx + 2]!
   // const cx = ships[bcx]!
   // const cy = ships[bcx + 1]!
   // const cz = ships[bcx + 2]!
   
   /** container. first 3d dot, then 3d vector */
-  const t3d = new Float32Array(3)
+  const target = new Float32Array(3)
   closest_ship_or_sun_coordinates(
     gb, uuid,
-    sxyz, t3d
+    center, target
   )
 
   /** vector to target ship */
-  t3d[0]! -= sxyz[0]
-  t3d[1]! -= sxyz[1]
-  t3d[2]! -= sxyz[2]
+  const vtt = new Float32Array(3)
+  vtt[0] = target[0]! - center[0]
+  vtt[1] = target[1]! - center[1]
+  vtt[2] = target[2]! - center[2]
   // const vtt = gemm.vecXD([cx,cy,cz],t3d)
   
   /* first check the front vector is suitable to create rotation axis with target vector */
-  const angle_deg = gemm.degrees(Math.acos( gemm.v3v3cos(fv, t3d) ))
+  const angle_deg = gemm.degrees(Math.acos( gemm.v3v3cos(fv, vtt) ))
   
   // const angle_deg = gemm.degrees(Math.acos(gemm.vecXDcos([ship.fvx,ship.fvy,ship.fvz],vtt)))
   if (DEVLOG) devlog("target angle [deg]", angle_deg) // todo remove
   
   // todo continue refactor below
-  let axis:number[]
-  if (!angle_deg || angle_deg === 180){
-    axis = [ship.tvx,ship.tvy,ship.tvz]
-    rawlog("top axis used", axis) //todo remove
+  const axis = new Float32Array(3)
+  if (!(angle_deg%180)){
+    axis[0] = tv[0]
+    axis[1] = tv[1]
+    axis[2] = tv[2]
+    // axis = [ship.tvx,ship.tvy,ship.tvz]
+    if (DEVLOG) devlog("top axis used", axis) //todo remove
   } else {
-    axis = gemm.vec3Dnormal([ship.fvx,ship.fvy,ship.fvz],vtt)
-    rawlog("front axis used",axis) //todo remove
+    // axis = gemm.vec3Dnormal([ship.fvx,ship.fvy,ship.fvz],vtt)
+    gemm.v3normal(fv, vtt, axis)
+    if (DEVLOG) devlog("front axis used", axis) //todo remove
   }
   
 
-  const avx = axis[0]! //warning unsafe speed
-  const avy = axis[1]!
-  const avz = axis[2]!
+  // const avx = axis[0]! //warning unsafe speed
+  // const avy = axis[1]!
+  // const avz = axis[2]!
   
   // const avs +-[deg/s]. avoid accel at the moment
-  const av = (calc_av(ship.max_avelo, power))
+  const av = (calc_av(ships[b + S.MAX_AVELO]!, power))
   const duration_s = calc_duration(av, power, angle_deg)
   const now = rts()
   const av_tsend =  now + duration_s*1000
 
   /* raw stop previous rotations */
   gb.update_one_ship_rotations(uuid, now)
-  gb.set_avf(uuid, 0)
-  gb.set_avt(uuid, 0)
-  gb.set_avs(uuid, 0)
+  // gb.set_avf(uuid, 0)
+  // gb.set_avt(uuid, 0)
+  // gb.set_avs(uuid, 0)
+  ships[b + S.AVF] = 0
+  ships[b + S.AVT] = 0
+  ships[b + S.AVS] = 0
 
   /* set new rotation */
   
-  gb.set_avx(uuid, avx)
-  gb.set_avy(uuid, avy)
-  gb.set_avz(uuid, avz)
+  // gb.set_avx(uuid, avx)
+  // gb.set_avy(uuid, avy)
+  // gb.set_avz(uuid, avz)
 
-  gb.set_av(uuid, av)
-  gb.set_av_ts(uuid, now) // start timestamp
-  gb.set_av_tsend(uuid, av_tsend) //final timestamp
+  ships[b + S.AVX] = axis[0]!
+  ships[b + S.AVY] = axis[1]!
+  ships[b + S.AVZ] = axis[2]!
+
+  // gb.set_av(uuid, av)
+  // gb.set_av_ts(uuid, now) // start timestamp
+  // gb.set_av_tsend(uuid, av_tsend) //final timestamp
+  ships[b + S.AV] = av
+  ships[b + S.AV_TS] = now
+  ships[b + S.AV_TSEND] = av_tsend
+
 
   result.push({
     mt: MT.TARGETMOVE,
     msg: {
-      uuid, av:av, av_ts:now, av_tsend: av_tsend,
-      fvx:ship.fvx, fvy:ship.fvy, fvz:ship.fvz,
-      tvx:ship.tvx,tvy:ship.tvy,tvz:ship.tvz,
-      avx:avx,avy:avy,avz:avz, // todo rotation axis must be calculated every start
+      uuid, av, av_ts:now, av_tsend,
+      fvx:fv[0]!, fvy:fv[1]!, fvz:fv[2]!,
+      tvx:tv[0]!,tvy:tv[1]!,tvz:tv[2]!,
+      avx:axis[0]!,avy:axis[1]!,avz:axis[2]!, // todo rotation axis must be calculated every start
     } as Rotation,
     ms: 0,
     uuids: [0]
@@ -188,9 +207,9 @@ const closest_ship_or_sun_coordinates = (
   }
 
   if (target[0] === Infinity
-    && target [1] === Infinity
-    && target[2] === Infinity
+    || target [1] === Infinity
+    || target[2] === Infinity
   ) target.fill(0) // zero zero zero is sun coordinates(hardcoded at the moment)
 
-  if (DEVLOG) devlog("closest target", result) //todo remove
+  if (DEVLOG) devlog("closest target", target) //todo remove
 }
