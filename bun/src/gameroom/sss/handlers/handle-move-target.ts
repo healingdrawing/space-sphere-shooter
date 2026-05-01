@@ -42,24 +42,24 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
   const b = gb.base(uuid)
 
   /** ship top vector */
-  const btv = b + S.TVX
-  const tv = new Float32Array(3)
-  tv[0] = ships[btv]!
-  tv[1] = ships[btv + 1]!
-  tv[2] = ships[btv + 2]!
+  const btop = b + S.TVX
+  const top = new Float32Array(3)
+  top[0] = ships[btop]!
+  top[1] = ships[btop + 1]!
+  top[2] = ships[btop + 2]!
   
   /** ship front vector */
-  const bfv = b + S.FVX
-  const fv = new Float32Array(3)
-  fv[0] = ships[bfv]!
-  fv[0] = ships[bfv + 1]!
-  fv[0] = ships[bfv + 2]!
+  const bfront = b + S.FVX
+  const front = new Float32Array(3)
+  front[0] = ships[bfront]!
+  front[0] = ships[bfront + 1]!
+  front[0] = ships[bfront + 2]!
   
-  if (fv[0]! * fv[0]! + fv[1]! * fv[1]! + fv[2]! * fv[2]! === 0){
+  if (front[0]! * front[0]! + front[1]! * front[1]! + front[2]! * front[2]! === 0){
     errlog("zero front vector")
     return result;
   }
-  if (tv[0] * tv[0] + tv[1] * tv[1] + tv[2] * tv[2] === 0){
+  if (top[0] * top[0] + top[1] * top[1] + top[2] * top[2] === 0){
     errlog("zero top vector")
     return result;
   }
@@ -72,11 +72,8 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
   center[0] = ships[bcx]!
   center[1] = ships[bcx + 1]!
   center[2] = ships[bcx + 2]!
-  // const cx = ships[bcx]!
-  // const cy = ships[bcx + 1]!
-  // const cz = ships[bcx + 2]!
   
-  /** container. first 3d dot, then 3d vector */
+  /** target center coordinates */
   const target = new Float32Array(3)
   closest_ship_or_sun_coordinates(
     gb, uuid,
@@ -88,34 +85,25 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
   vtt[0] = target[0]! - center[0]
   vtt[1] = target[1]! - center[1]
   vtt[2] = target[2]! - center[2]
-  // const vtt = gemm.vecXD([cx,cy,cz],t3d)
-  
+    
   /* first check the front vector is suitable to create rotation axis with target vector */
-  const angle_deg = gemm.degrees(Math.acos( gemm.v3v3cos(fv, vtt) ))
+  const angle_deg = gemm.degrees(Math.acos( gemm.v3v3cos(front, vtt) ))
   
-  // const angle_deg = gemm.degrees(Math.acos(gemm.vecXDcos([ship.fvx,ship.fvy,ship.fvz],vtt)))
   if (DEVLOG) devlog("target angle [deg]", angle_deg) // todo remove
   
   // todo continue refactor below
   const axis = new Float32Array(3)
   if (!(angle_deg%180)){
-    axis[0] = tv[0]
-    axis[1] = tv[1]
-    axis[2] = tv[2]
-    // axis = [ship.tvx,ship.tvy,ship.tvz]
+    axis[0] = top[0]
+    axis[1] = top[1]
+    axis[2] = top[2]
     if (DEVLOG) devlog("top axis used", axis) //todo remove
   } else {
-    // axis = gemm.vec3Dnormal([ship.fvx,ship.fvy,ship.fvz],vtt)
-    gemm.v3normal(fv, vtt, axis)
+    gemm.v3normal(front, vtt, axis)
     if (DEVLOG) devlog("front axis used", axis) //todo remove
   }
   
-
-  // const avx = axis[0]! //warning unsafe speed
-  // const avy = axis[1]!
-  // const avz = axis[2]!
-  
-  // const avs +-[deg/s]. avoid accel at the moment
+  // const av +-[deg/s]. avoid accel at the moment
   const av = (calc_av(ships[b + S.MAX_AVELO]!, power))
   const duration_s = calc_duration(av, power, angle_deg)
   const now = rts()
@@ -123,37 +111,26 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
 
   /* raw stop previous rotations */
   gb.update_one_ship_rotations(uuid, now)
-  // gb.set_avf(uuid, 0)
-  // gb.set_avt(uuid, 0)
-  // gb.set_avs(uuid, 0)
-  ships[b + S.AVF] = 0
-  ships[b + S.AVT] = 0
-  ships[b + S.AVS] = 0
+  gb.ships[b + S.AVF] = 0
+  gb.ships[b + S.AVT] = 0
+  gb.ships[b + S.AVS] = 0
 
   /* set new rotation */
-  
-  // gb.set_avx(uuid, avx)
-  // gb.set_avy(uuid, avy)
-  // gb.set_avz(uuid, avz)
+  gb.ships[b + S.AVX] = axis[0]!
+  gb.ships[b + S.AVY] = axis[1]!
+  gb.ships[b + S.AVZ] = axis[2]!
 
-  ships[b + S.AVX] = axis[0]!
-  ships[b + S.AVY] = axis[1]!
-  ships[b + S.AVZ] = axis[2]!
-
-  // gb.set_av(uuid, av)
-  // gb.set_av_ts(uuid, now) // start timestamp
-  // gb.set_av_tsend(uuid, av_tsend) //final timestamp
-  ships[b + S.AV] = av
-  ships[b + S.AV_TS] = now
-  ships[b + S.AV_TSEND] = av_tsend
+  gb.ships[b + S.AV] = av
+  gb.ships[b + S.AV_TS] = now
+  gb.ships[b + S.AV_TSEND] = av_tsend
 
 
   result.push({
     mt: MT.TARGETMOVE,
     msg: {
-      uuid, av, av_ts:now, av_tsend,
-      fvx:fv[0]!, fvy:fv[1]!, fvz:fv[2]!,
-      tvx:tv[0]!,tvy:tv[1]!,tvz:tv[2]!,
+      uuid, av:av, av_ts:now, av_tsend:av_tsend,
+      fvx:front[0]!, fvy:front[1]!, fvz:front[2]!,
+      tvx:top[0]!,tvy:top[1]!,tvz:top[2]!,
       avx:axis[0]!,avy:axis[1]!,avz:axis[2]!, // todo rotation axis must be calculated every start
     } as Rotation,
     ms: 0,
@@ -172,8 +149,7 @@ const closest_ship_or_sun_coordinates = (
   gb:SSSBoard, uuid:number,
   sxyz:Float32Array, target:Float32Array) => {
   target.fill(Infinity)
-  let result:[number, number, number] = [Infinity, Infinity, Infinity] 
-
+  
   /** container to each player center xyz. //todo Consider to refactor without Float32Array creation */
   const pxyz = new Float32Array(3)
 
