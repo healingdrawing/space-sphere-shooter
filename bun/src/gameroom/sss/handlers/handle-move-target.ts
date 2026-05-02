@@ -1,12 +1,11 @@
 import type { WebSocketData } from "../../..";
-import { DEVLOG, devlog, dlog, errlog, rawlog } from "../../../debug/debug";
+import { DEVLOG, devlog, errlog, rawlog } from "../../../debug/debug";
 import { MT } from "../../../enums/mt";
 import { gameroom } from "../../../ram/storage";
 import type { GameRoomResponseMessage } from "../../base";
-import { vec3 } from "gl-matrix";
 import { rts } from "../../../utils/basetime";
 import { mm } from "../../../manage/message";
-import type { Rotation, SideRotation } from "../types";
+import type { Rotation } from "../types";
 import { CCR } from "../../../manage/close";
 import { calc_av, calc_duration } from "../ship/limits";
 import { gemm } from "../gameboard/non-autistic-math/gemm";
@@ -37,18 +36,15 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
   }
 
   const uuid = ws.data.uuid
-  //todo refactor without getters/setters and Ship object. to speedup
   const gb = gameroom.board
   const b = gb.base(uuid)
 
 
-  // let top = vec3.fromValues(ship.tvx, ship.tvy, ship.tvz);
   const top = new Float32Array(3)
   top[0] = gb.ships[b + S.TVX]!
   top[1] = gb.ships[b + S.TVX + 1]!
   top[2] = gb.ships[b + S.TVX + 2]!
 
-  // let front = vec3.fromValues(ship.fvx, ship.fvy, ship.fvz);
   const front = new Float32Array(3)
   front[0] = gb.ships[b + S.FVX]!
   front[1] = gb.ships[b + S.FVX + 1]!
@@ -72,21 +68,16 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
   const target = new Float32Array(3)
   closest_ship_or_sun_coordinates(gb, uuid, center, target )
   /** vector from center to target */
-  // const vtt = gemm.vecXD(
-  //   center as unknown as number[],
-  //   target as unknown as number[]
-  // )
   const vct = new Float32Array(3)
   vct[0] = target[0]! - center[0]
   vct[1] = target[1]! - center[1]
   vct[2] = target[2]! - center[2]
   /* first check the front vector is suitable to create rotation axis with target vector */
   const angle_deg = gemm.degrees(Math.acos(gemm.v3v3cos( front, vct )))
-  devlog("target angle [deg]", angle_deg) // todo remove
+  if(DEVLOG) devlog("target angle [deg]", angle_deg) // todo remove
   
   const axis = new Float32Array(3)
   if (!angle_deg || angle_deg === 180){
-    // axis = [ship.tvx,ship.tvy,ship.tvz]
     axis[0] = top[0]
     axis[1] = top[1]
     axis[2] = top[2]
@@ -104,25 +95,15 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
 
   /* raw stop previous rotations */
   gb.update_one_ship_rotations(uuid, now)
-  // gb.set_avf(uuid, 0)
-  // gb.set_avt(uuid, 0)
-  // gb.set_avs(uuid, 0)
   gb.ships[b + S.AVF] = 0
   gb.ships[b + S.AVT] = 0
   gb.ships[b + S.AVS] = 0
 
   /* set new rotation */
-  
-  // gb.set_avx(uuid, avx)
-  // gb.set_avy(uuid, avy)
-  // gb.set_avz(uuid, avz)
   gb.ships[b + S.AVX] = axis[0]!
   gb.ships[b + S.AVY] = axis[1]!
   gb.ships[b + S.AVZ] = axis[2]!
 
-  // gb.set_av(uuid, av)
-  // gb.set_av_ts(uuid, now) // start timestamp
-  // gb.set_av_tsend(uuid, av_tsend) //final timestamp
   gb.ships[b + S.AV] = av
   gb.ships[b + S.AV_TS] = now
   gb.ships[b + S.AV_TSEND] = av_tsend
