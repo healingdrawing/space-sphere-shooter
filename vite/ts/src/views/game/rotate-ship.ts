@@ -10,9 +10,11 @@ export const front_rotation = (data: FrontRotation) => {
   /* patch to force function rotate to present timestamp */
   if(ship_box.metadata.sideRotation) ship_box.metadata.sideRotation.tsend = now;
   if(ship_box.metadata.topRotation) ship_box.metadata.topRotation.tsend = now;
+  if(ship_box.metadata.targetRotation) ship_box.metadata.targetRotation.tsend = now;
   check_rotations_metadata(ship_box, now+1)
   delete ship_box.metadata.sideRotation;
   delete ship_box.metadata.topRotation;
+  delete ship_box.metadata.targetRotation;
   syncOrientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
   ship_box.metadata.frontRotation = {av: data.avf, ts: data.avf_ts, tsend: data.avf_tsend};
 };
@@ -24,9 +26,11 @@ export const top_rotation = (data: TopRotation) => {
   /* patch to force function rotate to present timestamp */
   if(ship_box.metadata.frontRotation) ship_box.metadata.frontRotation.tsend = now;
   if(ship_box.metadata.sideRotation) ship_box.metadata.sideRotation.tsend = now;
+  if(ship_box.metadata.targetRotation) ship_box.metadata.targetRotation.tsend = now;
   check_rotations_metadata(ship_box, now+1)
   delete ship_box.metadata.frontRotation;
   delete ship_box.metadata.sideRotation;
+  delete ship_box.metadata.targetRotation;
 
   //warning //bug syncO...
   // console.log("TOP_ROTATION call:", {
@@ -47,9 +51,11 @@ export const side_rotation = (data: SideRotation) => {
   /* patch to force function rotate to present timestamp */
   if(ship_box.metadata.topRotation) ship_box.metadata.topRotation.tsend = now;
   if(ship_box.metadata.frontRotation) ship_box.metadata.frontRotation.tsend = now;
+  if(ship_box.metadata.targetRotation) ship_box.metadata.targetRotation.tsend = now;
   check_rotations_metadata(ship_box, now+1)
   delete ship_box.metadata.topRotation;
   delete ship_box.metadata.frontRotation;
+  delete ship_box.metadata.targetRotation;
 
   // console.log("SIDE_ROTATION called:", {
   //   avs: data.avs,  // angular velocity
