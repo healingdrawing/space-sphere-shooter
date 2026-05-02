@@ -25,7 +25,7 @@ export interface WebSocketData {
 }
 
 /** server access, to broadcast easily */
-export const s = Bun.serve<WebSocketData, undefined>({
+export const s = Bun.serve<WebSocketData>({
   hostname: HOST,
   port: PORT,
   async fetch(req, server) {
