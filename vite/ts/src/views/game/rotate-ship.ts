@@ -1,7 +1,7 @@
 import { crts } from "../../handlers/utils";
 import { type FrontRotation, type Rotation, type SideRotation, type TopRotation } from "../../tunnel";
 import { game_box } from "./game-box";
-import { syncOrientation } from "./sync-orientation";
+import { sync_orientation } from "./sync-orientation";
 
 export const front_rotation = (data: FrontRotation) => {
   const ship_box = game_box.ship_boxes[data.uuid]!;
@@ -10,10 +10,12 @@ export const front_rotation = (data: FrontRotation) => {
   /* patch to force function rotate to present timestamp */
   if(ship_box.metadata.sideRotation) ship_box.metadata.sideRotation.tsend = now;
   if(ship_box.metadata.topRotation) ship_box.metadata.topRotation.tsend = now;
+  if(ship_box.metadata.targetRotation) ship_box.metadata.targetRotation.tsend = now;
   check_rotations_metadata(ship_box, now+1)
   delete ship_box.metadata.sideRotation;
   delete ship_box.metadata.topRotation;
-  syncOrientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
+  delete ship_box.metadata.targetRotation;
+  sync_orientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
   ship_box.metadata.frontRotation = {av: data.avf, ts: data.avf_ts, tsend: data.avf_tsend};
 };
 
@@ -24,9 +26,11 @@ export const top_rotation = (data: TopRotation) => {
   /* patch to force function rotate to present timestamp */
   if(ship_box.metadata.frontRotation) ship_box.metadata.frontRotation.tsend = now;
   if(ship_box.metadata.sideRotation) ship_box.metadata.sideRotation.tsend = now;
+  if(ship_box.metadata.targetRotation) ship_box.metadata.targetRotation.tsend = now;
   check_rotations_metadata(ship_box, now+1)
   delete ship_box.metadata.frontRotation;
   delete ship_box.metadata.sideRotation;
+  delete ship_box.metadata.targetRotation;
 
   //warning //bug syncO...
   // console.log("TOP_ROTATION call:", {
@@ -36,7 +40,7 @@ export const top_rotation = (data: TopRotation) => {
   //   duration: data.avt_tsend - data.avt_ts,
   //   fvx: data.fvx, fvy: data.fvy, fvz: data.fvz, tvx: data.tvx, tvy: data.tvy, tvz: data.tvz,    
   // });
-  syncOrientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
+  sync_orientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
   ship_box.metadata.topRotation = {av: data.avt, ts: data.avt_ts, tsend: data.avt_tsend};
 };
 
@@ -47,9 +51,11 @@ export const side_rotation = (data: SideRotation) => {
   /* patch to force function rotate to present timestamp */
   if(ship_box.metadata.topRotation) ship_box.metadata.topRotation.tsend = now;
   if(ship_box.metadata.frontRotation) ship_box.metadata.frontRotation.tsend = now;
+  if(ship_box.metadata.targetRotation) ship_box.metadata.targetRotation.tsend = now;
   check_rotations_metadata(ship_box, now+1)
   delete ship_box.metadata.topRotation;
   delete ship_box.metadata.frontRotation;
+  delete ship_box.metadata.targetRotation;
 
   // console.log("SIDE_ROTATION called:", {
   //   avs: data.avs,  // angular velocity
@@ -59,7 +65,7 @@ export const side_rotation = (data: SideRotation) => {
   //   vectors: { fvx: data.fvx, fvy: data.fvy, fvz: data.fvz, tvx: data.tvx, tvy: data.tvy, tvz: data.tvz },
   // });
 
-  syncOrientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
+  sync_orientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
   ship_box.metadata.sideRotation = {av: data.avs, ts: data.avs_ts, tsend: data.avs_tsend};
 };
 
@@ -84,7 +90,7 @@ export const target_rotation = (data: Rotation) => {
   //   vectors: { fvx: data.fvx, fvy: data.fvy, fvz: data.fvz, tvx: data.tvx, tvy: data.tvy, tvz: data.tvz },
   // });
 
-  syncOrientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
+  sync_orientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
   ship_box.metadata.targetRotation = {
     av: data.av, ts: data.av_ts, tsend: data.av_tsend,
     avx: data.avx,avy: data.avy,avz: data.avz,

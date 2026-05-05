@@ -1,54 +1,59 @@
 import type { WebSocketData } from "../../..";
-import { devlog, rawlog } from "../../../debug/debug";
+import { devlog, errlog } from "../../../debug/debug";
 import { MT } from "../../../enums/mt";
+import { CCR } from "../../../manage/close";
+import { mm } from "../../../manage/message";
 import { gameroom } from "../../../ram/storage";
 import { rts } from "../../../utils/basetime";
 import type { GameRoomResponseMessage } from "../../base";
-import { SOFF } from "../gameboard/enums";
+import { SOFF as S } from "../gameboard/enums";
 
 export function handle_move_stop(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array): GameRoomResponseMessage[] {
   devlog("handle_move_stop() execution.")
 
   const result: GameRoomResponseMessage[] = [];
-  const uuid = ws.data.uuid;
-  const b = gameroom.board;
-  const ship = b.read_ship(uuid);
 
-  const vx = ship.vvx;
-  const vy = ship.vvy;
-  const vz = ship.vvz;
-  const speedSq = vx*vx + vy*vy + vz*vz;
+  let obj:{code:number, power:number}
+  let power = 0
 
-  if (speedSq === 0) return result;
+  try {
+    obj = mm.u8aobj(msg) as {code:number, power:number}
+    power = obj.power/100
+    if(!power){
+      errlog("incorrect stop move message from client(no obj.power)")
+      return result
+    } else if (power < 0 || power > 1){
+      errlog("stop move power outside of allowed range. Hijacking")
+      ws.close(CCR.HIJACKING.code, CCR.HIJACKING.reason)
+    }
+  } catch (e) {
+    errlog("incorrect stop move message from client","mm.u8aobj(msg) parsing fail")
+    return result
+  }
 
-  const speed = Math.sqrt(speedSq);
-  const friction = ship.maccel;  // same accel value, against motion
+  const uuid = ws.data.uuid
+  const gb = gameroom.board
+  const ships = gb.ships
+  const b = gb.base(uuid)
 
-  let newSpeed = speed - friction;
-  if (newSpeed < 0) newSpeed = 0;
+  const bvv = b+S.VVX
+  const scale = 1 - power
 
-  const scale = 0 // newSpeed / speed;//warning just stop for now
-
-  ship.vvx *= scale;
-  ship.vvy *= scale;
-  ship.vvz *= scale;
+  ships[bvv]! *= scale
+  ships[bvv + 1]! *= scale
+  ships[bvv + 2]! *= scale
 
   const now = rts()
+  const bcx = b+S.CX
 
-  b.set_vvx(uuid, ship.vvx);
-  b.set_vvy(uuid, ship.vvy);
-  b.set_vvz(uuid, ship.vvz);
-  b.set_vts(uuid, now);
-
-  rawlog("stop ship.vvx:",ship.vvx,"vs record ships[i].vvx:",b.ships[b.base(uuid)+SOFF.VVX]!)
-  rawlog("stop move: ship: cx, cy, cz: ",`${ship.cx} ${ship.cy} ${ship.cz}`)
+  ships[b + S.V_TS] = now
 
   result.push({
     mt: MT.STOPMOVE,
     msg: {
       uuid,
-      cx: ship.cx, cy: ship.cy, cz: ship.cz,
-      vvx: ship.vvx, vvy: ship.vvy, vvz: ship.vvz,
+      cx: ships[bcx], cy: ships[bcx+1], cz: ships[bcx+2],
+      vvx: ships[bvv], vvy: ships[bvv + 1], vvz: ships[bvv + 2],
       vts: now
     },
     ms: 0,

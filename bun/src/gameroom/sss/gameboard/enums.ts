@@ -45,11 +45,15 @@ export enum SOFF {
   VERT_GUNS,
 
   ENGINES,
+  /** front radius */
+  FR,
+  /** back radius */
+  BR,
+  /** side radius */
+  SR,
+  /** vertical radius */
+  VR,
 
-  FR,   // front radius
-  BR,   // back radius
-  SR,  // side radius
-  VR,  // vertical radius
 
   /** max energy */
   MAX_EN,

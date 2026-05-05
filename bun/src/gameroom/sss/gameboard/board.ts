@@ -324,22 +324,16 @@ export class SSSBoard {
    * @param power requested power of for shot 0-100% of current en
    * @param en current energy units available to use
    * @param max_en maximum energy units capacity
-   * @param vx coordinate of the lazer beam front direction
-   * @param vy coordinate of the lazer beam front direction
-   * @param vz coordinate of the lazer beam front direction
-   * @param nx x coordinate of lazer beam normal axis to rotate beam
-   * @param ny y coordinate of lazer beam normal axis to rotate beam
-   * @param nz z coordinate of lazer beam normal axis to rotate beam
-   * @param cx coordinate of the start lazer beam
-   * @param cy coordinate of the start lazer beam
-   * @param cz coordinate of the start lazer beam
+   * @param v3 3d vector of the lazer beam front direction
+   * @param v3n 3d vector of the lazer beam normal axis to rotate beam
+   * @param d3 3d dot of the start of the lazer beam
   */
   lazer_shot(
     uuid:number,
     guns:number, power:number, en:number, max_en:number,
-    vx:number, vy:number, vz:number,
-    nx:number, ny:number, nz:number,
-    cx:number, cy:number, cz:number,
+    v3:Float32Array,
+    v3n:Float32Array,
+    d3:Float32Array,
   ):GameRoomResponseMessage[]
   {
     const result:GameRoomResponseMessage[] = []
@@ -352,15 +346,19 @@ export class SSSBoard {
     const s = this.read_ship(uuid)
 
     /** beam start dot */
-    const bs = [cx,cy,cz]
+    const bs = d3
+    const bsx = bs[0]!
+    const bsy = bs[1]!
+    const bsz = bs[2]!
 
     /** beam front vector */
-    const bfv = [vx,vy,vz]
+    const bfv = v3
     /** beam normal vector */
-    const bnv = [nx,ny,nz]
+    const bnv = v3n
 
     /** beam side vector to rotate in vertical plane */
-    const bsv = gemm.vec3Dnormal(bfv,bnv)
+    const bsv = new Float32Array(3)
+    gemm.v3normal(bfv,bnv, bsv)
     
     
     /* raw collision just calc distance from beam vector to center of ship. Then compare with dmax */
@@ -378,23 +376,45 @@ export class SSSBoard {
       /** max distance from target ship center when target ship affected by beam */
       const dmax = (2*r*r)**0.5
       
-      const tc = [t.cx, t.cy, t.cz]
+      /* todo refactor properly, first consider refactor t */
+      const tc = new Float32Array( [t.cx, t.cy, t.cz])
+      const tcx = tc[0]!
+      const tcy = tc[1]!
+      const tcz = tc[2]!
 
       /** vertical plane of the cross styled beam */
-      const vp = gemm.plane3D_dot3Dnormal(bs,bnv)
+      const vp = new Float32Array(4)
+      gemm.p3_d3v3_mut(bs,bnv, vp)
       /** horizontal plane of the cross styled beam */
-      const hp = gemm.plane3D_dot3Dnormal(bs,bsv)
+      const hp = new Float32Array(4)
+      gemm.p3_d3v3_mut(bs,bsv, hp)
 
       /** projection of the target ship to the vertical plane of the beam */
-      const vp_dot = gemm.projection_dot3D_on_plane3D(tc, vp)
+      const vp_dot = new Float32Array(3)
+      gemm.d3_projection_on_p3_mut(tc, vp, vp_dot)
+      const vp_dotx = vp_dot[0]!
+      const vp_doty = vp_dot[1]!
+      const vp_dotz = vp_dot[2]!
       /** projection of the target ship to the horizontal plane of the beam */
-      const hp_dot = gemm.projection_dot3D_on_plane3D(tc, hp)
+      const hp_dot = new Float32Array(3)
+      gemm.d3_projection_on_p3_mut(tc, hp, hp_dot)
+      const hp_dotx = hp_dot[0]!
+      const hp_doty = hp_dot[1]!
+      const hp_dotz = hp_dot[2]!
       /** distance from target ship center to vertical plane of the beam */
-      const vd = gemm.vecXDnorm(gemm.vecXD(tc, vp_dot))
+      let v = new Float32Array(3)
+      v[0] = vp_dotx - tcx
+      v[1] = vp_doty - tcy
+      v[2] = vp_dotz - tcz
+      const vd = gemm.v3mag(v)
+      if (DEVLOG) devlog("vd:" + vd + " v:"+ v + " tc:"+tc +" vp_dot:"+vp_dot) //todo remove
       /** distance from target ship center to horizontal plane of the beam */
-      const hd = gemm.vecXDnorm(gemm.vecXD(tc, hp_dot))
+      v[0] = hp_dotx - tcx
+      v[1] = hp_doty - tcy
+      v[2] = hp_dotz - tcz
+      const hd = gemm.v3mag(v)
       
-      rawlog("vd:"+vd+" dmax:", dmax)
+      if (DEVLOG) rawlog("vd:"+vd+" dmax:"+ dmax)
       /* at the moment just in plane and close to front directions */
       /* how much hit the target ship by cross lazerbeam */
       let density = 0
@@ -402,28 +422,44 @@ export class SSSBoard {
       if(vd<dmax){ /* target ship damagable sphere intersects the vertical plane */
         devlog("vd<dmax")
         /* check the beam angle affects target ship sphere */
-        const vp_dot_to_hp = gemm.projection_dot3D_on_plane3D(vp_dot, hp)
+        const vp_dot_to_hp = new Float32Array(3)
+        gemm.d3_projection_on_p3_mut(vp_dot, hp, vp_dot_to_hp)
         /** distance from vp_dot to hp  */
-        const d_to_hp = gemm.vecXDnorm(gemm.vecXD(vp_dot_to_hp, vp_dot))
+        const x = vp_dot_to_hp[0]!, y = vp_dot_to_hp[1]!, z = vp_dot_to_hp[2]!
+        v[0] = vp_dotx - x
+        v[1] = vp_doty - y
+        v[2] = vp_dotz - z
+        const d_to_hp = gemm.v3mag(v)
         /** distance from beam start to vp_dot_to_hp */
-        const d_far_v = gemm.vecXDnorm(gemm.vecXD(bs, vp_dot_to_hp))
+        v[0] = x - bsx
+        v[1] = y - bsy
+        v[2] = z - bsz
+        const d_far_v = gemm.v3mag(v)
         /** limit distance from beam vector to vertical direction, depends on angle and how far target is */
         const limit = d_far_v * Math.tan(gemm.radians(guns/2)) //half of 90 max, so not more than 45
-        devlog("d_to_hp < limit:"+ (d_to_hp < limit))
+        if (DEVLOG) devlog("d_to_hp < limit:"+ (d_to_hp < limit))
         if(d_to_hp < limit) density++
       }
       /* now the similarly appropriate for horizontal plane of the beam */
       if (hd<dmax){
-        const hp_dot_to_vp = gemm.projection_dot3D_on_plane3D(hp_dot, vp)
-        const d_to_vp = gemm.vecXDnorm(gemm.vecXD(hp_dot_to_vp, hp_dot))
-        const d_far_h = gemm.vecXDnorm(gemm.vecXD(bs, hp_dot_to_vp))
+        const hp_dot_to_vp = new Float32Array(3)
+        gemm.d3_projection_on_p3_mut(hp_dot, vp, hp_dot_to_vp)
+        const x = hp_dot_to_vp[0]!, y = hp_dot_to_vp[1]!, z = hp_dot_to_vp[2]!
+        v[0] = hp_dotx - x
+        v[1] = hp_doty - y
+        v[2] = hp_dotz - z
+        const d_to_vp = gemm.v3mag(v)
+        v[0] = x - bsx
+        v[1] = y - bsy
+        v[2] = z - bsz
+        const d_far_h = gemm.v3mag(v)
         const limit = d_far_h * Math.tan(gemm.radians(guns/2))
         if(d_to_vp < limit) density++
       }
 
       if (!density) continue
       const thp = t.hp - damage*density
-      devlog("thp t.hp damage*density density", thp, t.hp, damage*density, density)
+      if (DEVLOG) devlog("thp t.hp damage*density density", thp, t.hp, damage*density, density)
 
       if(thp >0){
         this.set_hp(i, thp)
@@ -485,6 +521,21 @@ export class SSSBoard {
       }
     } catch {
       errlog("update_ship_rotations error");
+    }
+  }
+
+  update_one_ship_rotations(uuid:number, now: number): void {
+    try {
+      const b = this.base(uuid);
+      if (!this.ships[b + S.HP]) return;
+      // rawlog("log_ship:", this.log_ship(i)) //todo delete
+        /** consider order around side, front, top . to provide persuit first numpad 7/8/9, then 4/6 horisontal . No quaternions. only vector rotate */
+      this.applyAngularVelocity(b, S.AVS, now);
+      this.applyAngularVelocity(b, S.AVF, now);
+      this.applyAngularVelocity(b, S.AVT, now);
+      this.apply_angular_velocity(b, S.AV, now);
+    } catch {
+      errlog("update_one_ship_rotations error");
     }
   }
   

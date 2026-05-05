@@ -3,12 +3,12 @@ import { devlog, errlog } from "../../../debug/debug";
 import { MT } from "../../../enums/mt";
 import { gameroom } from "../../../ram/storage";
 import type { GameRoomResponseMessage } from "../../base";
-import { vec3 } from "gl-matrix";
 import { rts } from "../../../utils/basetime";
 import { mm } from "../../../manage/message";
 import type { TopRotation } from "../types";
 import { CCR } from "../../../manage/close";
 import { calc_av, calc_duration } from "../ship/limits";
+import { SOFF as S } from "../gameboard/enums";
 
 export function handle_move_left(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
   devlog("handle_move_left() execution.")
@@ -34,46 +34,53 @@ export function handle_move_left(ws: Bun.ServerWebSocket<WebSocketData>, msg: Ui
   }
 
   const uuid = ws.data.uuid
-  //todo refactor without getters/setters and Ship object. to speedup
-  const b = gameroom.board
-  const ship = b.read_ship(uuid)
-  let top = vec3.fromValues(ship.tvx, ship.tvy, ship.tvz);
-  const len_sq_top = vec3.squaredLength(top);
-  let front = vec3.fromValues(ship.fvx, ship.fvy, ship.fvz);
-  const len_sq_front = vec3.squaredLength(front);
-
-  if (len_sq_front === 0){
-    errlog("zero front vector", top)
+  const gb = gameroom.board
+  const ships = gb.ships
+  const b = gb.base(uuid)
+  
+  const btv = b + S.TVX
+  const tvx = ships[btv]!
+  const tvy = ships[btv + 1]!
+  const tvz = ships[btv + 2]!
+  
+  const bfv = b + S.FVX
+  const fvx = ships[bfv]!
+  const fvy = ships[bfv + 1]!
+  const fvz = ships[bfv + 2]!
+  
+  if (fvx * fvx + fvy * fvy + fvz * fvz === 0){
+    errlog("zero front vector")
     return result;
   }
-  if (len_sq_top === 0){
-    errlog("zero top vector", top)
+  if (tvx * tvx + tvy * tvy + tvz * tvz === 0){
+    errlog("zero top vector")
     return result;
   }
   // const power = obj.power // 0-100% -> 90 deg
   
   // const avt +-[deg/s]. avoid accel at the moment
-  const avt = (calc_av(ship.max_avelo, power))
+  const avt = (calc_av(ships[b + S.MAX_AVELO]!, power))
   const duration_s = calc_duration(avt, power)
   const now = rts()
   const avt_tsend =  now + duration_s*1000
 
   /* raw stop previous rotations */
-  b.update_ship_rotations(now)
-  b.set_avf(uuid, 0)
-  b.set_avs(uuid, 0)
+  gb.update_one_ship_rotations(uuid, now)
+  ships[b + S.AVF] = 0
+  ships[b + S.AVS] = 0
+  ships[b + S.AV] = 0
 
   /* set new rotation */
-  b.set_avt(uuid, avt)
-  b.set_avt_ts(uuid, now) // start timestamp
-  b.set_avt_tsend(uuid, avt_tsend) //final timestamp
+  ships[b + S.AVT] = avt
+  ships[b + S.AVT_TS] = now
+  ships[b + S.AVT_TSEND] = avt_tsend
 
   result.push({
     mt: MT.LEFTMOVE,
     msg: {
-      uuid, avt:avt, avt_ts:now, avt_tsend,
-      fvx:ship.fvx, fvy:ship.fvy, fvz:ship.fvz,
-      tvx:ship.tvx,tvy:ship.tvy,tvz:ship.tvz,      
+      uuid, avt, avt_ts:now, avt_tsend,
+      fvx, fvy, fvz,
+      tvx,tvy,tvz,      
     } as TopRotation,
     ms: 0,
     uuids: [0]

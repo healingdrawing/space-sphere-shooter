@@ -1,4 +1,4 @@
-// todo refactor to not use vec3 when possible, to speedup. use just x3 separated params etc. No arrays when siutable
+// todo consider to refactor without v3, only if it is faster/performant
 type Vec3 = [number, number, number];
 
 const add = (a: Vec3, b: Vec3): Vec3 => [a[0]+b[0], a[1]+b[1], a[2]+b[2]];

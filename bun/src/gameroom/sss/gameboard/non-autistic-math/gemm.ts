@@ -78,20 +78,20 @@ class GEMM {
   }
 
   /**
-     return cos between vectors
-     @param vecXDa - vector
-     @param vecXDb - vector
-    */
-     vecXDcos(
-      vecXDa:Array<number>,
-      vecXDb:Array<number>
-      ){
-      var rez = 0
-      var la = this.vecXDnorm(vecXDa);
-      var lb = this.vecXDnorm(vecXDb);
-      if (la > 0 && lb > 0){
-          rez = this.sin_cos_cut( this.vecXDscalar(vecXDa,vecXDb) / (la * lb) );
-      }return rez;
+   return cos between vectors
+    @param vecXDa - vector
+    @param vecXDb - vector
+  */
+  vecXDcos(
+  vecXDa:Array<number>,
+  vecXDb:Array<number>
+  ){
+    var rez = 0
+    var la = this.vecXDnorm(vecXDa);
+    var lb = this.vecXDnorm(vecXDb);
+    if (la > 0 && lb > 0){
+        rez = this.sin_cos_cut( this.vecXDscalar(vecXDa,vecXDb) / (la * lb) );
+    }return rez;
   }
 
   /**
@@ -546,7 +546,560 @@ dot3Dline3D_x_plane3D(
     Math.abs( this.multisum_xF([pabc, dot3D]) + plane3D[3] ) / vl;
   }
 
-  /* todo consider 3D specific below, without arrays, but only with numbers */
+  /* 3D specific below, for performant calcs */
+
+  /**
+   * rotate v around naxis to angle. Mutates v on place. returns nothing
+   * @param v 3d vector to rotate around naxis. Will be mutated
+   * @param naxis normalized (length ≈ 1) axis [nax,nay,naz] of rotation(3d vector)
+   * @param angle in radians to rotate v
+   */
+  v3rotmut(
+    v:     Float32Array,
+    naxis:  Float32Array,
+    angle: number
+  ) {
+
+    const nax = naxis[0];
+    const nay = naxis[1];
+    const naz = naxis[2];
+
+    const vx = v[0];
+    const vy = v[1];
+    const vz = v[2];
+
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    const t   = 1 - cos;
+
+    // K·V
+    const dot = nax*vx + nay*vy + naz*vz;
+
+    // // K × V
+    // const cx = nay*vz - naz*vy;
+    // const cy = naz*vx - nax*vz;
+    // const cz = nax*vy - nay*vx;
+
+    // // v' = cos·v + sin·(k×v) + t·k·(k·v)
+    // v[0] = vx * cos + cx * sin + nax * dot * t;
+    // v[1] = vy * cos + cy * sin + nay * dot * t;
+    // v[2] = vz * cos + cz * sin + naz * dot * t;
+
+    v[0] = vx * cos + (nay*vz - naz*vy) * sin + nax * dot * t;
+    v[1] = vy * cos + (naz*vx - nax*vz) * sin + nay * dot * t;
+    v[2] = vz * cos + (nax*vy - nay*vx) * sin + naz * dot * t;
+
+  }
+
+  /**
+   * rotate v around naxis  to angle. Returns new array
+   * @param v 3d vector to rotate around axis
+   * @param naxis normalized axis (length ≈ 1) of rotation(3d vector)
+   * @param angle in radians to rotate v
+   * @returns rotated 3d vector
+   */
+  v3rotnew(
+    v:     Float32Array,
+    naxis:  Float32Array,
+    angle: number
+  ): Float32Array {
+    const out = new Float32Array(3);
+    out.set(v);
+    this.v3rotmut(out, naxis, angle);
+    return out
+  }
+
+  /**
+   * safe rotate v around naxis to angle. Mutates v on place. returns nothing. Implement checks include normalization before calcs. In case of any checks fail, silently do nothing with v.
+   * @param v 3d vector to rotate around naxis. Will be mutated
+   * @param naxis normalized (length ≈ 1) axis [nax,nay,naz] of rotation(3d vector)
+   * @param angle in radians to rotate v
+   */
+  v3rotmut_safe(
+    v:     Float32Array,
+    naxis:  Float32Array,
+    angle: number
+  ) {
+    /* checks */
+    if( this.v3_ok(v) && this.v3_ok(naxis) && isFinite(angle) ){
+      this.v3one(naxis)
+      this.v3rotmut(v, naxis, angle)
+    }else{
+      // console.log("CHECK FAILED v3rotmut_safe", v, naxis, angle )
+      // console.log("this.v3_ok(v)", this.v3_ok(v), v)
+      // console.log("this.v3_ok(naxis)", this.v3_ok(naxis), naxis)
+      return
+    }
+  }
+
+  /**
+   * rotate v around naxis to angle. Returns new array. Implement checks (include normalization) before calcs. In case of any checks fail, silently returns original v.
+   * @param v 3d vector to rotate around axis
+   * @param naxis normalized axis (length ≈ 1) of rotation(3d vector)
+   * @param angle in radians to rotate v
+   * @returns rotated 3d vector
+   */
+  v3rotnew_safe(
+    v:     Float32Array,
+    naxis:  Float32Array,
+    angle: number
+  ): Float32Array {
+    const out = new Float32Array(v.length);
+    out.set(v);
+    this.v3rotmut_safe(out, naxis, angle);
+    return out
+  }
+
+  /**
+    INCOMINGS MUST BE SANITIZED.
+    return vector length (other names "norm" or "magnitude"). NaN raise NaN result.
+    For [1,2,3] return Math.sqrt((1 * 1) + (2 * 2) + (3 * 3))
+    @param v3 - incoming 3d vector, must be sanitized before call
+    @returns number
+  */
+  v3mag(v3:Float32Array){ return Math.sqrt(v3[0]*v3[0] + v3[1]*v3[1] + v3[2]*v3[2]) }
+
+  /**
+    INCOMINGS MUST BE SANITIZED.
+    return vector squared length (similar as "v3norm" or "magnitude" but without Math.sqrt).  NaN raise NaN result.
+    For [1,2,3] return (1 * 1) + (2 * 2) + (3 * 3). To fast check vector is non zero
+    @param v3 - incoming 3d vector
+    @returns number
+  */
+  v3mag2(v3:Float32Array){ return v3[0]*v3[0] + v3[1]*v3[1] + v3[2]*v3[2] }
+
+  /**
+   * check if 3d vector is correct (finite AND non-zero)
+   * @param v3 3d vector
+   * @returns true if all components are finite and vector is non-zero
+   */
+  v3_ok(v3: Float32Array): boolean {
+    if (v3.length !== 3) return false
+    const x = v3[0]
+    const y = v3[1]
+    const z = v3[2]
+    const mag2 = x*x+y*y+z*z
+    return mag2 !== 0 && isFinite(mag2)    
+  }
+
+  /**
+   * mutate v3 to length equal 1. in Case of any fail, silently do nothing with v3
+   * @param v3 - sanitized incoming 3d vector
+   */
+  v3one(v3:Float32Array){
+    const mag = Math.sqrt(v3[0]*v3[0] + v3[1]*v3[1] + v3[2]*v3[2])
+    if (mag){
+      v3[0] /= mag
+      v3[1] /= mag
+      v3[2] /= mag
+    }
+  }
+
+  /**
+   check incomings, then mutate d3, as result of offset d3 along v3 to t
+    @param d3 - dot [x,y,z]
+    @param v3 - vector [vx,vy,vz]
+    @param t - distance
+  **/
+  d3offset_mut_safe(
+    d3:Float32Array,
+    v3:Float32Array,
+    t:number
+  ){
+    if (!t || d3.length !== 3 || v3.length !== 3) return
+    const mag = Math.sqrt(v3[0]*v3[0] + v3[1]*v3[1] + v3[2]*v3[2])
+    if (!mag) return
+    t /= mag
+    d3[0] += v3[0] * t
+    d3[1] += v3[1] * t
+    d3[2] += v3[2] * t
+  }
+
+  /**
+    INCOMINGS MUST BE SANITIZED.
+    mutate d3, as result of offset d3 along v3 to t
+    @param d3 - dot [x,y,z]
+    @param v3 - vector [vx,vy,vz]
+    @param t - distance
+  **/
+  d3offset_mut(
+    d3:Float32Array,
+    v3:Float32Array,
+    t:number
+  ){
+    const mag = Math.sqrt(v3[0]*v3[0] + v3[1]*v3[1] + v3[2]*v3[2])
+    if (!t || !mag) return
+    t /= mag
+    d3[0] += v3[0] * t
+    d3[1] += v3[1] * t
+    d3[2] += v3[2] * t
+  }
+
+  /**
+    check incomings, then fill v3n 3d vector, which is result of cross product of two vectors (normal vector of plane based on two vectors). 
+    Result vector placed so if you will see from end of result vector, then the rotating direction will be 
+    CCW from v3a to v3b.
+    Also internally v3n is normalized using v3one. To manage some edge case overflows.
+    @param v3a - 3d vector direction from [ax, ay, az]
+    @param v3b - 3d vector direction to [bx, by, bz]
+    @param v3n - 3d vector [nx, ny, nz] (empty/mutable result container to fill)
+  */
+  v3normal_safe(
+    v3a:Float32Array,
+    v3b:Float32Array,
+    v3n:Float32Array,
+  ){
+    if (this.v3_ok(v3a) && this.v3_ok(v3b)){
+      v3n[0] = v3a[1] * v3b[2] - v3a[2] * v3b[1];
+      v3n[1] = -v3a[0] * v3b[2] + v3a[2] * v3b[0];
+      v3n[2] = v3a[0] * v3b[1] - v3a[1] * v3b[0];
+      this.v3one(v3n)
+    }
+  }
+
+  /**
+    INCOMINGS MUST BE SANITIZED.
+    Fill v3n 3d vector, which is result of cross product of two vectors (normal vector of plane based on two vectors). 
+    Result vector placed so if you will see from end of result vector, then the rotating direction will be 
+    CCW from v3a to v3b.
+    Also internally v3n is normalized using v3one. To manage some edge case overflows.
+    @param v3a - 3d vector direction from [ax, ay, az]
+    @param v3b - 3d vector direction to [bx, by, bz]
+    @param v3n - 3d vector [nx, ny, nz] (empty/mutable result container to fill)
+  */
+  v3normal(
+    v3a:Float32Array,
+    v3b:Float32Array,
+    v3n:Float32Array,
+  ){
+    const v3ax = v3a[0], v3ay = v3a[1], v3az = v3a[2];
+    const v3bx = v3b[0], v3by = v3b[1], v3bz = v3b[2];
+
+    const v3x = v3ay * v3bz - v3az * v3by;
+    const v3y = -v3ax * v3bz + v3az * v3bx;
+    const v3z = v3ax * v3by - v3ay * v3bx;
+    /* hardcoded this.v3one */
+    const mag = Math.sqrt(v3x*v3x + v3y*v3y + v3z*v3z)
+    v3n[0] = v3x / mag
+    v3n[1] = v3y / mag
+    v3n[2] = v3z / mag
+    
+  }
+
+  /**
+    INCOMINGS MUST BE SANITIZED. At least 25% SLOWER than v3normal(), since returns new Float32Array.
+    Fill v3n 3d vector, which is result of cross product of two vectors (normal vector of plane based on two vectors). 
+    Result vector placed so if you will see from end of result vector, then the rotating direction will be 
+    CCW from v3a to v3b.
+    Also internally v3n is normalized using v3one. To manage some edge case overflows.
+    @param v3a - 3d vector direction from [ax, ay, az]
+    @param v3b - 3d vector direction to [bx, by, bz]
+    @returns v3n - 3d vector [nx, ny, nz] normal vector to v3a and v3b
+  */
+  v3normal_new(
+    v3a:Float32Array,
+    v3b:Float32Array
+  ){
+    const v3n = new Float32Array(3)
+    this.v3normal(v3a, v3b, v3n)
+    return v3n
+  }
+
+  /**
+    INCOMINGS MUST BE SANITAZED. return scalar product of 3d vectors
+    @param v3a - 3d vector
+    @param v3b - 3d vector
+  **/
+  v3v3scalar( v3a:Float32Array, v3b:Float32Array ){
+    return v3a[0] * v3b[0] + v3a[1] * v3b[1] + v3a[2] * v3b[2]
+  }
+  
+  /**
+    INCOMINGS MUST BE SANITIZED. return cos between vectors
+    @param v3a - 3d vector
+    @param v3b - 3d vector
+  */
+  v3v3cos( v3a:Float32Array, v3b:Float32Array ){
+    // return this.sin_cos_cut(this.v3v3scalar(v3a,v3b)/(this.v3mag(v3a)*this.v3mag(v3b)))
+
+    const v3ax = v3a[0], v3ay = v3a[1], v3az = v3a[2];
+    const v3bx = v3b[0], v3by = v3b[1], v3bz = v3b[2];
+    return this.sin_cos_cut(
+      (v3ax * v3bx + v3ay * v3by + v3az * v3bz)/
+      (
+        Math.sqrt(v3ax*v3ax + v3ay*v3ay + v3az*v3az)*
+        Math.sqrt(v3bx*v3bx + v3by*v3by + v3bz*v3bz)
+      )
+    )
+  }
+  
+  /**
+    INCOMINGS MUST BE SANITIZED. return angle(radians) between vectors
+    @param v3a - 3d vector
+    @param v3b - 3d vector
+  */
+  v3v3angle( v3a:Float32Array, v3b:Float32Array ){
+    return Math.acos(this.v3v3cos(v3a,v3b))
+  }
+
+  /**
+    INCOMINGS MUST BE SANITIZED. mutate 3d vector to opposite 3d vector. [1, 2, -4] return [-1, -2, 4]
+    @param v3 - 3d vector
+  */
+  v3back_mut(v3:Float32Array){
+    if(v3.length === 3){
+      v3[0] *= -1
+      v3[1] *= -1
+      v3[2] *= -1
+    }
+  }
+
+  /**
+    INCOMINGS MUST BE SANITIZED.
+    
+    Precision: 0.000001 (1e-6).
+
+    return true if 3d vectors paralleled and have same direction
+    @param v3a - 3d vector
+    @param v3b - 3d vector
+  */
+  v3v3paralleled_sameside( v3a:Float32Array, v3b:Float32Array ):boolean{
+    return this.v3v3cos(v3a,v3b) > 0.999999
+  }
+
+  /**
+    INCOMINGS MUST BE SANITIZED.
+    
+    Precision: 0.000001 (1e-6).
+
+    return true if 3d vectors paralleled and have opposite direction
+    @param v3a - 3d vector
+    @param v3b - 3d vector
+  */
+  v3v3paralleled_opposite( v3a:Float32Array, v3b:Float32Array ):boolean{
+    return this.v3v3cos(v3a,v3b) < -0.999999
+  }
+
+  /**
+    INCOMINGS MUST BE SANITIZED.
+    
+    Precision: 0.000001 (1e-6).
+
+    return true if 3d vectors paralleled
+    @param v3a - 3d vector
+    @param v3b - 3d vector
+  */
+  v3v3paralleled( v3a:Float32Array, v3b:Float32Array ):boolean{
+    const c = this.v3v3cos(v3a,v3b)
+    return c > 0.999999 || c < -0.999999
+  }
+
+  /**
+    INCOMINGS MUST BE SANITIZED. returns true if 3d vectors have equal data.
+    @param v3a - 3d vector
+    @param v3b - 3d vector
+  */
+  v3v3same( v3a:Float32Array, v3b:Float32Array ):boolean{
+    return v3a[0] === v3b[0] && v3a[1] === v3b[1] && v3a[2] === v3b[2]
+  }
+
+  /**
+    INCOMINGS MUST BE SANITIZED. returns true if 3d vectors have similar components.
+    
+    Precision: 0.000001 (1e-6)
+    
+    @param v3a - 3d vector
+    @param v3b - 3d vector
+  */
+  v3v3similar(v3a: Float32Array, v3b: Float32Array): boolean {
+    const epsilon = 1e-6;
+    return Math.abs(v3a[0] - v3b[0]) < epsilon &&
+           Math.abs(v3a[1] - v3b[1]) < epsilon &&
+           Math.abs(v3a[2] - v3b[2]) < epsilon;
+  }
+
+  /**
+    INCOMINGS MUST BE SANITIZED.
+    mutates 3d dot, which is intersection dot for 3d line(d3, v3) and 3d plane(p3)
+    @param d3 - 3d dot of start of line [x,y,z]
+    @param v3 - 3d vector of line direction [vx,vy,vz]
+    @param p3 - 3d plane [a,b,c,d] . d - displacement of plane 3D from [0,0,0] along plane normal vector [a,b,c].
+    @param dot - result container to fill uses data of 3d intersection dot [x,y,z]
+  */
+  d3_line_x_plane_mut(
+    d3:Float32Array,
+    v3:Float32Array,
+    p3:Float32Array,
+    dot:Float32Array,
+  ){
+    const d3x = d3[0], d3y = d3[1], d3z = d3[2];
+    const v3x = v3[0], v3y = v3[1], v3z = v3[2];
+    const p3a = p3[0], p3b = p3[1], p3c = p3[2], p3d = p3[3];
+
+    const t = -(p3a*d3x + p3b*d3y + p3c*d3z + p3d) / (p3a*v3x + p3b*v3y + p3c*v3z);
+
+    dot[0] = d3x + v3x * t;
+    dot[1] = d3y + v3y * t;
+    dot[2] = d3z + v3z * t;
+  }
+
+  /**
+    INCOMINGS MUST BE SANITIZED.
+    mutates 3d dot, which is projection of 3d dot (d3) on 3d plane (p3)
+    @param d3 - 3d dot of start of line [x,y,z]
+    @param p3 - 3d plane [a,b,c,d] . d - displacement of plane 3D from [0,0,0] along plane normal vector [a,b,c].
+    @param dot - result container to fill uses data of 3d intersection dot [x,y,z]
+  */
+  d3_projection_on_p3_mut( d3:Float32Array, p3:Float32Array, dot:Float32Array ){
+    const d3x = d3[0], d3y = d3[1], d3z = d3[2];
+    const p3a = p3[0], p3b = p3[1], p3c = p3[2], p3d = p3[3];
+
+    const t = -(p3a*d3x + p3b*d3y + p3c*d3z + p3d) / (p3a*p3a + p3b*p3b + p3c*p3c);
+
+    dot[0] = d3x + p3a * t;
+    dot[1] = d3y + p3b * t;
+    dot[2] = d3z + p3c * t;
+  }
+
+  /**
+    INCOMINGS MUST BE SANITIZED.
+    @param d3 3d dot of start of line [x,y,z]
+    @param p3 3d plane [a,b,c,d] . d - displacement of plane 3D from [0,0,0] along plane normal vector [a,b,c].
+    @returns distance from 3d dot (d3) to 3d plane (p3)
+  */
+  distance_d3_p3( d3:Float32Array, p3:Float32Array ){
+    const d3x = d3[0], d3y = d3[1], d3z = d3[2];
+    const p3a = p3[0], p3b = p3[1], p3c = p3[2], p3d = p3[3];
+    return Math.abs(p3a*d3x + p3b*d3y + p3c*d3z + p3d) / Math.sqrt(p3a*p3a + p3b*p3b + p3c*p3c);
+  }
+
+  /**
+    INCOMINGS MUST BE SANITIZED. The FASTEST version.
+    mutates 3d plane, determined by 3d dot and 3d vector.
+    Where [a, b, c] is 3d plane normal vector, and (d) is plane displacement plane from (0, 0, 0) along [a, b, c]
+    @param d3 3d dot on result 3d plane
+    @param v3 normal vector of result 3d plane
+    @param p3 container to resulted 3d plane [a,b,c,d] . d - displacement of plane 3D from [0,0,0] along plane normal vector [a,b,c]. Will be filled
+  */
+  p3_d3v3_mut(
+    d3:Float32Array,
+    v3:Float32Array,
+    p3:Float32Array
+  ){
+    const d3x = d3[0], d3y = d3[1], d3z = d3[2];
+    let v3x = v3[0], v3y = v3[1], v3z = v3[2];
+    
+    /* hardcoded this.v3one(v3) */
+    const lv = Math.sqrt(v3x*v3x+v3y*v3y+v3z*v3z)
+    v3x /= lv
+    v3y /= lv
+    v3z /= lv
+
+    p3[0] = v3x
+    p3[1] = v3y
+    p3[2] = v3z
+    p3[3] = -(v3x*d3x+v3y*d3y+v3z*d3z)
+  }
+
+  /**
+    INCOMINGS MUST BE SANITIZED. Plane normal vector from v3a to v3b CCW.
+    mutates 3d plane, determined by 3d dot and two 3d vectors.
+    @param d3 3d dot on result 3d plane
+    @param v3a 3d vector to calculate plane normal vector FROM (CCW)
+    @param v3b 3d vector to calculate plane normal vector TO (CCW)
+    @param p3 container to resulted 3d plane [a,b,c,d] . d - displacement of plane 3D from [0,0,0] along plane normal vector [a,b,c]. Will be filled
+  */
+  p3_d3v3v3_mut(
+    d3:Float32Array,
+    v3a:Float32Array,
+    v3b:Float32Array,
+    p3:Float32Array
+  ){
+    const d3x = d3[0], d3y = d3[1], d3z = d3[2];
+    /* hardcoded this.v3normal(v3a,v3b) */
+    let v3x = v3a[1] * v3b[2] - v3a[2] * v3b[1];
+    let v3y = -v3a[0] * v3b[2] + v3a[2] * v3b[0];
+    let v3z = v3a[0] * v3b[1] - v3a[1] * v3b[0];
+    /* hardcoded this.v3one(v3) */
+    const lv = Math.sqrt(v3x*v3x+v3y*v3y+v3z*v3z)
+    v3x /= lv
+    v3y /= lv
+    v3z /= lv
+
+    p3[0] = v3x
+    p3[1] = v3y
+    p3[2] = v3z
+    p3[3] = -(v3x*d3x+v3y*d3y+v3z*d3z)
+  }
+
+  /**
+    INCOMINGS MUST BE SANITIZED. Wrapper of this.p3_d3v3 (with prebuilt normal vector from d3 to d3n).
+    mutates 3d plane, determined by two 3d dots.
+    @param d3 3d dot on result 3d plane
+    @param d3n 3d dot at the end of the normal of the result 3d plane
+    @param p3 container to resulted 3d plane [a,b,c,d] . d - displacement of plane 3D from [0,0,0] along plane normal vector [a,b,c]. Will be filled
+  */
+  p3_d3d3_mut(
+    d3:Float32Array,
+    d3n:Float32Array,
+    p3:Float32Array
+  ){
+    const d3x = d3[0], d3y = d3[1], d3z = d3[2];
+    let v3x = d3n[0] - d3x, v3y = d3n[1] - d3y, v3z = d3n[2] - d3z;
+    /* hardcoded this.v3one(v3) */
+    const lv = Math.sqrt(v3x*v3x+v3y*v3y+v3z*v3z)
+    v3x /= lv
+    v3y /= lv
+    v3z /= lv
+
+    p3[0] = v3x
+    p3[1] = v3y
+    p3[2] = v3z
+    p3[3] = -(v3x*d3x+v3y*d3y+v3z*d3z)
+  }
+
+  /**
+    INCOMINGS MUST BE SANITIZED.
+    mutates 3d plane, determined by 3d dot and 3d vector.
+    Where [a, b, c] is 3d plane normal vector, and (d) is plane displacement plane from (0, 0, 0) along [a, b, c]
+    @param d3 3d dot on result 3d plane(also start dot for plane normal and two vectors in plane)
+    @param d3a 3d dot on result 3d plane
+    @param d3b 3d dot on result 3d plane
+    @param p3 container to resulted 3d plane [a,b,c,d] . d - displacement of plane 3D from [0,0,0] along plane normal vector [a,b,c]. Will be filled
+  */
+  p3_d3d3d3_mut(
+    d3:Float32Array,
+    d3a:Float32Array,
+    d3b:Float32Array,
+    p3:Float32Array
+  ){
+    const d3x = d3[0]
+    const d3y = d3[1]
+    const d3z = d3[2]
+    const v3ax = d3a[0] - d3x
+    const v3ay = d3a[1] - d3y
+    const v3az = d3a[2] - d3z
+    const v3bx = d3b[0] - d3x
+    const v3by = d3b[1] - d3y
+    const v3bz = d3b[2] - d3z
+    /* hardcoded this.v3normal(v3a, v3b) */
+    let v3x = v3ay * v3bz - v3az * v3by;
+    let v3y = -v3ax * v3bz + v3az * v3bx;
+    let v3z = v3ax * v3by - v3ay * v3bx;
+    /* hardcoded this.v3one(v3n) */
+    const lv = Math.sqrt(v3x*v3x+v3y*v3y+v3z*v3z)
+    v3x /= lv
+    v3y /= lv
+    v3z /= lv
+
+    p3[0] = v3x
+    p3[1] = v3y
+    p3[2] = v3z
+    p3[3] = -(v3x*d3x+v3y*d3y+v3z*d3z)
+  }
+
+  /* todo some 3d specific new stuff not covered by test and benchmarks vs multidimentional stable versions.
+  Safe versions not implemented for several methods. After that consider to refactor space-sphere-shooter etc. Since it will be less or more ready. ... but i do not think so :) */
 
 }
 

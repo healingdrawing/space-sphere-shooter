@@ -30,7 +30,7 @@ export function check_ip_banned(address: string | undefined, req: Request): Resp
 }
 
 /** request to upgrade to websocket */
-export function handle_ws_request(req: Request, server: Bun.Server, address: string | undefined): boolean {
+export function handle_ws_request(req: Request, server: Bun.Server<WebSocketData>, address: string | undefined): boolean {
 
   try {
     server.upgrade(req, {
