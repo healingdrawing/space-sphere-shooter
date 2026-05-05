@@ -1,6 +1,7 @@
 import { ram } from "../../ram";
 import { type Ship } from "../../tunnel";
 import { createRawShipHull } from "./ship-mesh";
+import { sync_orientation } from "./sync-orientation";
 
 export const add_ship = async (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BABYLON.TransformNode | null)[]) => {
   console.log("add_ship data:", ship)
@@ -39,6 +40,7 @@ export const add_ship = async (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BAB
   const front = new BABYLON.Vector3(ship.fvx, ship.fvy, ship.fvz);
   // const top = new BABYLON.Vector3(ship.tvx, ship.tvy, ship.tvz);
   hull.lookAt(hull.position.add(front));
+  sync_orientation(box, ship.fvx, ship.fvy, ship.fvz, ship.tvx, ship.tvy, ship.tvz)
   
   ship_boxes[idx] = box
 
