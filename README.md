@@ -31,6 +31,7 @@ Yes, the client and the server are separated, and executed using the same comman
 ## Build
 
 Standalone build and Dockerfile build available.
+For the onrender.com case for client configuration the `PORT` variable from .env file must be removed(not added), otherwise the service will stuck for long time to check the PORT value is functional, then crush.
 
 ## Dockerfile development build
 
