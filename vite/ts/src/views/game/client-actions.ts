@@ -66,10 +66,35 @@ export const manage_client_actions = (ws:WebSocket, view:HTMLDivElement) => {
  
    const onPointerDown = (e: PointerEvent) => {
      console.log('POINTER DOWN', e.pointerType);
+     const actionEl = (e.target as HTMLElement).closest('[data-action]') as HTMLElement | null;
+    if (!actionEl) return;
+    const actionStr = actionEl.dataset.action?? '';
+    if (!actionStr) return;
+    const action = (MT as any)[actionStr] as MT;
+    if (!action) return;
+  
+    if (!keyPressTimes.has(actionStr)) {
+      keyPressTimes.set(actionStr, crts());
+    }
    };
  
    const onPointerUp = (e: PointerEvent) => {
      console.log('POINTER UP', e.pointerType);
+     const actionEl = (e.target as HTMLElement).closest('[data-action]') as HTMLElement | null;
+    if (!actionEl) return;
+    const actionStr = actionEl.dataset.action?? '';
+    if (!actionStr) return;
+    const start = keyPressTimes.get(actionStr);
+    if (!start) return;
+    
+    keyPressTimes.delete(actionStr);
+    
+    const heldMs = crts() - start;
+    let power = Math.round((heldMs / FULL_POWER_MS) * POWER_MAX);
+    power = Math.max(POWER_MIN_SEND, Math.min(POWER_MAX, power));
+    
+    const action = (MT as any)[actionStr] as MT;
+    if (action) send_client_action(ws, action, power);
    };
  
    document.addEventListener('keydown', onKeyDown);

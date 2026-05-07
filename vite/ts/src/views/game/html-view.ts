@@ -18,5 +18,11 @@ export const view_html_div = () => {
   view.innerHTML = game_title
   view.append(container);
 
+  // todo wrap it to div and implement all the buttons + positioning + appearing only when the screen is some way mobile or device does not have physical keyboard
+  const btn = document.createElement('button');
+  btn.textContent = 'Front Shot';
+  btn.dataset.action = 'FRONTSHOT';
+  container.append(btn);
+
   return {view, container, canvas}
 } 
