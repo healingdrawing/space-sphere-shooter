@@ -3,7 +3,7 @@ import { ram } from "../../ram";
 import { type Ship } from "../../tunnel"
 import { add_ship } from "./add-ship";
 import { manage_client_actions } from "./client-actions";
-import { add_exit_button_to_game_view } from "./exit-button";
+import { add_exit_button_to_game_view, add_show_ui_down_button_to_game_view, add_show_ui_side_button_to_game_view } from "./menu-buttons";
 import { view_html_div } from "./html-view";
 import { remove_ship } from "./remove-ship";
 import { check_move_metadata, move_ship } from "./move-ship";
@@ -47,8 +47,10 @@ function create_game_box() {
     }
     console.log("Initial WebSocket:", ws);
     
-
+    add_show_ui_side_button_to_game_view(view)
     add_exit_button_to_game_view(ws, view)
+    add_show_ui_down_button_to_game_view(view)
+
     manage_client_actions(ws, view)
 
     if (engine) return;
