@@ -96,39 +96,39 @@ export const MT_NAME: Record<MT, string> = {
 export const KEYMAP: Record<string, MT> = {
   // Numpad controls
   NumpadSubtract: MT.EXIT,          // exit/also consider to use to start/join
+  Numpad7:        MT.CCWMOVE,       // drill counter-clockwise
+  Numpad8:        MT.TOPMOVE,       // top rotate/pitch up
+  Numpad9:        MT.CWMOVE,        // drill clockwise
+  Numpad4:        MT.LEFTMOVE,      // horisontal slide
+  Numpad5:        MT.DOWNMOVE,      // down rotate/pitch down
+  Numpad6:        MT.RIGHTMOVE,     // horisontal slide
+  Numpad1:        MT.FRONTMOVE,     
+  Numpad2:        MT.STOPMOVE,      
+  Numpad3:        MT.TARGETMOVE,    // target move (as possible rotate to)
   Numpad0:        MT.FRONTSHOT,     
   ArrowLeft:      MT.LEFTSHOT,      
   ArrowRight:     MT.RIGHTSHOT,     
   NumpadEnter:    MT.BACKSHOT,      
   ArrowUp:        MT.TOPSHOT,       
   ArrowDown:      MT.DOWNSHOT,      
-  Numpad1:        MT.FRONTMOVE,     
-  Numpad2:        MT.STOPMOVE,      
-  Numpad4:        MT.LEFTMOVE,      // horisontal slide
-  Numpad6:        MT.RIGHTMOVE,     // horisontal slide
-  Numpad8:        MT.TOPMOVE,       // top rotate/pitch up
-  Numpad5:        MT.DOWNMOVE,      // down rotate/pitch down
-  Numpad9:        MT.CWMOVE,        // drill clockwise
-  Numpad7:        MT.CCWMOVE,       // drill counter-clockwise
-  Numpad3:        MT.TARGETMOVE,    // target move (as possible rotate to)
 
   // Letter keys alternative
   KeyO: MT.EXIT,
+  KeyW: MT.CCWMOVE,
+  KeyE: MT.TOPMOVE,
+  KeyD: MT.CWMOVE,
+  KeyQ: MT.LEFTMOVE,
+  KeyS: MT.DOWNMOVE,
+  KeyC: MT.RIGHTMOVE,
+  KeyA: MT.FRONTMOVE,
+  KeyZ: MT.STOPMOVE,
+  KeyX: MT.TARGETMOVE,
   KeyF: MT.FRONTSHOT,
   KeyN: MT.LEFTSHOT,
   KeyL: MT.RIGHTSHOT,
   KeyK: MT.BACKSHOT,
   KeyJ: MT.TOPSHOT,
   KeyM: MT.DOWNSHOT,
-  KeyZ: MT.FRONTMOVE,
-  KeyA: MT.STOPMOVE,
-  KeyQ: MT.LEFTMOVE,
-  KeyC: MT.RIGHTMOVE,
-  KeyE: MT.TOPMOVE,
-  KeyS: MT.DOWNMOVE,
-  KeyD: MT.CWMOVE,
-  KeyW: MT.CCWMOVE,
-  KeyX: MT.TARGETMOVE
 };
 
 // plan to use next way

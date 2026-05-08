@@ -42,16 +42,16 @@ function create_home_box(){
       Release = execute action<br><br>
 
       <strong>Move</strong><br>
-      [Z / Numpad1]: Forward<br>
-      [A / Numpad2]: Stop<br><br>
+      [A / Numpad1]: Forward<br>
+      [Z / Numpad2]: Stop<br><br>
       
       <strong>Rotate(around center)</strong><br>
-      [Q / Numpad4]: Left (spin)<br>
-      [C / Numpad6]: Right (spin)<br>
-      [E / Numpad8]: Pitch up<br>
-      [S / Numpad5]: Pitch down<br>
       [W / Numpad7]: CCW (drill)<br>
+      [E / Numpad8]: Pitch up<br>
       [D / Numpad9]: CW (drill)<br>
+      [Q / Numpad4]: Left (spin)<br>
+      [S / Numpad5]: Pitch down<br>
+      [C / Numpad6]: Right (spin)<br>
       [X / Numpad3]: Toward target<br><br>
 
       <strong>Shoot</strong><br>
