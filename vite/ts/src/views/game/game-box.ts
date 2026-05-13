@@ -4,7 +4,7 @@ import { type Ship } from "../../tunnel"
 import { add_ship } from "./add-ship";
 import { manage_client_actions } from "./client-actions";
 import { add_exit_button_to_game_view, add_show_ui_down_button_to_game_view, add_show_ui_side_button_to_game_view } from "./menu-buttons";
-import { view_html_div } from "./html-view";
+import { set_hp_on_screen, view_html_div } from "./html-view";
 import { remove_ship } from "./remove-ship";
 import { check_move_metadata, move_ship } from "./move-ship";
 import { move_left_ship } from "./move-left-ship";
@@ -31,6 +31,10 @@ function create_game_box() {
 
   let glow_box: BABYLON.GlowLayer;
   const get_glow_box = () => glow_box
+
+  /** the player id/uuid/index in array on server side */
+  let player_idx = 0;
+  const get_player_idx = () => player_idx
 
   /* to avoid quaternion injection, since it is bugged in edge case(reported, confirmed on forum) */
   const animated_lazer_beams: BABYLON.Mesh[] = [];
@@ -75,6 +79,11 @@ function create_game_box() {
     skyboxMaterial.disableLighting = true;
     skybox.material = skyboxMaterial;
     skybox.infiniteDistance = true; // Prevent the skybox from scaling with the camera
+
+    /* to manage hit later */
+    player_idx = ship.idx;
+    /* initial value. At the moment included also ship.max_hp value. Can be used for horizonal bar indicator. */
+    set_hp_on_screen(ship.hp)
 
     const ship_box = await add_ship(ship, scene, ship_boxes)
     
@@ -199,7 +208,8 @@ function create_game_box() {
     move_left_ship, move_right_ship,
     move_top_ship, move_down_ship,
     move_cw_ship, move_ccw_ship,
-    get_glow_box, lazer_shot, animated_lazer_beams };
+    get_glow_box, lazer_shot, animated_lazer_beams,
+    get_player_idx };
 }
 
 export const game_box = create_game_box();

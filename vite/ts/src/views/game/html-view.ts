@@ -9,6 +9,25 @@ export const view_html_div = () => {
   container.className = 'w-[400px] h-[400px] mx-auto';
   container.appendChild(canvas);
 
+  /** to manage information on playable screen area */
+  const ui_box = document.createElement('div');
+  ui_box.style.position = 'absolute';
+  ui_box.style.top = '0';
+  ui_box.style.left = '0';
+  ui_box.style.width = '100%';
+  ui_box.style.height = '100%';
+  ui_box.style.pointerEvents = 'none';
+  container.style.position = 'relative';
+  container.appendChild(ui_box);
+
+  const hp_text = document.createElement('div');
+  // hp_text.style.width = '100px';
+  // hp_text.style.height = '100px';
+  // hp_text.style.background = 'white';
+  hp_text.id = 'hp';
+  hp_text.innerText = '...waiting';
+  ui_box.appendChild(hp_text);
+
   const view = document.createElement('div');
   view.id = 'game-view';
   view.className = 'view';
@@ -17,7 +36,7 @@ export const view_html_div = () => {
   const game_title = `<h2 class="text-center">Space Sphere Shooter</h2>`;
   view.innerHTML = game_title
 
-  // === UI Containers ===
+  // === menu UI Containers. around playable area ===
   const ui_left = document.createElement('div');
   ui_left.className = 'ui-left';
   ui_left.style.display = 'none';
@@ -102,4 +121,10 @@ export const view_html_div = () => {
   
 
   return {view, container, canvas}
+}
+
+/** raw set the hp indicator value of the playable character */
+export function set_hp_on_screen(value:string|number){
+  const hp_text = document.getElementById('hp');
+  if(hp_text) hp_text.innerText = 'hp:' + ((typeof value === 'number')?Math.floor(value).toString():value)
 }
