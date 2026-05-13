@@ -1,3 +1,4 @@
+import { sfx } from "../../../sfx/sfx";
 import type { Frontmove } from "../../tunnel";
 import { game_box } from "./game-box";
 
@@ -7,6 +8,8 @@ export const move_ship = (data: Frontmove) => {
   console.log("ship_box.position:", ship_box.position, "server position:", data.cx, data.cy, data.cz)
   ship_box.position.set(data.cx, data.cy, data.cz);
   ship_box.metadata.velocity = {x:data.vvx, y:data.vvy, z:data.vvz, vts:data.vts}
+  if(data.uuid === game_box.get_player_idx()) sfx.move()
+    
   console.log('move_ship called, velocity set to:', ship_box.metadata.velocity,'data:',data);
   console.log("ship_box.position",ship_box.position)
 }

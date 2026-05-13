@@ -1,3 +1,4 @@
+import { sfx } from "../../../sfx/sfx";
 import { crts } from "../../handlers/utils";
 import { gemm, type LazerBeam } from "../../tunnel";
 import { game_box } from "./game-box";
@@ -32,6 +33,7 @@ export const lazer_shot = (data: LazerBeam) => {
   lazer_beam(start, end, front_axis, data.d, side_axis.clone().negate(), a_rad, scene)
   lazer_beam(start, end, front_axis, data.d, vert_axis.clone(), a_rad, scene)
   lazer_beam(start, end, front_axis, data.d, vert_axis.clone().negate(), a_rad, scene)
+  if(data.uuid === game_box.get_player_idx()) sfx.shot()
 }
 
 /**

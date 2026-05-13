@@ -26,6 +26,7 @@ export function system_handler( text:string ){
     if (obj.hit && obj.hp && game_box.get_player_idx() === obj.hit){
       //player hit so change the hp indicator value shown
       set_hp_on_screen(obj.hp)
+      game_box.sfx.hit()
     }
 
     if (obj.umn){

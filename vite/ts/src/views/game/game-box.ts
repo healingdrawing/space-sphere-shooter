@@ -18,6 +18,7 @@ import { move_cw_ship } from "./move-cw-ship";
 import { move_ccw_ship } from "./move-ccw-ship";
 import { lazer_shot } from "./lazer-shot";
 import { move_target_ship } from "./move-target-ship";
+import { sfx } from "../../../sfx/sfx";
 
 
 function create_game_box() {
@@ -79,6 +80,8 @@ function create_game_box() {
     skyboxMaterial.disableLighting = true;
     skybox.material = skyboxMaterial;
     skybox.infiniteDistance = true; // Prevent the skybox from scaling with the camera
+
+    
 
     /* to manage hit later */
     player_idx = ship.idx;
@@ -209,7 +212,7 @@ function create_game_box() {
     move_top_ship, move_down_ship,
     move_cw_ship, move_ccw_ship,
     get_glow_box, lazer_shot, animated_lazer_beams,
-    get_player_idx };
+    get_player_idx, sfx };
 }
 
 export const game_box = create_game_box();
