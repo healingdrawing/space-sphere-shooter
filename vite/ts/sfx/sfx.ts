@@ -4,10 +4,10 @@ class SFXBox {
   constructor() {
     (async () => {
       const audioEngine = await BABYLON.CreateAudioEngineAsync();
-      this.sounds.hit = await BABYLON.CreateSoundAsync("hit", "/hit.wav");
-      this.sounds.move = await BABYLON.CreateSoundAsync("move", "/move.wav");
-      this.sounds.rotate = await BABYLON.CreateSoundAsync("rotate", "/rotate.wav");
-      this.sounds.shot = await BABYLON.CreateSoundAsync("shot", "/shot.wav");
+      this.sounds.hit = await BABYLON.CreateSoundAsync("hit", "/hit.ogg");
+      this.sounds.move = await BABYLON.CreateSoundAsync("move", "/move.ogg");
+      this.sounds.rotate = await BABYLON.CreateSoundAsync("rotate", "/rotate.ogg");
+      this.sounds.shot = await BABYLON.CreateSoundAsync("shot", "/shot.ogg");
       // Wait for the audio engine to unlock
       await audioEngine.unlockAsync();
       // this.sounds.shot.play()
