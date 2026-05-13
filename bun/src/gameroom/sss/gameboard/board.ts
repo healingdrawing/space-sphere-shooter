@@ -371,12 +371,12 @@ export class SSSBoard {
       /** target ship to check hit */
       const t = this.read_ship(i)
 
-      //todo implement the comparison first, otherwise the damage happens in two opposite directions. Some way filter the beam direction. Now it lags, and shoot happens two directions, but lazer beam drawn only one. direction.
+      //todo implement the comparison first, otherwise the damage happens in two opposite directions. Some way filter the beam direction(let it be angle between shoter center to beam start and shoter center to target center must be less than 45 degrees. But it is rough of course, since distance). Now it lags, and shoot happens two directions, but lazer beam animated only one. direction.
       
       /** raw distance from ship center to count damage. //todo implement Ellipsoid. Not implemented */
       const r = ( Math.min( t.br, t.sr, t.vr, t.fr ) )
       /** max distance from target ship center when target ship affected by beam */
-      const dmax = (2*r*r)**0.5
+      const dmax = (2*r*r)**0.5 //todo was tired probably :) why not r*2**0.5 (pifagor for two/doubled radii)
       
       /* todo refactor properly, first consider refactor t */
       const tc = new Float32Array( [t.cx, t.cy, t.cz])
