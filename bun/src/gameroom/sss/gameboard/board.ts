@@ -370,6 +370,8 @@ export class SSSBoard {
       if (!p[i] || i === uuid) continue
       /** target ship to check hit */
       const t = this.read_ship(i)
+
+      //todo implement the comparison first, otherwise the damage happens in two opposite directions. Some way filter the beam direction. Now it lags, and shoot happens two directions, but lazer beam drawn only one. direction.
       
       /** raw distance from ship center to count damage. //todo implement Ellipsoid. Not implemented */
       const r = ( Math.min( t.br, t.sr, t.vr, t.fr ) )
