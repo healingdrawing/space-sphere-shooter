@@ -688,12 +688,107 @@ export class SSSBoard {
     return c
   }
 
-  private apply_angular_velocity(b: number, avOffset: number, now: number): void {
-    const av = this.ships[b + avOffset]!;
-    if (av === 0) return;
+  private apply_angular_velocity(b: number, av_offset: number, now: number): void {
+    /** [deg/s] angular velocity. av_offset is S.AV value for the new code */
+    const av = this.ships[b + av_offset]!;
+    if (!av) return;
+    /** [rad] previous angle between current and destination position */
+    const da = this.ships[b + av_offset - 4]!;
+    if (!da) return;
+    /** [ms] timestamp of the last moment of rotation */
+    const ts = this.ships[b + av_offset + 1]!;
+    if (ts > now){
+      errlog("apply_angular_velocity() ts > now. should not happen", ts, now)
+      return
+    }// hypotetical case of some wrong data
+    /** vector, the rotation axis, calculated at the start moment of the rotation */
+    const rax = new Float32Array(3)
+    rax[0] = this.ships[b + av_offset - 3]!;
+    rax[1] = this.ships[b + av_offset - 2]!;
+    rax[2] = this.ships[b + av_offset - 1]!;
+    /** ship center S.CX S.CY S.CZ */
+    const sc = new Float32Array(3)
+    sc[0] = this.ships[b + av_offset - 25]!;
+    sc[1] = this.ships[b + av_offset - 24]!;
+    sc[2] = this.ships[b + av_offset - 23]!;
+    /** ship front vector */
+    const sfv = new Float32Array(3)
+    sfv[0] = this.ships[b + av_offset - 16]!;
+    sfv[1] = this.ships[b + av_offset - 15]!;
+    sfv[2] = this.ships[b + av_offset - 14]!;
+    /** ship top vector */
+    const stv = new Float32Array(3)
+    stv[0] = this.ships[b + av_offset - 13]!;
+    stv[1] = this.ships[b + av_offset - 12]!;
+    stv[2] = this.ships[b + av_offset - 11]!;
+    /** target ship front vector */
+    const sfv1 = new Float32Array(3)
+    sfv1[0] = this.ships[b + av_offset - 10]!;
+    sfv1[1] = this.ships[b + av_offset - 9]!;
+    sfv1[2] = this.ships[b + av_offset - 8]!;
+    /** target ship top vector */
+    const stv1 = new Float32Array(3)
+    stv1[0] = this.ships[b + av_offset - 7]!;
+    stv1[1] = this.ships[b + av_offset - 6]!;
+    stv1[2] = this.ships[b + av_offset - 5]!;
+    // rotation to step
+    /** [deg] angle for this step */
+    const ang = av*(now - ts)/1000
+    gemm.v3rotmut(sfv, rax, ang)
+    gemm.v3rotmut(stv, rax, ang)
 
-    const ts_offset    = avOffset + 1;   // *_TS   (last update time)
-    const tsend_offset = avOffset + 2;   // *_TSEND (end time)
+    // check angle between planes
+    /** current front x top plane vector */
+    const p3 = new Float32Array(4)
+    gemm.p3_d3v3v3_mut(sc, sfv, stv, p3)
+    const nv = new Float32Array(3)
+    nv[0] = p3[0]!;
+    nv[1] = p3[1]!;
+    nv[2] = p3[2]!;
+    /** target front x top plane vector */
+    const p31 = new Float32Array(4)
+    gemm.p3_d3v3v3_mut(sc, stv1, sfv1, p31)
+    const nv1 = new Float32Array(3)
+    nv1[0] = p31[0]!;
+    nv1[1] = p31[1]!;
+    nv1[2] = p31[2]!;
+    const new_da = gemm.v3v3angle(nv1, nv)
+    if (new_da < da){ // rotation still not over
+      this.ships[b + av_offset - 4] = new_da
+      this.ships[b + av_offset + 1] = now
+    } else { // stop the rotation , and for now ignore over rotation, uses just override to target position.
+      //todo consider implement autosmooth correction on client side
+      this.ships[b + av_offset] = 0 // stop the rotation, for the next step
+      this.ships[b + av_offset - 16] = sfv1[0]; // force override front and top vectors to destination position
+      this.ships[b + av_offset - 15] = sfv1[1];
+      this.ships[b + av_offset - 14] = sfv1[2];
+      this.ships[b + av_offset - 13] = stv1[0];
+      this.ships[b + av_offset - 12] = stv1[1];
+      this.ships[b + av_offset - 11] = stv1[2];
+    }
+    
+    /*
+    - rotate pair of the ship vectors front and top closer to destination, depends on av, now - ts, rax
+    - calculate and check the angle from destination positions to current positions(it will be around rax, so when angle grown vs previous, rotation is over, since angle decreasing from start to destination position step by step)
+    - - build the plane based on two rotated to step vectors (front and top) and the center of the ship
+      FVX, FVY, FVZ,        // current position of the front vector
+      TVX, TVY, TVZ,        // current position of the top vector
+    - - build the plane based on two vectors front and top in destination position
+      FVX1, FVY1, FVZ1,        // destination position of the front vector after rotation
+      TVX1, TVY1, TVZ1,        // destination position of the top vector after rotation
+    - - calculate the angle between planes(between normal vectors of the planes)
+    - - if angle became bigger than previous value f(S.DA), then stop rotation
+    It is ok to have some deviation vs expected position, since on client side will start move to new position on the next rotation from current client side position. So server send only destination position as major. If everything will be smooth then probably with this approach the sync_orientation function becomes not needed/minor.
+     */
+
+    return
+    //todo remove artefacts below
+    /** old code */
+    /** [deg/s] angular velocity */
+    // const av = this.ships[b + av_offset]!;
+    if (!av) return;
+    const ts_offset    = av_offset + 1;   // *_TS   (last update time)
+    const tsend_offset = av_offset + 2;   // *_TSEND (end time)
   
     const last_ts = this.ships[b + ts_offset]!;
     const tsend  = this.ships[b + tsend_offset]!;
@@ -717,9 +812,9 @@ export class SSSBoard {
         const dt = (tsend - last_ts) / 1000;
         const angle_rad = av * dt * Math.PI / 180;
         rawlog("rotation last step: dt=",dt ," angle_rad=", angle_rad)
-        this.rotate_ship_around(b,avOffset,angle_rad)
+        this.rotate_ship_around(b,av_offset,angle_rad)
       }
-      this.ships[b + avOffset] = 0;
+      this.ships[b + av_offset] = 0;
       // this.ships[b + tsend_offset] = 0;
       return;
     }
@@ -728,7 +823,7 @@ export class SSSBoard {
     
     const angle_rad = av * dt * Math.PI / 180;
     // rawlog("rotation step: dt=",dt ," angle_rad=", angle_rad)
-    this.rotate_ship_around(b,avOffset,angle_rad)
+    this.rotate_ship_around(b,av_offset,angle_rad)
   
     this.ships[b + ts_offset] = now;
   }

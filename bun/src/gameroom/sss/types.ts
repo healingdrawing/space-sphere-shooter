@@ -144,6 +144,13 @@ export type Rotation = {
   avx:number,avy:number,avz:number, // axis vector x y z, case of free axis
 }
 
+/** rotation around av(x/y/z) vector */
+export type NewRotation = {
+  uuid:number, av:number,
+  fvx1:number, fvy1:number, fvz1:number, // destination vector position after rotation
+  tvx1:number, tvy1:number, tvz1:number, // destination vector position after rotation
+}
+
 /** lazer gun shot beam. Separatedly sent with full coordinates, to manage the delay effect */
 export type LazerBeam = {
   /** ship/user index */

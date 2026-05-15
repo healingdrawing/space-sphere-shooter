@@ -1,5 +1,5 @@
 import { crts } from "../../handlers/utils";
-import { type FrontRotation, type Rotation, type SideRotation, type TopRotation } from "../../tunnel";
+import { type FrontRotation, type NewRotation, type SideRotation, type TopRotation } from "../../tunnel";
 import { game_box } from "./game-box";
 import { sync_orientation } from "./sync-orientation";
 
@@ -69,7 +69,7 @@ export const side_rotation = (data: SideRotation) => {
   ship_box.metadata.sideRotation = {av: data.avs, ts: data.avs_ts, tsend: data.avs_tsend};
 };
 
-export const target_rotation = (data: Rotation) => {
+export const target_rotation = (data: NewRotation) => {
   const ship_box = game_box.ship_boxes[data.uuid]!;
   /* raw stop previous rotations */
   const now = crts()
@@ -90,6 +90,7 @@ export const target_rotation = (data: Rotation) => {
   //   vectors: { fvx: data.fvx, fvy: data.fvy, fvz: data.fvz, tvx: data.tvx, tvy: data.tvy, tvz: data.tvz },
   // });
 
+  //todo full refactor. Consider to store in targetRotation the precalculated real rotation axis also + consider final values of the axes
   sync_orientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
   ship_box.metadata.targetRotation = {
     av: data.av, ts: data.av_ts, tsend: data.av_tsend,
@@ -160,6 +161,7 @@ export function check_rotations_metadata(ship_box:BABYLON.TransformNode, now: nu
     }
   }
 
+  //todo full refactor without time, consider angle etc comparison
   if (meta.targetRotation) {
     const meta_target = meta.targetRotation
     const target_tsend = meta_target.tsend

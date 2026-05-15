@@ -69,9 +69,21 @@ export enum SOFF {
 
   CX, CY, CZ,           // center coo
 
-  FVX, FVY, FVZ,        // front vector
-  TVX, TVY, TVZ,        // top vector
+  FVX0, FVY0, FVZ0, // original value of the front vector before rotation
+  TVX0, TVY0, TVZ0, // original value of the top vector before rotation
+  FVX, FVY, FVZ,        // current position of the front vector
+  TVX, TVY, TVZ,        // current position of the top vector
+  FVX1, FVY1, FVZ1, // destination of the front vector after rotation
+  TVX1, TVY1, TVZ1, // destination of the top vector after rotation
+  /** [rad] delta angle (between rotated position and destination) from previous step, to compare with current, and check end */
+  DA,
   AVX, AVY, AVZ,        // angular velocity/rotation axis vector // todo consider refactor all to this
+  /** angular velocity [deg/s] */
+  AV,
+  /** angular velocity timestamp [ms] from last(previous moment) time */
+  AV_TS,
+  /** angular velocity END timestamp [ms] */
+  AV_TSEND,
 
   VVX, VVY, VVZ,        // linear velocity [m/s]
   /** velocity timestamp [ms] */
@@ -98,13 +110,6 @@ export enum SOFF {
   /** angular velocity SIDE END timestamp [ms] */
   AVS_TSEND,
   
-  /** angular velocity [deg/s] */
-  AV,
-  /** angular velocity timestamp [ms] */
-  AV_TS,
-  /** angular velocity END timestamp [ms] */
-  AV_TSEND,
-
 };
 
 /** the number of elements in enum SOFF */

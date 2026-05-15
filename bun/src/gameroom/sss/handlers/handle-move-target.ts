@@ -5,7 +5,7 @@ import { gameroom } from "../../../ram/storage";
 import type { GameRoomResponseMessage } from "../../base";
 import { rts } from "../../../utils/basetime";
 import { mm } from "../../../manage/message";
-import type { Rotation } from "../types";
+import type { Rotation, NewRotation } from "../types";
 import { CCR } from "../../../manage/close";
 import { calc_av, calc_duration } from "../ship/limits";
 import { gemm } from "../gameboard/non-autistic-math/gemm";
@@ -39,16 +39,22 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
   const gb = gameroom.board
   const b = gb.base(uuid)
 
+  /** target position for front vector after rotation */
+  const front1 = new Float32Array(3)
+  /** target position for top vector after rotation */
+  const top1 = new Float32Array(3)
 
-  const top = new Float32Array(3)
-  top[0] = gb.ships[b + S.TVX]!
-  top[1] = gb.ships[b + S.TVX + 1]!
-  top[2] = gb.ships[b + S.TVX + 2]!
-
+  /** current ship front vector */
   const front = new Float32Array(3)
   front[0] = gb.ships[b + S.FVX]!
   front[1] = gb.ships[b + S.FVX + 1]!
   front[2] = gb.ships[b + S.FVX + 2]!
+
+  /** current ship top vector */
+  const top = new Float32Array(3)
+  top[0] = gb.ships[b + S.TVX]!
+  top[1] = gb.ships[b + S.TVX + 1]!
+  top[2] = gb.ships[b + S.TVX + 2]!
   
   if (gemm.v3mag2(front) === 0){
     errlog("zero front vector", front)
@@ -73,7 +79,7 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
   vct[1] = target[1]! - center[1]
   vct[2] = target[2]! - center[2]
   /* first check the front vector is suitable to create rotation axis with target vector */
-  const angle_deg = gemm.degrees(Math.acos(gemm.v3v3cos( front, vct )))
+  const angle_deg = gemm.degrees(Math.acos(gemm.v3v3cos( front, vct ))) * power //todo remove comment. *power is patch for new code , to implement partial rotation and exclude binding to time from flow
   if(DEVLOG) devlog("target angle [deg]", angle_deg) // todo remove
   
   const axis = new Float32Array(3)
@@ -81,16 +87,56 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
     axis[0] = top[0]
     axis[1] = top[1]
     axis[2] = top[2]
+    gemm.v3one(axis)
     rawlog("top axis used", axis) //todo remove
+    /* calc target positions front1 and top1(copy here) vectors */
+    gemm.v3rotmut(front1, axis, gemm.radians(angle_deg)) //todo refactor to radians
+    top1[0] = axis[0]
+    top1[1] = axis[1]
+    top1[2] = axis[2]
   } else {
     gemm.v3normal( front, vct, axis )
-    rawlog("front axis used",axis) //todo remove
+    rawlog("front x vct axes used",axis) //todo remove
+    gemm.v3rotmut(front1, axis, gemm.radians(angle_deg)) //todo refactor to radians
+    gemm.v3rotmut(top1, axis, gemm.radians(angle_deg)) //todo refactor to radians
   }
   
-  // const av +-[deg/s]. avoid accel at the moment
+  /* new code, exclude bindings to time */
   const av = (calc_av(gb.ships[b + S.MAX_AVELO]!, power))
-  const duration_s = calc_duration(av, power, angle_deg)
   const now = rts()
+
+  /* raw stop previous rotations */
+  gb.update_one_ship_rotations(uuid, now)
+  gb.ships[b + S.AVF] = 0
+  gb.ships[b + S.AVT] = 0
+  gb.ships[b + S.AVS] = 0
+
+  /* set new rotation */
+  gb.ships[b + S.AVX] = axis[0]!
+  gb.ships[b + S.AVY] = axis[1]!
+  gb.ships[b + S.AVZ] = axis[2]!
+
+  gb.ships[b + S.AV] = av
+  gb.ships[b + S.AV_TS] = now
+
+  result.push({
+    mt: MT.TARGETMOVE,
+    msg: {
+      uuid, av:av,
+      fvx1:front1[0], fvy1:front1[1], fvz1:front1[2],
+      tvx1:top1[0],tvy1:top1[1],tvz1:top1[2],
+    } as NewRotation,
+    ms: 0,
+    uuids: [0]
+  })
+
+  return result
+
+  // old code
+  // const av +-[deg/s]. avoid accel at the moment
+  //const av = (calc_av(gb.ships[b + S.MAX_AVELO]!, power))
+  const duration_s = calc_duration(av, power, angle_deg)
+  // const now = rts()
   const av_tsend =  now + duration_s*1000
 
   /* raw stop previous rotations */
