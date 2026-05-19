@@ -39,22 +39,31 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
   const gb = gameroom.board
   const b = gb.base(uuid)
 
-  /** target position for front vector after rotation */
-  const front1 = new Float32Array(3)
-  /** target position for top vector after rotation */
-  const top1 = new Float32Array(3)
-
   /** current ship front vector */
   const front = new Float32Array(3)
   front[0] = gb.ships[b + S.FVX]!
   front[1] = gb.ships[b + S.FVX + 1]!
   front[2] = gb.ships[b + S.FVX + 2]!
-
+  
   /** current ship top vector */
   const top = new Float32Array(3)
   top[0] = gb.ships[b + S.TVX]!
   top[1] = gb.ships[b + S.TVX + 1]!
   top[2] = gb.ships[b + S.TVX + 2]!
+  
+  /** target position for front vector after rotation */
+  const front1 = new Float32Array(3)
+  front1[0] = front[0]
+  front1[1] = front[1]
+  front1[2] = front[2]
+
+  /** target position for top vector after rotation */
+  const top1 = new Float32Array(3)
+  top1[0] = top[0]
+  top1[1] = top[1]
+  top1[2] = top[2]
+
+  devlog("fresh front and top", front, top)
   
   if (gemm.v3mag2(front) === 0){
     errlog("zero front vector", front)
@@ -107,11 +116,19 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
 
   /* raw stop previous rotations */
   gb.update_one_ship_rotations(uuid, now)
-  gb.ships[b + S.AVF] = 0
+  gb.ships[b + S.AVF] = 0 //todo for remove
   gb.ships[b + S.AVT] = 0
   gb.ships[b + S.AVS] = 0
 
   /* set new rotation */
+  gb.ships[b + S.FVX1] = front1[0]
+  gb.ships[b + S.FVY1] = front1[1]
+  gb.ships[b + S.FVZ1] = front1[2]
+  gb.ships[b + S.TVX1] = top1[0]
+  gb.ships[b + S.TVY1] = top1[1]
+  gb.ships[b + S.TVZ1] = top1[2]
+
+  gb.ships[b + S.DA] = gemm.radians(angle_deg) //todo consider refactor without repeat
   gb.ships[b + S.AVX] = axis[0]!
   gb.ships[b + S.AVY] = axis[1]!
   gb.ships[b + S.AVZ] = axis[2]!
@@ -119,12 +136,14 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
   gb.ships[b + S.AV] = av
   gb.ships[b + S.AV_TS] = now
 
+  devlog("wtf why zeros sent", "front1", front1, "top1", top1)
+
   result.push({
     mt: MT.TARGETMOVE,
     msg: {
       uuid, av:av,
       fvx1:front1[0], fvy1:front1[1], fvz1:front1[2],
-      tvx1:top1[0],tvy1:top1[1],tvz1:top1[2],
+      tvx1:top1[0], tvy1:top1[1], tvz1:top1[2],
     } as NewRotation,
     ms: 0,
     uuids: [0]

@@ -1,9 +1,9 @@
 import { sfx } from "../../../sfx/sfx";
-import type { SideRotation } from "../../tunnel";
+import type { NewRotation } from "../../tunnel";
 import { game_box } from "./game-box";
-import { side_rotation } from "./rotate-ship";
+import { target_rotation } from "./rotate-ship";
 
-export const move_top_ship = (data: SideRotation) => {
-  side_rotation(data)
+export const move_top_ship = (data: NewRotation) => {
+  target_rotation(data)
   if(data.uuid === game_box.get_player_idx()) sfx.rotate()
 }

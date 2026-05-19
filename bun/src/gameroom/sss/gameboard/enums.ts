@@ -69,8 +69,6 @@ export enum SOFF {
 
   CX, CY, CZ,           // center coo
 
-  FVX0, FVY0, FVZ0, // original value of the front vector before rotation
-  TVX0, TVY0, TVZ0, // original value of the top vector before rotation
   FVX, FVY, FVZ,        // current position of the front vector
   TVX, TVY, TVZ,        // current position of the top vector
   FVX1, FVY1, FVZ1, // destination of the front vector after rotation

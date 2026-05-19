@@ -130,12 +130,12 @@ function create_game_box() {
         }
 
         check_rotations_metadata(ship, now)
-        if (ship.metadata.sideRotation){
-          const dt = (now - ship.metadata.sideRotation.ts ) / 1000
-          ship.metadata.sideRotation.ts = now
-          const axis = ship.getDirection(BABYLON.Vector3.Left())
-          rotate_around_axis(ship, axis, ship.metadata.sideRotation, dt);
-        }
+        // if (ship.metadata.sideRotation){
+        //   const dt = (now - ship.metadata.sideRotation.ts ) / 1000
+        //   ship.metadata.sideRotation.ts = now
+        //   const axis = ship.getDirection(BABYLON.Vector3.Left())
+        //   rotate_around_axis(ship, axis, ship.metadata.sideRotation, dt);
+        // }
         if (ship.metadata.frontRotation){
           const dt = (now - ship.metadata.frontRotation.ts ) / 1000
           ship.metadata.frontRotation.ts = now
@@ -148,15 +148,35 @@ function create_game_box() {
           const axis = ship.getDirection(BABYLON.Vector3.Up())
           rotate_around_axis(ship, axis, ship.metadata.topRotation, dt);
         }
-        if (ship.metadata.targetRotation){
-          const dt = (now - ship.metadata.targetRotation.ts ) / 1000
-          ship.metadata.targetRotation.ts = now
-          const axis = new BABYLON.Vector3(
-            ship.metadata.targetRotation.avx,
-            ship.metadata.targetRotation.avy,
-            ship.metadata.targetRotation.avz
-          )
-          rotate_around_axis(ship, axis, ship.metadata.targetRotation, dt);
+
+        //todo consider full refactoring, to avoid bindings to time
+        if (ship.metadata.targetRotation) {
+          const tr = ship.metadata.targetRotation;
+          const now = crts();
+          const dt = (now - tr.ts) / 1000;
+          tr.ts = now;
+      
+          if (dt <= 0) continue; //todo weird, need polish
+      
+          const radiansPerSecond = BABYLON.Tools.ToRadians(tr.av);
+          const angle_this_frame = radiansPerSecond * dt;
+      
+          tr.progress += angle_this_frame;
+      
+          if (tr.progress >= tr.totalAngle) {
+              // Finish rotation
+              ship.rotationQuaternion = tr.targetQuat.clone();
+              delete ship.metadata.targetRotation;
+              continue;
+          }
+      
+          // SLERP
+          const t = tr.progress / tr.totalAngle;
+          ship.rotationQuaternion = BABYLON.Quaternion.Slerp(
+              tr.startQuat,
+              tr.targetQuat,
+              t
+          );
         }
       }
 

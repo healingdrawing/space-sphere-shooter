@@ -144,7 +144,16 @@ export type Rotation = {
   avx:number,avy:number,avz:number, // axis vector x y z, case of free axis
 }
 
-/** rotation around av(x/y/z) vector */
+/** rotation around av(x/y/z) vector. Data sent from server side, wip.
+ * @property uuid to find section of the ship data in array
+ * @property av angular velocity [deg/s] at the moment
+ * @property fvx1 target orientation front vector x
+ * @property fvy1 target orientation front vector y
+ * @property fvz1 target orientation front vector z
+ * @property tvx1 target orientation top vector x
+ * @property tvy1 target orientation top vector y
+ * @property tvz1 target orientation top vector z
+ */
 export type NewRotation = {
   uuid:number, av:number,
   fvx1:number, fvy1:number, fvz1:number, // destination vector position after rotation

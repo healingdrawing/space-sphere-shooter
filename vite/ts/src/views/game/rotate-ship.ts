@@ -1,5 +1,5 @@
 import { crts } from "../../handlers/utils";
-import { type FrontRotation, type NewRotation, type SideRotation, type TopRotation } from "../../tunnel";
+import { gemm, type FrontRotation, type NewRotation, type SideRotation, type TopRotation } from "../../tunnel";
 import { game_box } from "./game-box";
 import { sync_orientation } from "./sync-orientation";
 
@@ -44,43 +44,42 @@ export const top_rotation = (data: TopRotation) => {
   ship_box.metadata.topRotation = {av: data.avt, ts: data.avt_ts, tsend: data.avt_tsend};
 };
 
-export const side_rotation = (data: SideRotation) => {
-  const ship_box = game_box.ship_boxes[data.uuid]!;
-  /* raw stop previous rotations */
-  const now = crts()
-  /* patch to force function rotate to present timestamp */
-  if(ship_box.metadata.topRotation) ship_box.metadata.topRotation.tsend = now;
-  if(ship_box.metadata.frontRotation) ship_box.metadata.frontRotation.tsend = now;
-  if(ship_box.metadata.targetRotation) ship_box.metadata.targetRotation.tsend = now;
-  check_rotations_metadata(ship_box, now+1)
-  delete ship_box.metadata.topRotation;
-  delete ship_box.metadata.frontRotation;
-  delete ship_box.metadata.targetRotation;
+// export const side_rotation = (data: SideRotation) => {
+//   const ship_box = game_box.ship_boxes[data.uuid]!;
+//   /* raw stop previous rotations */
+//   const now = crts()
+//   /* patch to force function rotate to present timestamp */
+//   if(ship_box.metadata.topRotation) ship_box.metadata.topRotation.tsend = now;
+//   if(ship_box.metadata.frontRotation) ship_box.metadata.frontRotation.tsend = now;
+//   if(ship_box.metadata.targetRotation) ship_box.metadata.targetRotation.tsend = now;
+//   check_rotations_metadata(ship_box, now+1)
+//   delete ship_box.metadata.topRotation;
+//   delete ship_box.metadata.frontRotation;
+//   delete ship_box.metadata.targetRotation;
 
-  // console.log("SIDE_ROTATION called:", {
-  //   avs: data.avs,  // angular velocity
-  //   avs_ts: data.avs_ts,  // start time
-  //   avs_tsend: data.avs_tsend,  // end time
-  //   duration: data.avs_tsend - data.avs_ts,
-  //   vectors: { fvx: data.fvx, fvy: data.fvy, fvz: data.fvz, tvx: data.tvx, tvy: data.tvy, tvz: data.tvz },
-  // });
+//   // console.log("SIDE_ROTATION called:", {
+//   //   avs: data.avs,  // angular velocity
+//   //   avs_ts: data.avs_ts,  // start time
+//   //   avs_tsend: data.avs_tsend,  // end time
+//   //   duration: data.avs_tsend - data.avs_ts,
+//   //   vectors: { fvx: data.fvx, fvy: data.fvy, fvz: data.fvz, tvx: data.tvx, tvy: data.tvy, tvz: data.tvz },
+//   // });
 
-  sync_orientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
-  ship_box.metadata.sideRotation = {av: data.avs, ts: data.avs_ts, tsend: data.avs_tsend};
-};
+//   sync_orientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
+//   ship_box.metadata.sideRotation = {av: data.avs, ts: data.avs_ts, tsend: data.avs_tsend};
+// };
 
 export const target_rotation = (data: NewRotation) => {
   const ship_box = game_box.ship_boxes[data.uuid]!;
   /* raw stop previous rotations */
   const now = crts()
   /* patch to force function rotate to present timestamp */
-  if(ship_box.metadata.topRotation) ship_box.metadata.topRotation.tsend = now;
-  if(ship_box.metadata.frontRotation) ship_box.metadata.frontRotation.tsend = now;
-  if(ship_box.metadata.sideRotation) ship_box.metadata.sideRotation.tsend = now;
-  check_rotations_metadata(ship_box, now+1)
+  // if(ship_box.metadata.topRotation) ship_box.metadata.topRotation.tsend = now;
+  // if(ship_box.metadata.frontRotation) ship_box.metadata.frontRotation.tsend = now;
+  // check_rotations_metadata(ship_box, now+1)
+  delete ship_box.metadata.targetRotation; //todo test
   delete ship_box.metadata.topRotation;
   delete ship_box.metadata.frontRotation;
-  delete ship_box.metadata.sideRotation;
 
   // console.warn("target_rotation() call:", {
   //   avs: data.avs,  // angular velocity
@@ -90,11 +89,29 @@ export const target_rotation = (data: NewRotation) => {
   //   vectors: { fvx: data.fvx, fvy: data.fvy, fvz: data.fvz, tvx: data.tvx, tvy: data.tvy, tvz: data.tvz },
   // });
 
-  //todo full refactor. Consider to store in targetRotation the precalculated real rotation axis also + consider final values of the axes
-  sync_orientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
+  //todo full refactor.
+  
+  // Get current live orientation
+  const currentQuat = ship_box.rotationQuaternion || BABYLON.Quaternion.Identity();
+
+  // Create target quaternion from desired front + top vectors
+  const targetFront = new BABYLON.Vector3(data.fvx1, data.fvy1, data.fvz1);
+  const targetTop = new BABYLON.Vector3(data.tvx1, data.tvy1, data.tvz1);
+
+  const targetQuat = createQuaternionFromVectors(targetFront, targetTop);
+
+  // Calculate total angle (radians)
+  const dot = BABYLON.Quaternion.Dot(currentQuat, targetQuat);
+  const clampedDot = Math.max(-1, Math.min(1, dot));
+  const totalAngle = Math.acos(clampedDot);
+
   ship_box.metadata.targetRotation = {
-    av: data.av, ts: data.av_ts, tsend: data.av_tsend,
-    avx: data.avx,avy: data.avy,avz: data.avz,
+      ts: now,
+      av: data.av,                    // angular velocity deg/s
+      targetQuat: targetQuat,
+      totalAngle: totalAngle,         // radians
+      startQuat: currentQuat.clone(), // important for smooth interrupt
+      progress: 0
   };
 };
 
@@ -106,22 +123,22 @@ export function rotate_around_axis(ship: BABYLON.TransformNode, axis: BABYLON.Ve
 /** clean if rotation complete */
 export function check_rotations_metadata(ship_box:BABYLON.TransformNode, now: number){
   const meta = ship_box.metadata
-  if (meta.sideRotation) {
-    const meta_side = meta.sideRotation
-    const side_tsend = meta_side.tsend
-    if (now >= side_tsend) {
-      /* additional check to rotate, closer to final expected rotation */
-      if (now > side_tsend){ /* need rotate up to equal condition */
-        const fake_dt = (side_tsend - meta_side.ts) / 1000
-        // meta_side.ts = now // commented since metadata will be removed anyways
-        const axis = ship_box.getDirection(BABYLON.Vector3.Left())
-        rotate_around_axis(ship_box, axis, meta_side, fake_dt);
-      }
-      delete ship_box.metadata.sideRotation;
-      console.warn("SIDE ROTATION END")
-      log_orientation(ship_box)
-    }
-  }
+  // if (meta.sideRotation) {
+  //   const meta_side = meta.sideRotation
+  //   const side_tsend = meta_side.tsend
+  //   if (now >= side_tsend) {
+  //     /* additional check to rotate, closer to final expected rotation */
+  //     if (now > side_tsend){ /* need rotate up to equal condition */
+  //       const fake_dt = (side_tsend - meta_side.ts) / 1000
+  //       // meta_side.ts = now // commented since metadata will be removed anyways
+  //       const axis = ship_box.getDirection(BABYLON.Vector3.Left())
+  //       rotate_around_axis(ship_box, axis, meta_side, fake_dt);
+  //     }
+  //     delete ship_box.metadata.sideRotation;
+  //     console.warn("SIDE ROTATION END")
+  //     log_orientation(ship_box)
+  //   }
+  // }
   if (meta.frontRotation) {
     const meta_front = meta.frontRotation
     const front_tsend = meta_front.tsend
@@ -197,4 +214,19 @@ function log_orientation(ship_box:BABYLON.TransformNode){
     ,"\ntvy:", t[1]
     ,"\ntvz:", t[2]
   )
+}
+
+function createQuaternionFromVectors(front: BABYLON.Vector3, top: BABYLON.Vector3): BABYLON.Quaternion {
+  const right = BABYLON.Vector3.Cross(top, front).normalize();
+  const topRecalc = BABYLON.Vector3.Cross(front, right).normalize();
+
+  const matrix = BABYLON.Matrix.Identity(); // better than Zero()
+
+  // Use setRow or direct but safe assignment
+  matrix.setRowFromFloats(0, right.x,   right.y,   right.z,   0);
+  matrix.setRowFromFloats(1, topRecalc.x, topRecalc.y, topRecalc.z, 0);
+  matrix.setRowFromFloats(2, front.x,   front.y,   front.z,   0);
+  matrix.setRowFromFloats(3, 0,         0,         0,         1);
+
+  return BABYLON.Quaternion.FromRotationMatrix(matrix);
 }

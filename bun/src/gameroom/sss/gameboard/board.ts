@@ -532,7 +532,7 @@ export class SSSBoard {
       if (!this.ships[b + S.HP]) return;
       // rawlog("log_ship:", this.log_ship(i)) //todo delete
         /** consider order around side, front, top . to provide persuit first numpad 7/8/9, then 4/6 horisontal . No quaternions. only vector rotate */
-      this.applyAngularVelocity(b, S.AVS, now);
+      // this.applyAngularVelocity(b, S.AVS, now);
       this.applyAngularVelocity(b, S.AVF, now);
       this.applyAngularVelocity(b, S.AVT, now);
       this.apply_angular_velocity(b, S.AV, now);
@@ -691,10 +691,14 @@ export class SSSBoard {
   private apply_angular_velocity(b: number, av_offset: number, now: number): void {
     /** [deg/s] angular velocity. av_offset is S.AV value for the new code */
     const av = this.ships[b + av_offset]!;
+    // rawlog("inside apply_angular_velocity. av = ",av) //todo remove
     if (!av) return;
+
     /** [rad] previous angle between current and destination position */
     const da = this.ships[b + av_offset - 4]!;
+    // rawlog("inside apply_angular_velocity. da = ",da) //todo remove
     if (!da) return;
+
     /** [ms] timestamp of the last moment of rotation */
     const ts = this.ships[b + av_offset + 1]!;
     if (ts > now){
@@ -702,64 +706,67 @@ export class SSSBoard {
       return
     }// hypotetical case of some wrong data
     /** vector, the rotation axis, calculated at the start moment of the rotation */
+    rawlog("inside apply_angular_velocity. before calc step")
     const rax = new Float32Array(3)
-    rax[0] = this.ships[b + av_offset - 3]!;
-    rax[1] = this.ships[b + av_offset - 2]!;
-    rax[2] = this.ships[b + av_offset - 1]!;
-    /** ship center S.CX S.CY S.CZ */
-    const sc = new Float32Array(3)
-    sc[0] = this.ships[b + av_offset - 25]!;
-    sc[1] = this.ships[b + av_offset - 24]!;
-    sc[2] = this.ships[b + av_offset - 23]!;
+    rax[0] = this.ships[b + S.AVX]!;
+    rax[1] = this.ships[b + S.AVY]!;
+    rax[2] = this.ships[b + S.AVZ]!;
+
     /** ship front vector */
     const sfv = new Float32Array(3)
-    sfv[0] = this.ships[b + av_offset - 16]!;
-    sfv[1] = this.ships[b + av_offset - 15]!;
-    sfv[2] = this.ships[b + av_offset - 14]!;
+    sfv[0] = this.ships[b + S.FVX]!;
+    sfv[1] = this.ships[b + S.FVY]!;
+    sfv[2] = this.ships[b + S.FVZ]!;
     /** ship top vector */
     const stv = new Float32Array(3)
-    stv[0] = this.ships[b + av_offset - 13]!;
-    stv[1] = this.ships[b + av_offset - 12]!;
-    stv[2] = this.ships[b + av_offset - 11]!;
+    stv[0] = this.ships[b + S.TVX]!;
+    stv[1] = this.ships[b + S.TVY]!;
+    stv[2] = this.ships[b + S.TVZ]!;
     /** target ship front vector */
     const sfv1 = new Float32Array(3)
-    sfv1[0] = this.ships[b + av_offset - 10]!;
-    sfv1[1] = this.ships[b + av_offset - 9]!;
-    sfv1[2] = this.ships[b + av_offset - 8]!;
+    sfv1[0] = this.ships[b + S.FVX1]!;
+    sfv1[1] = this.ships[b + S.FVY1]!;
+    sfv1[2] = this.ships[b + S.FVZ1]!;
     /** target ship top vector */
     const stv1 = new Float32Array(3)
-    stv1[0] = this.ships[b + av_offset - 7]!;
-    stv1[1] = this.ships[b + av_offset - 6]!;
-    stv1[2] = this.ships[b + av_offset - 5]!;
+    stv1[0] = this.ships[b + S.TVX1]!;
+    stv1[1] = this.ships[b + S.TVY1]!;
+    stv1[2] = this.ships[b + S.TVZ1]!;
     // rotation to step
-    /** [deg] angle for this step */
-    const ang = av*(now - ts)/1000
+    /** [radians] angle for this step */
+    const ang = gemm.radians(av*(now - ts)/1000)
+    devlog("ang", ang )
+    devlog("before rotate", "sfv", sfv, "stv", stv, "ang", ang)
     gemm.v3rotmut(sfv, rax, ang)
     gemm.v3rotmut(stv, rax, ang)
+    devlog("after rotate", "sfv", sfv, "stv", stv, "ang", ang)
 
-    // check angle between planes
-    /** current front x top plane vector */
-    const p3 = new Float32Array(4)
-    gemm.p3_d3v3v3_mut(sc, sfv, stv, p3)
-    const nv = new Float32Array(3)
-    nv[0] = p3[0]!;
-    nv[1] = p3[1]!;
-    nv[2] = p3[2]!;
-    /** target front x top plane vector */
-    const p31 = new Float32Array(4)
-    gemm.p3_d3v3v3_mut(sc, stv1, sfv1, p31)
-    const nv1 = new Float32Array(3)
-    nv1[0] = p31[0]!;
-    nv1[1] = p31[1]!;
-    nv1[2] = p31[2]!;
-    const new_da = gemm.v3v3angle(nv1, nv)
+    /* check the angle between pairs, current to destination positions */
+    const v = new Float32Array(3)
+    gemm.v3normal(sfv, stv, v)
+    const v1 = new Float32Array(3)
+    gemm.v3normal(sfv1, stv1, v1)
+    const new_da = gemm.v3v3angle(v, v1)
+
     if (new_da < da){ // rotation still not over
-      this.ships[b + av_offset - 4] = new_da
-      this.ships[b + av_offset + 1] = now
+      rawlog("rotation continues")//todo remove
+      this.ships[b + S.DA] = new_da
+      this.ships[b + S.AV_TS] = now
+      this.ships[b + S.FVX] = sfv[0];
+      this.ships[b + S.FVY] = sfv[1];
+      this.ships[b + S.FVZ] = sfv[2];
+      this.ships[b + S.TVX] = stv[0];
+      this.ships[b + S.TVY] = stv[1];
+      this.ships[b + S.TVZ] = stv[2];
     } else { // stop the rotation , and for now ignore over rotation, uses just override to target position.
+      devlog("rotation is over", "new_da", new_da, "da", da, "v", v, "v1", v1)
       //todo consider implement autosmooth correction on client side
+      this.ships[b + S.DA] = -Infinity //todo not sure it is clear
+      this.ships[b + S.AV_TS] = Infinity
+
       this.ships[b + av_offset] = 0 // stop the rotation, for the next step
-      this.ships[b + av_offset - 16] = sfv1[0]; // force override front and top vectors to destination position
+      // force override front and top vectors to destination position
+      this.ships[b + av_offset - 16] = sfv1[0];
       this.ships[b + av_offset - 15] = sfv1[1];
       this.ships[b + av_offset - 14] = sfv1[2];
       this.ships[b + av_offset - 13] = stv1[0];
@@ -767,65 +774,6 @@ export class SSSBoard {
       this.ships[b + av_offset - 11] = stv1[2];
     }
     
-    /*
-    - rotate pair of the ship vectors front and top closer to destination, depends on av, now - ts, rax
-    - calculate and check the angle from destination positions to current positions(it will be around rax, so when angle grown vs previous, rotation is over, since angle decreasing from start to destination position step by step)
-    - - build the plane based on two rotated to step vectors (front and top) and the center of the ship
-      FVX, FVY, FVZ,        // current position of the front vector
-      TVX, TVY, TVZ,        // current position of the top vector
-    - - build the plane based on two vectors front and top in destination position
-      FVX1, FVY1, FVZ1,        // destination position of the front vector after rotation
-      TVX1, TVY1, TVZ1,        // destination position of the top vector after rotation
-    - - calculate the angle between planes(between normal vectors of the planes)
-    - - if angle became bigger than previous value f(S.DA), then stop rotation
-    It is ok to have some deviation vs expected position, since on client side will start move to new position on the next rotation from current client side position. So server send only destination position as major. If everything will be smooth then probably with this approach the sync_orientation function becomes not needed/minor.
-     */
-
-    return
-    //todo remove artefacts below
-    /** old code */
-    /** [deg/s] angular velocity */
-    // const av = this.ships[b + av_offset]!;
-    if (!av) return;
-    const ts_offset    = av_offset + 1;   // *_TS   (last update time)
-    const tsend_offset = av_offset + 2;   // *_TSEND (end time)
-  
-    const last_ts = this.ships[b + ts_offset]!;
-    const tsend  = this.ships[b + tsend_offset]!;
-  
-    if (last_ts > now){
-      errlog("apply_angular_velocity() last_ts > now. should not happen", last_ts, now)
-      return
-    }// hypotetical case of some wrong data
-
-    // rawlog("raw_now:", rts(), "last_ts:", last_ts);
-    // warning detected repeatedly returned the same timestamp based on Date.now() . Desided just ignore it. The performance.now() is laggs and ruining everything, with huge negative numbers. It works like prealpha, so no. Integer part of performance.now() often the same, that means settimeouts ignores pauses. and setinterval can ruin the server flow under heavy loading. settimeouts will just delay, without queue. So delay + ignore is better than overload. Especially for free tier account.
-    if (last_ts === now){
-      // if(DEVLOG) errlog("apply_angular_velocity() last_ts === now", last_ts, now) //todo remove
-      return
-    }// case of the first moment. ... and more as described above
-
-    if (now >= tsend){
-      /* case of small rotation still need to be to satisfy the ... "plan" */
-      if (now > tsend){
-        // rotation to difference of time
-        const dt = (tsend - last_ts) / 1000;
-        const angle_rad = av * dt * Math.PI / 180;
-        rawlog("rotation last step: dt=",dt ," angle_rad=", angle_rad)
-        this.rotate_ship_around(b,av_offset,angle_rad)
-      }
-      this.ships[b + av_offset] = 0;
-      // this.ships[b + tsend_offset] = 0;
-      return;
-    }
-
-    const dt = (now - last_ts) / 1000;
-    
-    const angle_rad = av * dt * Math.PI / 180;
-    // rawlog("rotation step: dt=",dt ," angle_rad=", angle_rad)
-    this.rotate_ship_around(b,av_offset,angle_rad)
-  
-    this.ships[b + ts_offset] = now;
   }
 
   rotate_ship_around(
