@@ -5,9 +5,9 @@ import { gameroom } from "../../../ram/storage";
 import type { GameRoomResponseMessage } from "../../base";
 import { rts } from "../../../utils/basetime";
 import { mm } from "../../../manage/message";
-import type { NewRotation, SideRotation } from "../types";
+import type { NewRotation } from "../types";
 import { CCR } from "../../../manage/close";
-import { calc_av, calc_duration } from "../ship/limits";
+import { calc_av_rads } from "../ship/limits";
 import { SOFF as S } from "../gameboard/enums";
 import { gemm } from "../gameboard/non-autistic-math/gemm";
 
@@ -73,7 +73,7 @@ export function handle_move_down(ws: Bun.ServerWebSocket<WebSocketData>, msg: Ui
   }
   
   /** [rad] rotation angle between current and target orientation */
-  const ran = gemm.radians(90 * power)
+  const ran = -gemm.radians(90 * power)
 
   /* rotate front vector around side */
   gemm.v3rotmut(front, side, ran)
@@ -85,12 +85,12 @@ export function handle_move_down(ws: Bun.ServerWebSocket<WebSocketData>, msg: Ui
   // const power = obj.power // 0-100% -> 90 deg
   
   // const av +-[deg/s]. avoid accel at the moment
-  const av = -(calc_av(gb.ships[b + S.MAX_AVELO]!, power))
+  const av = (calc_av_rads(gb.ships[b + S.MAX_AVELO]!, power))
   
   /* set new rotation */
   ships[b + S.AV] = av
   ships[b + S.AV_TS] = now
-  ships[b + S.DA] = ran
+  ships[b + S.DA] = Math.abs(ran) //once module, later just decrementation happens in board.ts
 
   ships[b + S.AVX] = side[0]!
   ships[b + S.AVY] = side[1]!

@@ -56,9 +56,9 @@ export const parse_limits = (nick:string):{
   // todo implement on client side
   const mass = 1000 + sum_nick // [kg] also will be radius of core sphere [mm]
   const max_lvelo = 30 + (sum_nick + sum_others) / 1000 // [m/s]
-  const max_avelo = 30 + (sum_nick - sum_others) / 1000 // [deg/s]
+  const max_avelo = (30 + (sum_nick - sum_others) / 1000) * Math.PI/180 // [rad/s]
   const maccel = 1 * 1000 / mass * (1+sum_others)/(1+sum_nick) // [m/(s*s)]
-  const daccel = 10 * 1000 / mass * (1+sum_nick)/(1+sum_others) // [deg/(s*s)]
+  const daccel = 10 * 1000 / mass * (1+sum_nick)/(1+sum_others) * Math.PI/180 // [rad/(s*s)]
   const fr = (mass + sum_consonants * dscale) /1000 // [m]
   const br = (mass + sum_consonants * dscale * 0.5) /1000 // [m]
   const sr = (mass + sum_vowels * dscale) /1000 // [m]
@@ -70,18 +70,9 @@ export const parse_limits = (nick:string):{
 }
 
 /**
- * calculate angular velocity [deg/s] for rotation
+ * calculate and convert angular velocity [rad/s] for rotation.
  * @param max_avelo 
  * @param power 
  * @returns 
  */
-export const calc_av = ( max_avelo:number, power:number ) => max_avelo*(1/5+4/5*power**2)
-
-/**
- * calculate duration [s] of angular rotation 
- * @param av 
- * @param power 
- * @param angle_deg optional angle of rotation in degrees, 90 default. but for target rotation can be greater
- * @returns 
- */
-export const calc_duration = ( av:number, power:number, angle_deg=90 ) => angle_deg*power/av
+export const calc_av_rads = ( max_avelo:number, power:number ) => max_avelo*(1/5+4/5*power**2)

@@ -32,12 +32,12 @@ export enum SOFF {
   /** max linear velocity [m/s] */
   MAX_LVELO,
 
-  /** max angular velocity [deg/s] */
+  /** max angular velocity [rad/s] */
   MAX_AVELO,
   
   /** linear acceleration [m/(s*s)] */
   MACCEL,
-  /** angular acceleration[deg/(s*s)] */
+  /** angular acceleration[rad/(s*s)] */
   DACCEL,
 
   FRONT_GUNS,

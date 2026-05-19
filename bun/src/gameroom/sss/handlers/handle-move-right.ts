@@ -5,10 +5,11 @@ import { gameroom } from "../../../ram/storage";
 import type { GameRoomResponseMessage } from "../../base";
 import { rts } from "../../../utils/basetime";
 import { mm } from "../../../manage/message";
-import type { TopRotation } from "../types";
+import type { NewRotation } from "../types";
 import { CCR } from "../../../manage/close";
-import { calc_av, calc_duration } from "../ship/limits";
+import { calc_av_rads } from "../ship/limits";
 import { SOFF as S } from "../gameboard/enums";
+import { gemm } from "../gameboard/non-autistic-math/gemm";
 
 export function handle_move_right(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array):GameRoomResponseMessage[] {
   devlog("handle_move_right() execution.")
@@ -33,55 +34,85 @@ export function handle_move_right(ws: Bun.ServerWebSocket<WebSocketData>, msg: U
     return result
   }
 
+  const now = rts()
   const uuid = ws.data.uuid
   const gb = gameroom.board
   const ships = gb.ships
   const b = gb.base(uuid)
+
+  /** stop previous rotation */
+  ships[b + S.AV] = 0
   
-  const btv = b + S.TVX
-  const tvx = ships[btv]!
-  const tvy = ships[btv + 1]!
-  const tvz = ships[btv + 2]!
+  /** current ship front vector */
+  const front = new Float32Array(3)
+  front[0] = ships[b + S.FVX]!
+  front[1] = ships[b + S.FVX + 1]!
+  front[2] = ships[b + S.FVX + 2]!
   
-  const bfv = b + S.FVX
-  const fvx = ships[bfv]!
-  const fvy = ships[bfv + 1]!
-  const fvz = ships[bfv + 2]!
+  /** current ship top vector */
+  const top = new Float32Array(3)
+  top[0] = ships[b + S.TVX]!
+  top[1] = ships[b + S.TVX + 1]!
+  top[2] = ships[b + S.TVX + 2]!
   
-  if (fvx * fvx + fvy * fvy + fvz * fvz === 0){
-    errlog("zero front vector")
+  if (front[0]*front[0]+front[1]*front[1]+front[2]*front[2] === 0){
+    errlog("zero front vector", front)
     return result;
   }
-  if (tvx * tvx + tvy * tvy + tvz * tvz === 0){
-    errlog("zero top vector")
+  if (top[0]*top[0]+top[1]*top[1]+top[2]*top[2] === 0){
+    errlog("zero top vector", top)
     return result;
   }
+
+  /** current ship side vector */
+  const side = new Float32Array(3)
+  gemm.v3normal(front, top, side)
+  if (!gemm.v3_ok(side)){
+    errlog("incorrect or zero calculated side vector", side)
+    return result;
+  }
+
+  /** rebuild top vector, based on front and side */
+  gemm.v3normal(side, front, top)
+
+  /** [rad] rotation angle between current and target orientation */
+  const ran = -gemm.radians(90 * power)
+
+  /* rotate front vector around top */
+  gemm.v3rotmut(front, top, ran)
+
   // const power = obj.power // 0-100% -> 90 deg
   
-  // const avt +-[deg/s]. avoid accel at the moment
-  const avt = -(calc_av(ships[b + S.MAX_AVELO]!, power))
-  const duration_s = calc_duration(-avt, power)
-  const now = rts()
-  const avt_tsend =  now + duration_s*1000
-
-  /* raw stop previous rotations */
-  gb.update_one_ship_rotations(uuid, now)
-  ships[b + S.AVF] = 0
-  ships[b + S.AVS] = 0
-  ships[b + S.AV] = 0
-
+  // const av +-[deg/s]. avoid accel at the moment
+  const av = (calc_av_rads(ships[b + S.MAX_AVELO]!, power))
+  
   /* set new rotation */
-  ships[b + S.AVT] = avt
-  ships[b + S.AVT_TS] = now
-  ships[b + S.AVT_TSEND] = avt_tsend
+  ships[b + S.AV] = av
+  ships[b + S.AV_TS] = now
+  ships[b + S.DA] = Math.abs(ran)
+
+  ships[b + S.AVX] = top[0]!
+  ships[b + S.AVY] = top[1]!
+  ships[b + S.AVZ] = top[2]!
+
+  ships[b + S.FVX1] = front[0]
+  ships[b + S.FVY1] = front[1]
+  ships[b + S.FVZ1] = front[2]
+  ships[b + S.TVX1] = top[0]
+  ships[b + S.TVY1] = top[1]
+  ships[b + S.TVZ1] = top[2]
 
   result.push({
-    mt: MT.RIGHTMOVE,
+    mt: MT.TARGETMOVE,
     msg: {
-      uuid, avt, avt_ts:now, avt_tsend,
-      fvx, fvy, fvz,
-      tvx,tvy,tvz,      
-    } as TopRotation,
+      uuid, av,
+      fvx1:front[0],
+      fvy1:front[1],
+      fvz1:front[2],
+      tvx1:top[0],
+      tvy1:top[1],
+      tvz1:top[2],
+    } as NewRotation,
     ms: 0,
     uuids: [0]
   })

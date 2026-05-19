@@ -7,15 +7,9 @@ import { add_exit_button_to_game_view, add_show_ui_down_button_to_game_view, add
 import { set_hp_on_screen, view_html_div } from "./html-view";
 import { remove_ship } from "./remove-ship";
 import { check_move_metadata, move_ship } from "./move-ship";
-import { move_left_ship } from "./move-left-ship";
-import { move_right_ship } from "./move-right-ship";
 import { crts } from "../../handlers/utils";
-import { check_rotations_metadata, rotate_around_axis } from "./rotate-ship";
-import { move_top_ship } from "./move-top-ship";
+import { check_rotations_metadata } from "./rotate-ship";
 import { xyz_dev } from "./xyz";
-import { move_down_ship } from "./move-down-ship";
-import { move_cw_ship } from "./move-cw-ship";
-import { move_ccw_ship } from "./move-ccw-ship";
 import { lazer_shot } from "./lazer-shot";
 import { move_target_ship } from "./move-target-ship";
 import { sfx } from "../../../sfx/sfx";
@@ -129,26 +123,8 @@ function create_game_box() {
           ship.metadata.velocity = {x:v.x,y:v.y,z:v.z,vts:now}
         }
 
-        check_rotations_metadata(ship, now)
-        // if (ship.metadata.sideRotation){
-        //   const dt = (now - ship.metadata.sideRotation.ts ) / 1000
-        //   ship.metadata.sideRotation.ts = now
-        //   const axis = ship.getDirection(BABYLON.Vector3.Left())
-        //   rotate_around_axis(ship, axis, ship.metadata.sideRotation, dt);
-        // }
-        if (ship.metadata.frontRotation){
-          const dt = (now - ship.metadata.frontRotation.ts ) / 1000
-          ship.metadata.frontRotation.ts = now
-          const axis = ship.getDirection(BABYLON.Vector3.Forward())
-          rotate_around_axis(ship, axis, ship.metadata.frontRotation, dt);
-        }
-        if (ship.metadata.topRotation){
-          const dt = (now - ship.metadata.topRotation.ts ) / 1000
-          ship.metadata.topRotation.ts = now
-          const axis = ship.getDirection(BABYLON.Vector3.Up())
-          rotate_around_axis(ship, axis, ship.metadata.topRotation, dt);
-        }
-
+        check_rotations_metadata(ship)
+        
         //todo consider full refactoring, to avoid bindings to time
         if (ship.metadata.targetRotation) {
           const tr = ship.metadata.targetRotation;
@@ -158,17 +134,9 @@ function create_game_box() {
       
           if (dt <= 0) continue; //todo weird, need polish
       
-          const radiansPerSecond = BABYLON.Tools.ToRadians(tr.av);
-          const angle_this_frame = radiansPerSecond * dt;
+          const angle_this_frame = tr.av_rads * dt;
       
           tr.progress += angle_this_frame;
-      
-          if (tr.progress >= tr.totalAngle) {
-              // Finish rotation
-              ship.rotationQuaternion = tr.targetQuat.clone();
-              delete ship.metadata.targetRotation;
-              continue;
-          }
       
           // SLERP
           const t = tr.progress / tr.totalAngle;
@@ -228,9 +196,6 @@ function create_game_box() {
   return {
     view, initGameView, add_ship, remove_ship, game_over, get_scene, ship_boxes,
     move_ship, move_target_ship,
-    move_left_ship, move_right_ship,
-    move_top_ship, move_down_ship,
-    move_cw_ship, move_ccw_ship,
     get_glow_box, lazer_shot, animated_lazer_beams,
     get_player_idx, sfx };
 }
