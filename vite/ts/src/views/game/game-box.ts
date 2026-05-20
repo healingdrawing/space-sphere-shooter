@@ -181,7 +181,7 @@ function create_game_box() {
         m_a.elapsed_ms += dt
         if (!progress) continue
         mesh.rotateAround(m_a.pivot, m_a.axis, m_a.angle_rad * progress);
-        mesh.computeWorldMatrix(true)
+        // mesh.computeWorldMatrix(true) //todo nope, some jerking happens every rotation in initial moment in this case
       }
 
       // console.log("Total meshes in scene:", scene.meshes.length);
