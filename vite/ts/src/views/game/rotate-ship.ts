@@ -92,8 +92,9 @@ export const target_rotation = (data: Rotation) => {
 
   sync_orientation(ship_box, data.fvx, data.fvy, data.fvz, data.tvx, data.tvy, data.tvz);
   ship_box.metadata.targetRotation = {
-    av: data.av, ts: data.av_ts, tsend: data.av_tsend,
-    avx: data.avx,avy: data.avy,avz: data.avz,
+    av: data.av, ran: data.ran, pan: 0,
+    avx: data.avx, avy: data.avy, avz: data.avz,
+    ts: now,
   };
 };
 
@@ -162,19 +163,20 @@ export function check_rotations_metadata(ship_box:BABYLON.TransformNode, now: nu
   }
 
   if (meta.targetRotation) {
-    const meta_target = meta.targetRotation
-    const target_tsend = meta_target.tsend
-    if (now >= target_tsend) {
+    const mtr = meta.targetRotation
+    const dt = (now - mtr.ts)/1000
+    const pp = mtr.pan + Math.abs(mtr.av * dt)
+    if (pp >= mtr.ran) {
       /* additional check to rotate, closer to final expected rotation */
-      if (now > target_tsend){ /* need rotate up to equal condition */
-        const fake_dt = (target_tsend - meta_target.ts) / 1000
+      if (pp > mtr.ran){ /* need rotate up to equal condition */
+        const mini_dt = mtr.ran/pp*dt
         // meta_target.ts = now // commented since metadata will be removed anyways
         const axis = new BABYLON.Vector3(
-          meta_target.avx,
-          meta_target.avy,
-          meta_target.avz
+          mtr.avx,
+          mtr.avy,
+          mtr.avz
         )
-        rotate_around_axis(ship_box, axis, meta_target, fake_dt);
+        rotate_around_axis(ship_box, axis, mtr, mini_dt);
       }
       delete ship_box.metadata.targetRotation;
       console.warn("TARGET ROTATION END")

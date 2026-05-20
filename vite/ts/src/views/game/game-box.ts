@@ -150,13 +150,15 @@ function create_game_box() {
         }
         if (ship.metadata.targetRotation){
           const dt = (now - ship.metadata.targetRotation.ts ) / 1000
-          ship.metadata.targetRotation.ts = now
+          const progress = Math.abs(ship.metadata.targetRotation.av * dt)
           const axis = new BABYLON.Vector3(
             ship.metadata.targetRotation.avx,
             ship.metadata.targetRotation.avy,
             ship.metadata.targetRotation.avz
           )
           rotate_around_axis(ship, axis, ship.metadata.targetRotation, dt);
+          ship.metadata.targetRotation.ts = now
+          ship.metadata.targetRotation.pan += progress
         }
       }
 

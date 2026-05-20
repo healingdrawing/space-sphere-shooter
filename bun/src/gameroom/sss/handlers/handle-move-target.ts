@@ -73,11 +73,12 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
   vct[1] = target[1]! - center[1]
   vct[2] = target[2]! - center[2]
   /* first check the front vector is suitable to create rotation axis with target vector */
-  const angle_deg = gemm.degrees(Math.acos(gemm.v3v3cos( front, vct )))
-  if(DEVLOG) devlog("target angle [deg]", angle_deg) // todo remove
+  /** rotation angle */
+  const ran = gemm.degrees(Math.acos(gemm.v3v3cos( front, vct )))
+  if(DEVLOG) devlog("target angle [deg]", ran) // todo remove
   
   const axis = new Float32Array(3)
-  if (!angle_deg || angle_deg === 180){
+  if (!ran || ran === 180){
     axis[0] = top[0]
     axis[1] = top[1]
     axis[2] = top[2]
@@ -89,7 +90,7 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
   
   // const av +-[deg/s]. avoid accel at the moment
   const av = (calc_av(gb.ships[b + S.MAX_AVELO]!, power))
-  const duration_s = calc_duration(av, power, angle_deg)
+  const duration_s = calc_duration(av, power, ran)
   const now = rts()
   const av_tsend =  now + duration_s*1000
 
@@ -106,12 +107,14 @@ export function handle_move_target(ws: Bun.ServerWebSocket<WebSocketData>, msg: 
 
   gb.ships[b + S.AV] = av
   gb.ships[b + S.AV_TS] = now
-  gb.ships[b + S.AV_TSEND] = av_tsend
+  // gb.ships[b + S.AV_TSEND] = av_tsend //todo remove later, after refactor
+  gb.ships[b + S.RAN] = Math.abs(ran)
+  gb.ships[b + S.PAN] = 0
 
   result.push({
     mt: MT.TARGETMOVE,
     msg: {
-      uuid, av:av, av_ts:now, av_tsend: av_tsend,
+      uuid, av, ran,
       fvx:front[0], fvy:front[1], fvz:front[2],
       tvx:top[0],tvy:top[1],tvz:top[2],
       avx:axis[0],avy:axis[1],avz:axis[2], // todo rotation axis must be calculated every start

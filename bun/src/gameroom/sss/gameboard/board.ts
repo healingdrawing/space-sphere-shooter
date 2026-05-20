@@ -128,7 +128,7 @@ export class SSSBoard {
 
   set_av = (i: number, v:number) => this.set(i, S.AV, v);
   set_av_ts = (i: number, v:number) => this.set(i, S.AV_TS, v);
-  set_av_tsend = (i: number, v:number) => this.set(i, S.AV_TSEND, v);
+  // set_av_tsend = (i: number, v:number) => this.set(i, S.AV_TSEND, v);
 
   log_ship(i: number) {
     const b = this.base(i);
@@ -240,7 +240,9 @@ export class SSSBoard {
 
       av: this.ships[b + S.AV]!,
       av_ts: this.ships[b + S.AV_TS]!,
-      av_tsend: this.ships[b + S.AV_TSEND]!,
+      ran: this.ships[b + S.RAN]!,
+      pan: this.ships[b + S.PAN]!,
+      // av_tsend: this.ships[b + S.AV_TSEND]!,
 
     };
   }
@@ -302,7 +304,9 @@ export class SSSBoard {
 
     this.ships[b + S.AV]! = data.av;
     this.ships[b + S.AV_TS]! = data.av_ts;
-    this.ships[b + S.AV_TSEND]! = data.av_tsend;
+    this.ships[b + S.RAN]! = data.ran;
+    this.ships[b + S.PAN]! = data.pan;
+    // this.ships[b + S.AV_TSEND]! = data.av_tsend;
   }
 
   /** Reset one ship slot when player exit or destroyed */
@@ -693,11 +697,11 @@ export class SSSBoard {
     if (av === 0) return;
 
     const ts_offset    = avOffset + 1;   // *_TS   (last update time)
-    const tsend_offset = avOffset + 2;   // *_TSEND (end time)
+    const ran_offset = avOffset + 2;   // *RAN (full rotation, abs)
+    const pan_offset = avOffset + 3;   // *PAN (current progress, abs)
   
     const last_ts = this.ships[b + ts_offset]!;
-    const tsend  = this.ships[b + tsend_offset]!;
-  
+      
     if (last_ts > now){
       errlog("apply_angular_velocity() last_ts > now. should not happen", last_ts, now)
       return
@@ -710,13 +714,19 @@ export class SSSBoard {
       return
     }// case of the first moment. ... and more as described above
 
-    if (now >= tsend){
+    const ran  = this.ships[b + ran_offset]!;
+    const pan  = this.ships[b + pan_offset]!;
+    const dt = (now - last_ts) / 1000;
+    /** potential progress */
+    const pp = pan + Math.abs(av * dt)
+
+    if (pp >= ran){
       /* case of small rotation still need to be to satisfy the ... "plan" */
-      if (now > tsend){
-        // rotation to difference of time
-        const dt = (tsend - last_ts) / 1000;
-        const angle_rad = av * dt * Math.PI / 180;
-        rawlog("rotation last step: dt=",dt ," angle_rad=", angle_rad)
+      if (pp > ran){
+        // rotation to difference
+        const mini_dt = ran/pp * dt;
+        const angle_rad = av * mini_dt * Math.PI / 180;
+        rawlog("rotation last step: mini_dt=",mini_dt ," angle_rad=", angle_rad) //todo remove
         this.rotate_ship_around(b,avOffset,angle_rad)
       }
       this.ships[b + avOffset] = 0;
@@ -724,13 +734,12 @@ export class SSSBoard {
       return;
     }
 
-    const dt = (now - last_ts) / 1000;
-    
     const angle_rad = av * dt * Math.PI / 180;
     // rawlog("rotation step: dt=",dt ," angle_rad=", angle_rad)
     this.rotate_ship_around(b,avOffset,angle_rad)
   
     this.ships[b + ts_offset] = now;
+    this.ships[b + pan_offset] = pp;
   }
 
   rotate_ship_around(

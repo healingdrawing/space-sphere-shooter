@@ -104,8 +104,10 @@ export interface Ship {
   av: number;
   /** angular velocity timestamp [ms] */
   av_ts: number;
-  /** angular velocity END timestamp [ms] */
-  av_tsend:number;
+  /** rotation angle [deg] */
+  ran: number,
+  /** progress positive angle [deg]. Use Math.abs */
+  pan: number,
 }
 
 export type Frontmove = {
@@ -136,9 +138,22 @@ export type SideRotation = {
   avx:number,avy:number,avz:number, // axis vector x y z
 }
 
-/** rotation around av(x/y/z) vector */
+/** rotation around av(x/y/z) vector
+ * @property uuid user identificator, integer index in array
+ * @property av [deg/s] angular velocity of the rotation
+ * @property ran [deg] rotation angle
+ * @property fvx ship front vector x
+ * @property fvy ship front vector y
+ * @property fvz ship front vector z
+ * @property tvx ship top vector x
+ * @property tvy ship top vector y
+ * @property tvz ship top vector z
+ * @property avx ship rotation axis x
+ * @property avy ship rotation axis y
+ * @property avz ship rotation axis z
+ */
 export type Rotation = {
-  uuid:number, av:number, av_ts:number, av_tsend: number,
+  uuid:number, av:number, ran: number,
   fvx:number, fvy:number, fvz:number, // data for synchronisation client to server orientation
   tvx:number,tvy:number,tvz:number, // data for synchronisation client to server orientation
   avx:number,avy:number,avz:number, // axis vector x y z, case of free axis
