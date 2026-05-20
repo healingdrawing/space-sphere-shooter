@@ -100,6 +100,7 @@ export const target_rotation = (data: Rotation) => {
 export function rotate_around_axis(ship: BABYLON.TransformNode, axis: BABYLON.Vector3, rot: {av: number}, dt: number) {
   const angleRad = rot.av * dt * Math.PI / 180;
   ship.rotateAround(ship.absolutePosition ,axis, angleRad);
+  ship.computeWorldMatrix(true)
 }
 
 /** clean if rotation complete */

@@ -181,6 +181,7 @@ function create_game_box() {
         m_a.elapsed_ms += dt
         if (!progress) continue
         mesh.rotateAround(m_a.pivot, m_a.axis, m_a.angle_rad * progress);
+        mesh.computeWorldMatrix(true)
       }
 
       // console.log("Total meshes in scene:", scene.meshes.length);
