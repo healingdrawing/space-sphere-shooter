@@ -146,7 +146,7 @@ export type Rotation = {
 
 /** rotation around av(x/y/z) vector. Data sent from server side, wip.
  * @property uuid to find section of the ship data in array
- * @property av angular velocity [deg/s] at the moment
+ * @property av angular velocity [rad/s] at the moment
  * @property fvx1 target orientation front vector x
  * @property fvy1 target orientation front vector y
  * @property fvz1 target orientation front vector z

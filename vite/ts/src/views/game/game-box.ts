@@ -108,7 +108,7 @@ function create_game_box() {
 
     function animate() {
       if (!engine || !scene) return;
-      const now = crts();
+      const now = crts(); //todo not sure it should be inside for loop
       
       for (const ship of game_box.ship_boxes) {
         if (!ship) continue
@@ -123,29 +123,31 @@ function create_game_box() {
           ship.metadata.velocity = {x:v.x,y:v.y,z:v.z,vts:now}
         }
 
-        check_rotations_metadata(ship)
+        
         
         //todo consider full refactoring, to avoid bindings to time
         if (ship.metadata.targetRotation) {
           const tr = ship.metadata.targetRotation;
-          const now = crts();
           const dt = (now - tr.ts) / 1000;
-          tr.ts = now;
+          ship.metadata.targetRotation.ts = now;
       
-          if (dt <= 0) continue; //todo weird, need polish
-      
-          const angle_this_frame = tr.av_rads * dt;
-      
-          tr.progress += angle_this_frame;
-      
-          // SLERP
-          const t = tr.progress / tr.totalAngle;
-          ship.rotationQuaternion = BABYLON.Quaternion.Slerp(
-              tr.startQuat,
-              tr.targetQuat,
-              t
-          );
+          if (dt > 0){
+            ship.metadata.targetRotation.progress += tr.av_rads * dt;
+            
+            // SLERP
+            if(tr.progress < tr.totalAngle){ //todo check looks not clear
+              const t = tr.progress / tr.totalAngle;
+              ship.rotationQuaternion = BABYLON.Quaternion.Slerp(
+                ship.rotationQuaternion?.clone() || BABYLON.Quaternion.Identity(),
+                tr.targetQuat,
+                t
+              );
+              ship.rotationQuaternion.normalize();           // clean
+              ship.computeWorldMatrix(true);
+            }
+          }
         }
+        check_rotations_metadata(ship)
       }
 
       for (let i = game_box.animated_lazer_beams.length - 1; i >= 0; i--) {
