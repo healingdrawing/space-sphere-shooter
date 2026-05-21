@@ -4,7 +4,19 @@ import { SSSBoard } from "./gameboard/board";
 
 import { USERS_MAX_NUMBER } from "../../ram/consts";
 import { MT } from "../../enums/mt";
-import { handle_shot_back, handle_move_ccw, handle_move_cw, handle_move_down, handle_shot_down, handle_join, handle_exit, handle_move_front, handle_shot_front, handle_move_left, handle_shot_left, handle_move_right, handle_shot_right, handle_move_stop, handle_move_target, handle_move_top, handle_shot_top } from "./handlers/game";
+import {
+  handle_join,
+  handle_exit,
+  handle_shot_front,
+  handle_shot_back,
+  handle_shot_top,
+  handle_shot_down,
+  handle_shot_left,
+  handle_shot_right,
+  handle_move_front,
+  handle_move_stop,
+  handle_rotation,
+} from "./handlers/game";
 import { CCR } from "../../manage/close";
 import type { WebSocketData } from "../..";
 import { parse_guns, parse_limits } from "./ship/limits";
@@ -89,7 +101,7 @@ export class SSSGameRoom implements GameRoom {
       avf: 0, avf_ts:0, avf_tsend:0,
       avt: 0, avt_ts:0, avt_tsend:0,
       avs: 0, avs_ts:0, avs_tsend:0,
-      av: 0, av_ts:0, av_tsend:0,
+      av: 0, av_ts:0, ran:0, pan:0, //av_tsend:0,//todo remove
     };
     b.write_ship(i, ship)
 
@@ -221,19 +233,13 @@ export class SSSGameRoom implements GameRoom {
       case MT.FRONTMOVE: return handle_move_front(ws, msg);
       case MT.STOPMOVE: return handle_move_stop(ws, msg);
     
-      case MT.LEFTMOVE: return handle_move_left(ws, msg);
-    
-      case MT.RIGHTMOVE: return handle_move_right(ws, msg);
-    
-      case MT.TOPMOVE: return handle_move_top(ws, msg);
-    
-      case MT.DOWNMOVE: return handle_move_down(ws, msg);
-    
-      case MT.CWMOVE: return handle_move_cw(ws, msg);
-    
-      case MT.CCWMOVE: return handle_move_ccw(ws, msg);
-    
-      case MT.TARGETMOVE: return handle_move_target(ws, msg); // todo consider to one shot target direction to closest object, (not implemented).
+      case MT.LEFTMOVE:
+      case MT.RIGHTMOVE:
+      case MT.TOPMOVE:
+      case MT.DOWNMOVE:
+      case MT.CWMOVE:
+      case MT.CCWMOVE:
+      case MT.TARGETMOVE: return handle_rotation(ws, msg, mt);
     
       default:
         ws.close(CCR.BROKENTYPE.code, CCR.BROKENTYPE.reason);

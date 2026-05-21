@@ -8,7 +8,7 @@ export const move_handler = (text:string) => {
   try {
     const obj = mm.parse(text) as Frontmove
     //todo check
-    game_box.move_ship(obj)
+    game_box.manage_move(obj)
   } catch (e) {
     console.error("wrong front move or stop move data received")
   }
