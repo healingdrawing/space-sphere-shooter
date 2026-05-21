@@ -39,7 +39,7 @@ export const add_ship = async (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BAB
   // Orientation using front + top vectors
   const front = new BABYLON.Vector3(ship.fvx, ship.fvy, ship.fvz);
   // const top = new BABYLON.Vector3(ship.tvx, ship.tvy, ship.tvz);
-  hull.lookAt(hull.position.add(front));
+  box.lookAt(hull.position.add(front));
   sync_orientation(box, ship.fvx, ship.fvy, ship.fvz, ship.tvx, ship.tvy, ship.tvz)
   
   /* raw attempt to force recalc, to avoid drift of the mesh */
