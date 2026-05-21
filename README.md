@@ -10,7 +10,7 @@ Multiplayer online browser game. TypeScript client. TypeScript server.
 - open terminal in **repo root level**(this README.md file folder).
 - development and build command sequences started from the **repo root level**.
 
-Project development runtime version `bun -v` upgraded to version **1.3.8**
+Project development runtime version `bun -v` upgraded to version **1.3.13**
 
 ## Development run
 
