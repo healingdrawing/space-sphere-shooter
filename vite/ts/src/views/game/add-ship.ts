@@ -42,6 +42,11 @@ export const add_ship = async (ship: Ship, scene: BABYLON.Scene, ship_boxes:(BAB
   hull.lookAt(hull.position.add(front));
   sync_orientation(box, ship.fvx, ship.fvy, ship.fvz, ship.tvx, ship.tvy, ship.tvz)
   
+  /* raw attempt to force recalc, to avoid drift of the mesh */
+  box.computeWorldMatrix(true);
+  hull.computeWorldMatrix(true);
+  core.computeWorldMatrix(true);
+  
   ship_boxes[idx] = box
 
   

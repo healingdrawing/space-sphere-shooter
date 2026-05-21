@@ -29,7 +29,7 @@ export const rotate_ship = (data: Rotation) => {
 export function rotate_around_axis(ship: BABYLON.TransformNode, axis: BABYLON.Vector3, rot: {av: number}, dt: number) {
   const angleRad = rot.av * dt * Math.PI / 180;
   ship.rotateAround(ship.absolutePosition ,axis, angleRad);
-  // ship.computeWorldMatrix(true) //todo nope, some jerking happens every rotation in initial moment in this case
+  ship.computeWorldMatrix(true) //todo nope, some jerking happens every rotation in initial moment in this case
 }
 
 /** clean if rotation complete */

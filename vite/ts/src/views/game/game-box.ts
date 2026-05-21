@@ -117,6 +117,8 @@ function create_game_box() {
           const vec = new BABYLON.Vector3(v.x, v.y, v.z)
           const scaled = vec.scaleInPlace(dt);
           ship.position.addInPlace(scaled);
+          /* attempt to force recalc, to prevent drift of the mesh */
+          ship.computeWorldMatrix(true)
           ship.metadata.velocity = {x:v.x,y:v.y,z:v.z,vts:now}
         }
 
@@ -130,6 +132,8 @@ function create_game_box() {
             ship.metadata.rotation.avz
           ) // warning not to store vector in metadata.rotation vs create, since consider test what is more performant. as *.Vector3 or new *.Vector3(used above)
           rotate_around_axis(ship, axis, ship.metadata.rotation, dt);
+          /* attempt to force recalc, to prevent drift of the mesh */
+          ship.computeWorldMatrix(true)
           ship.metadata.rotation.ts = now
           ship.metadata.rotation.pan += progress
         }
@@ -156,7 +160,6 @@ function create_game_box() {
         m_a.elapsed_ms += dt
         if (!progress) continue
         mesh.rotateAround(m_a.pivot, m_a.axis, m_a.angle_rad * progress);
-        // mesh.computeWorldMatrix(true) //todo nope, some jerking happens every rotation in initial moment in this case
       }
 
       // console.log("Total meshes in scene:", scene.meshes.length);
