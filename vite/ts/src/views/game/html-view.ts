@@ -21,9 +21,6 @@ export const view_html_div = () => {
   container.appendChild(ui_box);
 
   const hp_text = document.createElement('div');
-  // hp_text.style.width = '100px';
-  // hp_text.style.height = '100px';
-  // hp_text.style.background = 'white';
   hp_text.id = 'hp';
   hp_text.innerText = '...waiting';
   ui_box.appendChild(hp_text);

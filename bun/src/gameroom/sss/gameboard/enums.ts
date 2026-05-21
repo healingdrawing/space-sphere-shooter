@@ -102,8 +102,10 @@ export enum SOFF {
   AV,
   /** angular velocity timestamp [ms] */
   AV_TS,
-  /** angular velocity END timestamp [ms] */
-  AV_TSEND,
+  /** rotation angle [deg]. Use Math.abs. +- managed by AV sign */
+  RAN,
+  /** progress positive angle [deg]. Use Math.abs */
+  PAN,
 
 };
 
