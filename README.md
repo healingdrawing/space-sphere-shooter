@@ -1,6 +1,16 @@
 # SPACE SPHERE SHOOTER
 Multiplayer online browser game. TypeScript client. TypeScript server.
-![space sphere shooter demo](demo.webp)
+
+![space sphere shooter demo](demo.webp)  
+
+## Play online for free 
+
+
+[https://space-sphere-shooter.onrender.com](https://space-sphere-shooter.onrender.com)
+
+Demo deployment implemented as two separated dockerized web services onrender.com.
+
+![qr-play-online-for-free.png](qr-play-online-for-free.png) 
 
 ## Development environment
 
@@ -33,10 +43,6 @@ Project development runtime version `bun -v` upgraded to version **1.3.13**
 Standalone build and Dockerfile build available.
 
 In case of onrender.com deployment, for a client configuration, the `PORT` variable from `.env` file must be removed(not added), otherwise the web service deployment will stuck for long time to check the `PORT` value is functional, then crush. 
-
-Demo deployment implemented as two separated dockerized web services onrender.com.
-
-[https://space-sphere-shooter.onrender.com](https://space-sphere-shooter.onrender.com)
 
 ## Dockerfile development build
 
