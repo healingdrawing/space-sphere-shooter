@@ -1,5 +1,5 @@
 import type { WebSocketData } from "../../..";
-import { devlog, errlog } from "../../../debug/debug";
+import { DEVLOG, devlog, errlog } from "../../../debug/debug";
 import { MT } from "../../../enums/mt";
 import { CCR } from "../../../manage/close";
 import { mm } from "../../../manage/message";
@@ -9,7 +9,7 @@ import type { GameRoomResponseMessage } from "../../base";
 import { SOFF as S } from "../gameboard/enums";
 
 export function handle_move_stop(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array): GameRoomResponseMessage[] {
-  devlog("handle_move_stop() execution.")
+  if(DEVLOG) devlog("handle_move_stop() execution.")
 
   const result: GameRoomResponseMessage[] = [];
 

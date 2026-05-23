@@ -18,7 +18,7 @@ import { ccw_data } from "./rotation/ccw-data";
 import { cw_data } from "./rotation/cw-data";
 
 export function handle_rotation(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uint8Array, mt:MT):GameRoomResponseMessage[] {
-  devlog("handle_rotation() execution.")
+  if(DEVLOG) devlog("handle_rotation() execution.")
 
   const result:GameRoomResponseMessage[] = []
 
@@ -90,10 +90,7 @@ export function handle_rotation(ws: Bun.ServerWebSocket<WebSocketData>, msg: Uin
   
   /* raw stop previous rotations */
   gb.update_one_ship_rotations(uuid, now)
-  gb.ships[b + S.AVF] = 0
-  gb.ships[b + S.AVT] = 0
-  gb.ships[b + S.AVS] = 0
-
+  
   /* set new rotation */
   gb.ships[b + S.AVX] = axis[0]!
   gb.ships[b + S.AVY] = axis[1]!

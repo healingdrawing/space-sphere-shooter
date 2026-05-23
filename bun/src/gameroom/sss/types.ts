@@ -79,27 +79,6 @@ export interface Ship {
   /** velocity timestamp */
   v_ts:         number;
   
-  /** angular velocity [deg/s] FRONT */
-  avf: number;
-  /** angular velocity FRONT timestamp [ms] */
-  avf_ts: number;
-  /** angular velocity FRONT END timestamp [ms] */
-  avf_tsend:number;
-
-  /** angular velocity [deg/s] TOP */
-  avt: number;
-  /** angular velocity TOP timestamp [ms] */
-  avt_ts: number;
-  /** angular velocity TOP END timestamp [ms] */
-  avt_tsend:number;
-  
-  /** angular velocity [deg/s] SIDE */
-  avs: number;
-  /** angular velocity SIDE timestamp [ms] */
-  avs_ts: number;
-  /** angular velocity SIDE END timestamp [ms] */
-  avs_tsend:number;
-  
   /** angular velocity [deg/s] */
   av: number;
   /** angular velocity timestamp [ms] */

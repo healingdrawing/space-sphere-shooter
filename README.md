@@ -9,6 +9,10 @@ Multiplayer online browser game. TypeScript client. TypeScript server.
 - clone the repository using vscode.
 - open terminal in **repo root level**(this README.md file folder).
 - development and build command sequences started from the **repo root level**.
+- **the vpn extension of the browser can raise CORS issues in case of local development**.
+- the client and the server are separated, and executed using the same command, but **from different folders**.
+- **do not touch without reasons the babylonjs quaternions(issues reported)**
+- the file **bun/src/manage/open.ts** includes the `if(!DEVLOG){...}` code fragment, responsible to prohibit many clients on one IP (two tabs in browser etc). The `DEVLOG=false` activates this functionality and makes development on one machine more complicated. So before turn off all devlog prints, be ready to difficulties of check/test/development. 
 
 Project development runtime version `bun -v` upgraded to version **1.3.13**
 
@@ -23,10 +27,6 @@ Project development runtime version `bun -v` upgraded to version **1.3.13**
 - terminal: `cd vite/ts`
 - terminal: `bun i`
 - terminal: `bun run dev`
-
-**The vpn extension of the browser can raise CORS issues in case of local development.**
-
-Yes, the client and the server are separated, and executed using the same command, but from different folders.
 
 ## Build
 

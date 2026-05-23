@@ -97,11 +97,7 @@ export class SSSGameRoom implements GameRoom {
       avx: 0, avy: 0, avz: 0, // target rotation vector. Specifically for target move
 
       vvx: 0, vvy: 0, vvz: 0, v_ts: 0,
-      
-      avf: 0, avf_ts:0, avf_tsend:0,
-      avt: 0, avt_ts:0, avt_tsend:0,
-      avs: 0, avs_ts:0, avs_tsend:0,
-      av: 0, av_ts:0, ran:0, pan:0, //av_tsend:0,//todo remove
+      av: 0, av_ts:0, ran:0, pan:0,
     };
     b.write_ship(i, ship)
 

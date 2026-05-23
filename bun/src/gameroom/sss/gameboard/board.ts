@@ -10,7 +10,6 @@ import { two_ships_collision } from "./collide/obb";
 
 export class SSSBoard {
   
-
   /** the world sphere diameter //todo not implemented */
   readonly size = USERS_MAX_NUMBER
   private readonly sizeplus = this.size + 1
@@ -23,113 +22,7 @@ export class SSSBoard {
   ships = new Float32Array(this.sizeplus * SOFFSIZE);
 
   base = (i: number) => i * SOFFSIZE;
-  get = (i: number, off: number) => this.ships[this.base(i) + off];
-  set = (i: number, off: number, v: number) => this.ships[this.base(i) + off] = v;
-
-  // warning //todo refactor later to straight way, without getters/setters, to speedup
-  get_ship_idx = (i: number) => this.get(i, S.SHIP_IDX);
-  get_R = (i: number) => this.get(i, S.R);
-  get_G = (i: number) => this.get(i, S.G);
-  get_B = (i: number) => this.get(i, S.B);
-  get_mass = (i: number) => this.get(i, S.MASS);
-  get_max_lvelo = (i: number) => this.get(i, S.MAX_LVELO);
-  get_max_avelo = (i: number) => this.get(i, S.MAX_AVELO);
-  get_maccel = (i: number) => this.get(i, S.MACCEL);
-  get_daccel = (i: number) => this.get(i, S.DACCEL);
-  get_front_guns = (i: number) => this.get(i, S.FRONT_GUNS);
-  get_side_guns = (i: number) => this.get(i, S.SIDE_GUNS);
-  get_vert_guns = (i: number) => this.get(i, S.VERT_GUNS);
-  get_engines = (i: number) => this.get(i, S.ENGINES);
-  get_fr = (i: number) => this.get(i, S.FR);
-  get_br = (i: number) => this.get(i, S.BR);
-  get_sr = (i: number) => this.get(i, S.SR);
-  get_vr = (i: number) => this.get(i, S.VR);
-  get_max_en = (i: number) => this.get(i, S.MAX_EN);
-  get_en = (i: number) => this.get(i, S.EN);
-  get_en_ts = (i: number) => this.get(i, S.EN_TS);
-  get_max_hp = (i: number) => this.get(i, S.MAX_HP);
-  get_hp = (i: number) => this.get(i, S.HP);
-  get_hp_ts = (i: number) => this.get(i, S.HP_TS);
-  get_cx = (i: number) => this.get(i, S.CX);
-  get_cy = (i: number) => this.get(i, S.CY);
-  get_cz = (i: number) => this.get(i, S.CZ);
-  get_fvx = (i: number) => this.get(i, S.FVX);
-  get_fvy = (i: number) => this.get(i, S.FVY);
-  get_fvz = (i: number) => this.get(i, S.FVZ);
-  get_tvx = (i: number) => this.get(i, S.TVX);
-  get_tvy = (i: number) => this.get(i, S.TVY);
-  get_tvz = (i: number) => this.get(i, S.TVZ);
-  get_vvx = (i: number) => this.get(i, S.VVX);
-  get_vvy = (i: number) => this.get(i, S.VVY);
-  get_vvz = (i: number) => this.get(i, S.VVZ);
-  get_vts = (i: number) => this.get(i, S.V_TS);
   
-  get_avf = (i: number) => this.get(i, S.AVF);
-  get_avf_ts = (i: number) => this.get(i, S.AVF_TS);
-  get_avf_tsend = (i: number) => this.get(i, S.AVF_TSEND);
-  get_avt = (i: number) => this.get(i, S.AVT);
-  get_avt_ts = (i: number) => this.get(i, S.AVT_TS);
-  get_avt_tsend = (i: number) => this.get(i, S.AVT_TSEND);
-  get_avs = (i: number) => this.get(i, S.AVS);
-  get_avs_ts = (i: number) => this.get(i, S.AVS_TS);
-  get_avs_tsend = (i: number) => this.get(i, S.AVS_TSEND);
-
-  set_ship_idx = (i: number, v: number) => this.set(i, S.SHIP_IDX, v);
-  set_R = (i: number, v: number) => this.set(i, S.R, v);
-  set_G = (i: number, v: number) => this.set(i, S.G, v);
-  set_B = (i: number, v: number) => this.set(i, S.B, v);
-  set_mass = (i: number, v: number) => this.set(i, S.MASS, v);
-  set_max_lvelo = (i: number, v: number) => this.set(i, S.MAX_LVELO, v);
-  set_max_avelo = (i: number, v: number) => this.set(i, S.MAX_AVELO, v);
-  set_maccel = (i: number, v: number) => this.set(i, S.MACCEL, v);
-  set_daccel = (i: number, v: number) => this.set(i, S.DACCEL, v);
-  set_front_guns = (i: number, v: number) => this.set(i, S.FRONT_GUNS, v);
-  set_side_guns = (i: number, v: number) => this.set(i, S.SIDE_GUNS, v);
-  set_vert_guns = (i: number, v: number) => this.set(i, S.VERT_GUNS, v);
-  set_engines = (i: number, v: number) => this.set(i, S.ENGINES, v);
-  set_fr = (i: number, v: number) => this.set(i, S.FR, v);
-  set_br = (i: number, v: number) => this.set(i, S.BR, v);
-  set_sr = (i: number, v: number) => this.set(i, S.SR, v);
-  set_vr = (i: number, v: number) => this.set(i, S.VR, v);
-  set_max_en = (i: number, v: number) => this.set(i, S.MAX_EN, v);
-  set_en = (i: number, v: number) => this.set(i, S.EN, v);
-  set_en_ts = (i: number, v: number) => this.set(i, S.EN_TS, v);
-  set_max_hp = (i: number, v: number) => this.set(i, S.MAX_HP, v);
-  set_hp = (i: number, v: number) => this.set(i, S.HP, v);
-  set_hp_ts = (i: number, v: number) => this.set(i, S.HP_TS, v);
-  set_cx = (i: number, v: number) => this.set(i, S.CX, v);
-  set_cy = (i: number, v: number) => this.set(i, S.CY, v);
-  set_cz = (i: number, v: number) => this.set(i, S.CZ, v);
-  set_fvx = (i: number, v: number) => this.set(i, S.FVX, v);
-  set_fvy = (i: number, v: number) => this.set(i, S.FVY, v);
-  set_fvz = (i: number, v: number) => this.set(i, S.FVZ, v);
-  set_tvx = (i: number, v: number) => this.set(i, S.TVX, v);
-  set_tvy = (i: number, v: number) => this.set(i, S.TVY, v);
-  set_tvz = (i: number, v: number) => this.set(i, S.TVZ, v);
-  
-  set_avx = (i: number, v: number) => this.set(i, S.AVX, v);
-  set_avy = (i: number, v: number) => this.set(i, S.AVY, v);
-  set_avz = (i: number, v: number) => this.set(i, S.AVZ, v);
-
-  set_vvx = (i: number, v: number) => this.set(i, S.VVX, v);
-  set_vvy = (i: number, v: number) => this.set(i, S.VVY, v);
-  set_vvz = (i: number, v: number) => this.set(i, S.VVZ, v);
-  set_vts = (i: number, v: number) => this.set(i, S.V_TS, v);
-  
-  set_avf = (i: number, v:number) => this.set(i, S.AVF, v);
-  set_avf_ts = (i: number, v:number) => this.set(i, S.AVF_TS, v);
-  set_avf_tsend = (i: number, v:number) => this.set(i, S.AVF_TSEND, v);
-  set_avt = (i: number, v:number) => this.set(i, S.AVT, v);
-  set_avt_ts = (i: number, v:number) => this.set(i, S.AVT_TS, v);
-  set_avt_tsend = (i: number, v:number) => this.set(i, S.AVT_TSEND, v);
-  set_avs = (i: number, v:number) => this.set(i, S.AVS, v);
-  set_avs_ts = (i: number, v:number) => this.set(i, S.AVS_TS, v);
-  set_avs_tsend = (i: number, v:number) => this.set(i, S.AVS_TSEND, v);
-
-  set_av = (i: number, v:number) => this.set(i, S.AV, v);
-  set_av_ts = (i: number, v:number) => this.set(i, S.AV_TS, v);
-  // set_av_tsend = (i: number, v:number) => this.set(i, S.AV_TSEND, v);
-
   log_ship(i: number) {
     const b = this.base(i);
     console.log(`\n=== Ship ${i} ===`);
@@ -169,16 +62,8 @@ export class SSSBoard {
     console.log(`vvy:          ${this.ships[b + S.VVY]}`);
     console.log(`vvz:          ${this.ships[b + S.VVZ]}`);
     console.log(`v_ts:         ${this.ships[b + S.V_TS]}`);
-    
-    console.log(`avf:          ${this.ships[b + S.AVF]}`);
-    console.log(`avf_ts:          ${this.ships[b + S.AVF_TS]}`);
-    console.log(`avf_tsend:          ${this.ships[b + S.AVF_TSEND]}`);
-    console.log(`avt:          ${this.ships[b + S.AVT]}`);
-    console.log(`avt_ts:          ${this.ships[b + S.AVT_TS]}`);
-    console.log(`avt_tsend:          ${this.ships[b + S.AVT_TSEND]}`);
-    console.log(`avs:          ${this.ships[b + S.AVS]}`);
-    console.log(`avs_ts:          ${this.ships[b + S.AVS_TS]}`);
-    console.log(`avs_tsend:          ${this.ships[b + S.AVS_TSEND]}`);
+    console.log(`ran:          ${this.ships[b + S.RAN]}`);
+    console.log(`pan:          ${this.ships[b + S.PAN]}`);
     
     console.log("===================\n");
   }
@@ -228,22 +113,10 @@ export class SSSBoard {
       vvz:           this.ships[b + S.VVZ]!,
       v_ts:           this.ships[b + S.V_TS]!,
       
-      avf: this.ships[b + S.AVF]!,
-      avf_ts: this.ships[b + S.AVF_TS]!,
-      avf_tsend: this.ships[b + S.AVF_TSEND]!,
-      avt: this.ships[b + S.AVT]!,
-      avt_ts: this.ships[b + S.AVT_TS]!,
-      avt_tsend: this.ships[b + S.AVT_TSEND]!,
-      avs: this.ships[b + S.AVS]!,
-      avs_ts: this.ships[b + S.AVS_TS]!,
-      avs_tsend: this.ships[b + S.AVS_TSEND]!,
-
       av: this.ships[b + S.AV]!,
       av_ts: this.ships[b + S.AV_TS]!,
       ran: this.ships[b + S.RAN]!,
       pan: this.ships[b + S.PAN]!,
-      // av_tsend: this.ships[b + S.AV_TSEND]!,
-
     };
   }
 
@@ -292,21 +165,10 @@ export class SSSBoard {
     this.ships[b + S.VVZ] = data.vvz;
     this.ships[b + S.V_TS] = data.v_ts;
     
-    this.ships[b + S.AVF]! = data.avf;
-    this.ships[b + S.AVF_TS]! = data.avf_ts;
-    this.ships[b + S.AVF_TSEND]! = data.avf_tsend;
-    this.ships[b + S.AVT]! = data.avt;
-    this.ships[b + S.AVT_TS]! = data.avt_ts;
-    this.ships[b + S.AVT_TSEND]! = data.avt_tsend;
-    this.ships[b + S.AVS]! = data.avs;
-    this.ships[b + S.AVS_TS]! = data.avs_ts;
-    this.ships[b + S.AVS_TSEND]! = data.avs_tsend;
-
     this.ships[b + S.AV]! = data.av;
     this.ships[b + S.AV_TS]! = data.av_ts;
     this.ships[b + S.RAN]! = data.ran;
     this.ships[b + S.PAN]! = data.pan;
-    // this.ships[b + S.AV_TSEND]! = data.av_tsend;
   }
 
   /** Reset one ship slot when player exit or destroyed */
@@ -328,16 +190,16 @@ export class SSSBoard {
    * @param power requested power of for shot 0-100% of current en
    * @param en current energy units available to use
    * @param max_en maximum energy units capacity
-   * @param v3 3d vector of the lazer beam front direction
-   * @param v3n 3d vector of the lazer beam normal axis to rotate beam
-   * @param d3 3d dot of the start of the lazer beam
+   * @param bfv 3d vector. The lazer beam front vector
+   * @param bnv 3d vector. The lazer beam normal vector(axis) to rotate beam
+   * @param bsd 3d dot. The lazer beam start dot
   */
   lazer_shot(
     uuid:number,
     guns:number, power:number, en:number, max_en:number,
-    v3:Float32Array,
-    v3n:Float32Array,
-    d3:Float32Array,
+    bfv:Float32Array,
+    bnv:Float32Array,
+    bsd:Float32Array,
   ):GameRoomResponseMessage[]
   {
     const result:GameRoomResponseMessage[] = []
@@ -345,20 +207,6 @@ export class SSSBoard {
     if(DEVLOG) devlog("power en guns",power+" "+en+" "+guns) // todo remove
     /* damage value */
     const damage = power * en / guns * 0.5 // * 0.5 to satisfy density 0-2
-
-    // todo refactor to not use getters/read_ship to speedup
-    const s = this.read_ship(uuid)
-
-    /** beam start dot */
-    const bs = d3
-    const bsx = bs[0]!
-    const bsy = bs[1]!
-    const bsz = bs[2]!
-
-    /** beam front vector */
-    const bfv = v3
-    /** beam normal vector */
-    const bnv = v3n
 
     /** beam side vector to rotate in vertical plane */
     const bsv = new Float32Array(3)
@@ -373,51 +221,58 @@ export class SSSBoard {
     for (let i=1;i<lena;i++){
       if (!p[i] || i === uuid) continue
       /** target ship to check hit */
-      const t = this.read_ship(i)
+      const t = this.read_ship(i) //todo refactor to exclude read_ship
+      const b = this.base(i)
 
       //todo implement the comparison first, otherwise the damage happens in two opposite directions. Some way filter the beam direction(let it be angle between shoter center to beam start and shoter center to target center must be less than 45 degrees. But it is rough of course, since distance). Now it lags, and shoot happens two directions, but lazer beam animated only one. direction.
       
       /** raw distance from ship center to count damage. //todo implement Ellipsoid. Not implemented */
-      const r = ( Math.min( t.br, t.sr, t.vr, t.fr ) )
+
+      const r = ( Math.min(
+        this.ships[b + S.BR]!,
+        this.ships[b + S.SR]!,
+        this.ships[b + S.VR]!,
+        this.ships[b + S.FR]!
+      ) )
       /** max distance from target ship center when target ship affected by beam */
-      const dmax = (2*r*r)**0.5 //todo was tired probably :) why not r*2**0.5 (pifagor for two/doubled radii)
+      const dmax = r*Math.SQRT2 // (2*r*r)**0.5 . Was tired probably :) why not r*2**0.5 (pifagor for two/doubled radii)
       
       /* todo refactor properly, first consider refactor t */
       const tc = new Float32Array( [t.cx, t.cy, t.cz])
-      const tcx = tc[0]!
-      const tcy = tc[1]!
-      const tcz = tc[2]!
+      // const tcx = tc[0]!
+      // const tcy = tc[1]!
+      // const tcz = tc[2]!
 
       /** vertical plane of the cross styled beam */
       const vp = new Float32Array(4)
-      gemm.p3_d3v3_mut(bs,bnv, vp)
+      gemm.p3_d3v3_mut(bsd,bnv, vp)
       /** horizontal plane of the cross styled beam */
       const hp = new Float32Array(4)
-      gemm.p3_d3v3_mut(bs,bsv, hp)
+      gemm.p3_d3v3_mut(bsd,bsv, hp)
 
       /** projection of the target ship to the vertical plane of the beam */
       const vp_dot = new Float32Array(3)
       gemm.d3_projection_on_p3_mut(tc, vp, vp_dot)
-      const vp_dotx = vp_dot[0]!
-      const vp_doty = vp_dot[1]!
-      const vp_dotz = vp_dot[2]!
+      // const vp_dotx = vp_dot[0]!
+      // const vp_doty = vp_dot[1]!
+      // const vp_dotz = vp_dot[2]!
       /** projection of the target ship to the horizontal plane of the beam */
       const hp_dot = new Float32Array(3)
       gemm.d3_projection_on_p3_mut(tc, hp, hp_dot)
-      const hp_dotx = hp_dot[0]!
-      const hp_doty = hp_dot[1]!
-      const hp_dotz = hp_dot[2]!
+      // const hp_dotx = hp_dot[0]!
+      // const hp_doty = hp_dot[1]!
+      // const hp_dotz = hp_dot[2]!
       /** distance from target ship center to vertical plane of the beam */
       let v = new Float32Array(3)
-      v[0] = vp_dotx - tcx
-      v[1] = vp_doty - tcy
-      v[2] = vp_dotz - tcz
+      v[0] = vp_dot[0]! - tc[0]!
+      v[1] = vp_dot[1]! - tc[1]!
+      v[2] = vp_dot[2]! - tc[2]!
       const vd = gemm.v3mag(v)
       if (DEVLOG) devlog("vd:" + vd + " v:"+ v + " tc:"+tc +" vp_dot:"+vp_dot) //todo remove
       /** distance from target ship center to horizontal plane of the beam */
-      v[0] = hp_dotx - tcx
-      v[1] = hp_doty - tcy
-      v[2] = hp_dotz - tcz
+      v[0] = hp_dot[0]! - tc[0]!
+      v[1] = hp_dot[1]! - tc[1]!
+      v[2] = hp_dot[2]! - tc[2]!
       const hd = gemm.v3mag(v)
       
       if (DEVLOG) rawlog("vd:"+vd+" dmax:"+ dmax)
@@ -431,53 +286,59 @@ export class SSSBoard {
         const vp_dot_to_hp = new Float32Array(3)
         gemm.d3_projection_on_p3_mut(vp_dot, hp, vp_dot_to_hp)
         /** distance from vp_dot to hp  */
-        const x = vp_dot_to_hp[0]!, y = vp_dot_to_hp[1]!, z = vp_dot_to_hp[2]!
-        v[0] = vp_dotx - x
-        v[1] = vp_doty - y
-        v[2] = vp_dotz - z
+        // const
+        // x = vp_dot_to_hp[0]!,
+        // y = vp_dot_to_hp[1]!,
+        // z = vp_dot_to_hp[2]!
+        v[0] = vp_dot[0]! - vp_dot_to_hp[0]!
+        v[1] = vp_dot[1]! - vp_dot_to_hp[1]!
+        v[2] = vp_dot[2]! - vp_dot_to_hp[2]!
         const d_to_hp = gemm.v3mag(v)
         /** distance from beam start to vp_dot_to_hp */
-        v[0] = x - bsx
-        v[1] = y - bsy
-        v[2] = z - bsz
+        v[0] = vp_dot_to_hp[0]! - bsd[0]!
+        v[1] = vp_dot_to_hp[1]! - bsd[1]!
+        v[2] = vp_dot_to_hp[2]! - bsd[2]!
         const d_far_v = gemm.v3mag(v)
         /** limit distance from beam vector to vertical direction, depends on angle and how far target is */
         const limit = d_far_v * Math.tan(gemm.radians(guns/2)) //half of 90 max, so not more than 45
         if (DEVLOG) devlog("d_to_hp < limit:"+ (d_to_hp < limit))
-        if(d_to_hp < limit) density++
+        if (d_to_hp < limit) density++
       }
       /* now the similarly appropriate for horizontal plane of the beam */
       if (hd<dmax){
         const hp_dot_to_vp = new Float32Array(3)
         gemm.d3_projection_on_p3_mut(hp_dot, vp, hp_dot_to_vp)
-        const x = hp_dot_to_vp[0]!, y = hp_dot_to_vp[1]!, z = hp_dot_to_vp[2]!
-        v[0] = hp_dotx - x
-        v[1] = hp_doty - y
-        v[2] = hp_dotz - z
+        // const
+        // x = hp_dot_to_vp[0]!,
+        // y = hp_dot_to_vp[1]!,
+        // z = hp_dot_to_vp[2]!
+        v[0] = hp_dot[0]! - hp_dot_to_vp[0]!
+        v[1] = hp_dot[1]! - hp_dot_to_vp[1]!
+        v[2] = hp_dot[2]! - hp_dot_to_vp[2]!
         const d_to_vp = gemm.v3mag(v)
-        v[0] = x - bsx
-        v[1] = y - bsy
-        v[2] = z - bsz
+        v[0] = hp_dot_to_vp[0]! - bsd[0]!
+        v[1] = hp_dot_to_vp[1]! - bsd[1]!
+        v[2] = hp_dot_to_vp[2]! - bsd[2]!
         const d_far_h = gemm.v3mag(v)
         const limit = d_far_h * Math.tan(gemm.radians(guns/2))
         if(d_to_vp < limit) density++
       }
 
       if (!density) continue
-      const thp = t.hp - damage*density
-      if (DEVLOG) devlog("thp t.hp damage*density density", thp, t.hp, damage*density, density)
+      const thp = this.ships[b + S.HP]! - damage*density
+      if (DEVLOG) devlog("thp damage*density density", thp, damage*density, density)
 
-      if(thp >0){
-        this.set_hp(i, thp)
+      if(thp > 0){
+        this.ships[b + S.HP] = thp
         result.push({
           mt:MT.S,
-          msg: {hit:t.idx, hp:thp},
+          msg: {hit:this.ships[b + S.SHIP_IDX], hp:thp},
           ms:0,
           uuids:[0]
         })
       }else{
-        //todo consider implement destroy-exit as delayed action, if it will be more cases to use in parallel with gameroomresponsemessages . and delayed actions executor the similar way as tmdc
-        gameroom.remove_client(t.idx, true)
+        //todo consider beautify destroy-exit on client side, maybe with some delay. At the moment it is just kickout to home page.
+        gameroom.remove_client(this.ships[b + S.SHIP_IDX]!, true)
       }
     }
 
@@ -544,38 +405,55 @@ export class SSSBoard {
     const lens = this.players.length
     
     for (let i = 1; i < lens; i++) {
-      // const b = this.base(i) // calculated inside readship
-
+      
       if (!s[i * SOFFSIZE]) continue;
-      const s1 = this.read_ship(i) // todo refactor without read_ship and getters/setters to speedup
+      const b1 = this.base(i)
 
       for (let j = i + 1; j < lens; j++) {
         if (!s[j * SOFFSIZE]) continue;
-        const s2 = this.read_ship(j)
+        const b2 = this.base(j)
 
         if (two_ships_collision(
-          s1.cx, s1.cy, s1.cz,
-          s1.fvx, s1.fvy, s1.fvz,
-          s1.tvx, s1.tvy, s1.tvz,
-          s1.fr, s1.br, s1.sr, s1.vr,
+          s[b1 + S.CX]!,
+          s[b1 + S.CY]!,
+          s[b1 + S.CZ]!,
+          s[b1 + S.FVX]!,
+          s[b1 + S.FVY]!,
+          s[b1 + S.FVZ]!,
+          s[b1 + S.TVX]!,
+          s[b1 + S.TVY]!,
+          s[b1 + S.TVZ]!,
+          s[b1 + S.FR]!,
+          s[b1 + S.BR]!,
+          s[b1 + S.SR]!,
+          s[b1 + S.VR]!,
           
-          s2.cx, s2.cy, s2.cz,
-          s2.fvx, s2.fvy, s2.fvz,
-          s2.tvx, s2.tvy, s2.tvz,
-          s2.fr, s2.br, s2.sr, s2.vr,
+          s[b2 + S.CX]!,
+          s[b2 + S.CY]!,
+          s[b2 + S.CZ]!,
+          s[b2 + S.FVX]!,
+          s[b2 + S.FVY]!,
+          s[b2 + S.FVZ]!,
+          s[b2 + S.TVX]!,
+          s[b2 + S.TVY]!,
+          s[b2 + S.TVZ]!,
+          s[b2 + S.FR]!,
+          s[b2 + S.BR]!,
+          s[b2 + S.SR]!,
+          s[b2 + S.VR]!,
         )) {
-          const s1hp = s1.hp
-          const s2hp = s2.hp
+          const s1hp = s[b1 + S.HP]!
+          const s2hp = s[b2 + S.HP]!
           // rawlog("collision: ",s1.idx, " ", s2.idx)
           if (s1hp > s2hp){
-            this.set_hp(s1.idx, s1hp-s2hp)
-            gameroom.remove_client(s2.idx, true)
+            s[b1 + S.HP] = s1hp-s2hp
+            gameroom.remove_client(s[b2 + S.SHIP_IDX]!, true)
           } else if (s2hp > s1hp){
-            this.set_hp(s2.idx, s2hp-s1hp)
-            gameroom.remove_client(s1.idx, true)
+            s[b2 + S.HP] = s2hp-s1hp
+            gameroom.remove_client(s[b1 + S.SHIP_IDX]!, true)
           } else {
-            gameroom.remove_client(s1.idx, true)
-            gameroom.remove_client(s2.idx, true)
+            gameroom.remove_client(s[b1 + S.SHIP_IDX]!, true)
+            gameroom.remove_client(s[b2 + S.SHIP_IDX]!, true)
           }
 
         }
@@ -586,7 +464,7 @@ export class SSSBoard {
   /** random coordinate for ship spawn between 100 and 200  // todo consider implement check to avoid initial collision */
   ship_initial_random_coordinate(){
     const c = 100*(1 + Math.random()) * (Math.random()<0.5?-1:1)
-    devlog("new ship random coordinate", c)
+    if(DEVLOG) devlog("new ship random coordinate", c)
     return c
   }
 
@@ -595,7 +473,7 @@ export class SSSBoard {
     const av = this.ships[b + S.AV]!;
     if (av === 0) return;
 
-    const ts_offset    = S.AV_TS;   // *_TS   (last update time)
+    const ts_offset  = S.AV_TS;   // *_TS   (last update time)
     const ran_offset = S.RAN;   // *RAN (full rotation, abs)
     const pan_offset = S.PAN;   // *PAN (current progress, abs)
   
@@ -646,14 +524,27 @@ export class SSSBoard {
   ){
     //todo refactor to v3
     /** top vector */
-    let t = [this.ships[b + S.TVX]!, this.ships[b + S.TVY]!, this.ships[b + S.TVZ]!]
+    const t = new Float32Array(3)
+    t[0] = this.ships[b + S.TVX]!
+    t[1] = this.ships[b + S.TVY]!
+    t[2] = this.ships[b + S.TVZ]!
+    
     /** front vector */
-    let f = [this.ships[b + S.FVX]!, this.ships[b + S.FVY]!, this.ships[b + S.FVZ]!]
+    const f = new Float32Array(3)
+    f[0] = this.ships[b + S.FVX]!
+    f[1] = this.ships[b + S.FVY]!
+    f[2] = this.ships[b + S.FVZ]!
+    
     /** rotation axis */
-    const axis = [this.ships[b + S.AVX]!, this.ships[b + S.AVY]!, this.ships[b + S.AVZ]!]
+    const axis = new Float32Array(3)
+    axis[0] = this.ships[b + S.AVX]!
+    axis[1] = this.ships[b + S.AVY]!
+    axis[2] = this.ships[b + S.AVZ]!
 
-    f = gemm.vecXDone(gemm.vec3Drotate(f, axis, angle_rad, true)) // rotated + scaled to one
-    t = gemm.vecXDone(gemm.vec3Drotate(t, axis, angle_rad, true))
+    gemm.v3rotmut(f, axis, angle_rad)
+    gemm.v3one(f)
+    gemm.v3rotmut(t, axis, angle_rad)
+    gemm.v3one(t)
 
     this.ships[b + S.TVX] = t[0]!;
     this.ships[b + S.TVY] = t[1]!;
