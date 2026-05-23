@@ -64,16 +64,6 @@ export class SSSBoard {
   get_vvz = (i: number) => this.get(i, S.VVZ);
   get_vts = (i: number) => this.get(i, S.V_TS);
   
-  get_avf = (i: number) => this.get(i, S.AVF);
-  get_avf_ts = (i: number) => this.get(i, S.AVF_TS);
-  get_avf_tsend = (i: number) => this.get(i, S.AVF_TSEND);
-  get_avt = (i: number) => this.get(i, S.AVT);
-  get_avt_ts = (i: number) => this.get(i, S.AVT_TS);
-  get_avt_tsend = (i: number) => this.get(i, S.AVT_TSEND);
-  get_avs = (i: number) => this.get(i, S.AVS);
-  get_avs_ts = (i: number) => this.get(i, S.AVS_TS);
-  get_avs_tsend = (i: number) => this.get(i, S.AVS_TSEND);
-
   set_ship_idx = (i: number, v: number) => this.set(i, S.SHIP_IDX, v);
   set_R = (i: number, v: number) => this.set(i, S.R, v);
   set_G = (i: number, v: number) => this.set(i, S.G, v);
@@ -116,20 +106,11 @@ export class SSSBoard {
   set_vvz = (i: number, v: number) => this.set(i, S.VVZ, v);
   set_vts = (i: number, v: number) => this.set(i, S.V_TS, v);
   
-  set_avf = (i: number, v:number) => this.set(i, S.AVF, v);
-  set_avf_ts = (i: number, v:number) => this.set(i, S.AVF_TS, v);
-  set_avf_tsend = (i: number, v:number) => this.set(i, S.AVF_TSEND, v);
-  set_avt = (i: number, v:number) => this.set(i, S.AVT, v);
-  set_avt_ts = (i: number, v:number) => this.set(i, S.AVT_TS, v);
-  set_avt_tsend = (i: number, v:number) => this.set(i, S.AVT_TSEND, v);
-  set_avs = (i: number, v:number) => this.set(i, S.AVS, v);
-  set_avs_ts = (i: number, v:number) => this.set(i, S.AVS_TS, v);
-  set_avs_tsend = (i: number, v:number) => this.set(i, S.AVS_TSEND, v);
-
   set_av = (i: number, v:number) => this.set(i, S.AV, v);
   set_av_ts = (i: number, v:number) => this.set(i, S.AV_TS, v);
-  // set_av_tsend = (i: number, v:number) => this.set(i, S.AV_TSEND, v);
-
+  set_ran = (i: number, v:number) => this.set(i, S.RAN, v);
+  set_pan = (i: number, v:number) => this.set(i, S.PAN, v);
+  
   log_ship(i: number) {
     const b = this.base(i);
     console.log(`\n=== Ship ${i} ===`);
@@ -169,16 +150,6 @@ export class SSSBoard {
     console.log(`vvy:          ${this.ships[b + S.VVY]}`);
     console.log(`vvz:          ${this.ships[b + S.VVZ]}`);
     console.log(`v_ts:         ${this.ships[b + S.V_TS]}`);
-    
-    console.log(`avf:          ${this.ships[b + S.AVF]}`);
-    console.log(`avf_ts:          ${this.ships[b + S.AVF_TS]}`);
-    console.log(`avf_tsend:          ${this.ships[b + S.AVF_TSEND]}`);
-    console.log(`avt:          ${this.ships[b + S.AVT]}`);
-    console.log(`avt_ts:          ${this.ships[b + S.AVT_TS]}`);
-    console.log(`avt_tsend:          ${this.ships[b + S.AVT_TSEND]}`);
-    console.log(`avs:          ${this.ships[b + S.AVS]}`);
-    console.log(`avs_ts:          ${this.ships[b + S.AVS_TS]}`);
-    console.log(`avs_tsend:          ${this.ships[b + S.AVS_TSEND]}`);
     
     console.log("===================\n");
   }
@@ -228,22 +199,10 @@ export class SSSBoard {
       vvz:           this.ships[b + S.VVZ]!,
       v_ts:           this.ships[b + S.V_TS]!,
       
-      avf: this.ships[b + S.AVF]!,
-      avf_ts: this.ships[b + S.AVF_TS]!,
-      avf_tsend: this.ships[b + S.AVF_TSEND]!,
-      avt: this.ships[b + S.AVT]!,
-      avt_ts: this.ships[b + S.AVT_TS]!,
-      avt_tsend: this.ships[b + S.AVT_TSEND]!,
-      avs: this.ships[b + S.AVS]!,
-      avs_ts: this.ships[b + S.AVS_TS]!,
-      avs_tsend: this.ships[b + S.AVS_TSEND]!,
-
       av: this.ships[b + S.AV]!,
       av_ts: this.ships[b + S.AV_TS]!,
       ran: this.ships[b + S.RAN]!,
       pan: this.ships[b + S.PAN]!,
-      // av_tsend: this.ships[b + S.AV_TSEND]!,
-
     };
   }
 
@@ -292,21 +251,10 @@ export class SSSBoard {
     this.ships[b + S.VVZ] = data.vvz;
     this.ships[b + S.V_TS] = data.v_ts;
     
-    this.ships[b + S.AVF]! = data.avf;
-    this.ships[b + S.AVF_TS]! = data.avf_ts;
-    this.ships[b + S.AVF_TSEND]! = data.avf_tsend;
-    this.ships[b + S.AVT]! = data.avt;
-    this.ships[b + S.AVT_TS]! = data.avt_ts;
-    this.ships[b + S.AVT_TSEND]! = data.avt_tsend;
-    this.ships[b + S.AVS]! = data.avs;
-    this.ships[b + S.AVS_TS]! = data.avs_ts;
-    this.ships[b + S.AVS_TSEND]! = data.avs_tsend;
-
     this.ships[b + S.AV]! = data.av;
     this.ships[b + S.AV_TS]! = data.av_ts;
     this.ships[b + S.RAN]! = data.ran;
     this.ships[b + S.PAN]! = data.pan;
-    // this.ships[b + S.AV_TSEND]! = data.av_tsend;
   }
 
   /** Reset one ship slot when player exit or destroyed */
@@ -586,7 +534,7 @@ export class SSSBoard {
   /** random coordinate for ship spawn between 100 and 200  // todo consider implement check to avoid initial collision */
   ship_initial_random_coordinate(){
     const c = 100*(1 + Math.random()) * (Math.random()<0.5?-1:1)
-    devlog("new ship random coordinate", c)
+    if(DEVLOG) devlog("new ship random coordinate", c)
     return c
   }
 
