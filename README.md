@@ -111,33 +111,19 @@ Demo deployment implemented as two separated dockerized web services onrender.co
 - - **(wip, minor)** compile to solid executable if possible using electrobun.dev or electron, to promote/distribute in Steam for free.
 
 
-## Raw plan
+## Deployment/Details/Desirable futures
 <details>
 <summary></summary>
 
-Implement next:
-- separated client and server.
-- development run from separated terminals
-- **.env** file used to configure both client and server
-- **.env** placed in "bun" folder of the repo
-
 **SERVER**:
-- Bun server.
-- - dockerized
-- - everything using ws connection, except first call to server using get method to establish ws.
-- - everything in ram(no db used).
-- - nickname duplication is possible, use uuid on time of managing nickname.
-- - (only plans)CORS managing from .env file, for multiple client domains.
+- consider turn on the prohibition of the mupticonnection from one IP.
+- consider to restrict the access to the server, uses origin settings of the bun runtime server implementation.
+- consider implemented collision uses 26 boxes around or through one axis coordinates filtering if it will be reasonable(at the moment, it is not).
+- consider filter "invisible" lazer shot, from another side, it is bonus way.
 
 **CLIENT**:
-- vite + typescript client(jotai as state manager, babylonjs for 3d demo view).
-- - first screen just connect button.
-- - manage nickname.
-- - jump to game view.
-- - jump back to home page view when game is over.
-- - critical error - jump to home page, with closing connection
-- - able to be deployed as github page.
-- - (minor)dockerized to deploy in cloud services.
-- - (minor)compile to solid executable if possible using electrobun.dev or electron, to promote/distribute in Steam for free.
+- consider implement even vs odd style, to separate fractions, visually.
+- consider improve visuals/sounds, at the moment they are super raw.
+- consider proper GUI, at the moment only raw hp indicator added.
 
 </details>
