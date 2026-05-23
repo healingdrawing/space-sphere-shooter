@@ -36,6 +36,8 @@ function create_home_box(){
     <button id="check-connection">Check Connection</button>
     <button id="connect-websocket">Connect to WebSocket</button>
 
+    <div><br><img src="/qr-play-online-for-free.png"></div>
+
     <div style="margin-top: 2rem; line-height: 1.5;">
       <strong>Controls (Keyboard)</strong><br>
       Hold longer = stronger action (max 100% ~2 sec)<br>

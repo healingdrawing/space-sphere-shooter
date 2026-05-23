@@ -10,7 +10,7 @@ Multiplayer online browser game. TypeScript client. TypeScript server.
 
 Demo deployment implemented as two separated dockerized web services onrender.com.
 
-![qr-play-online-for-free.png](qr-play-online-for-free.png) 
+![qr-play-online-for-free.png](vite/ts/public/qr-play-online-for-free.png) 
 
 ## Development environment
 
