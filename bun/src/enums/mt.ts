@@ -130,13 +130,3 @@ export const KEYMAP: Record<string, MT> = {
   KeyJ: MT.TOPSHOT,
   KeyM: MT.DOWNSHOT,
 };
-
-// plan to use next way
-// addEventListener('pointerdown', e => {
-//   implement some way repeated accumulation of the press->hold 0%-100%-0% etc
-//   when key released the keycode and accumulated value send to server
-// });
-// addEventListener('pointerup', e => {
-//   const action = KEYMAP[e.code];
-//   if (action) sendToServer(action);
-// });

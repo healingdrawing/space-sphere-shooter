@@ -17,13 +17,13 @@ export function handle_ws_open(ws: Bun.ServerWebSocket<WebSocketData>): boolean 
   }
 
   //warning turned off check when DEVLOG true. Check prohibits more than one client on ip. F.e. one browser and two tabs/game views opened.
-  if(!DEVLOG){
-    if (ips.ip_connected(ws.data.address)) {
-      ws.send(alert_text_system_message(`Address ${ws.data.address} already connected to server.\nNo duplication allowed at the moment.`))
-      ws.close(CCR.DUPLICATION.code, CCR.DUPLICATION.reason)
-      return true
-    }
-  }
+  // if(!DEVLOG){
+  //   if (ips.ip_connected(ws.data.address)) {
+  //     ws.send(alert_text_system_message(`Address ${ws.data.address} already connected to server.\nNo duplication allowed at the moment.`))
+  //     ws.close(CCR.DUPLICATION.code, CCR.DUPLICATION.reason)
+  //     return true
+  //   }
+  // }
 
   users.set(ws.data.uuid, { ws })
   ips.connect(ws.data.address)
