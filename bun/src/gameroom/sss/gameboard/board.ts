@@ -246,7 +246,7 @@ export class SSSBoard {
       gemm.p3_d3v3_mut(bsd,bnv, vp)
       /** horizontal plane of the cross styled beam */
       const hp = new Float32Array(4)
-      gemm.p3_d3v3_mut(bsd,bsv, hp)
+      gemm.p3_d3v3_mut(bsd, bsv, hp)
 
       /** projection of the target ship to the vertical plane of the beam */
       const vp_dot = new Float32Array(3)
@@ -385,8 +385,9 @@ export class SSSBoard {
   /** all ships collision detection, without 26 zones around etc.
    * Simplified to box, not a asymmetrical ellipsoid etc
    * */
-  raw_ships_collider() {
+  raw_ships_collider():GameRoomResponseMessage[] {
     // console.log("raw_ships_collider() executed")
+    const result:GameRoomResponseMessage[] = []
     const s = this.ships
     const lens = this.players.length
     
@@ -432,22 +433,36 @@ export class SSSBoard {
           const s2hp = s[b2 + S.HP]!
           // rawlog("collision: ",s1.idx, " ", s2.idx)
           if (s1hp > s2hp){
-            s[b1 + S.HP] = s1hp-s2hp
+            const hp = s1hp-s2hp
+            s[b1 + S.HP] = hp
+            result.push({
+              mt:MT.S,
+              msg: {hit:this.ships[b1 + S.SHIP_IDX], hp},
+              ms:0,
+              uuids:[0]
+            })
             gameroom.remove_client(s[b2 + S.SHIP_IDX]!, true)
           } else if (s2hp > s1hp){
-            s[b2 + S.HP] = s2hp-s1hp
+            const hp = s2hp-s1hp
+            s[b2 + S.HP] = hp
+            result.push({
+              mt:MT.S,
+              msg: {hit:this.ships[b2 + S.SHIP_IDX], hp},
+              ms:0,
+              uuids:[0]
+            })
             gameroom.remove_client(s[b1 + S.SHIP_IDX]!, true)
           } else {
             gameroom.remove_client(s[b1 + S.SHIP_IDX]!, true)
             gameroom.remove_client(s[b2 + S.SHIP_IDX]!, true)
           }
-
         }
       }
     }
+    return result
   }
 
-  /** random coordinate for ship spawn between 100 and 200  // todo consider implement check to avoid initial collision */
+  /** random coordinate for ship spawn between 100 and 200  // todo consider implement check to avoid accidental initial collision */
   ship_initial_random_coordinate(){
     const c = 100*(1 + Math.random()) * (Math.random()<0.5?-1:1)
     if(DEVLOG) devlog("new ship random coordinate", c)

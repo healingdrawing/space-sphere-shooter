@@ -1,5 +1,5 @@
 import { DEVLOG, devlog, errlog, rawlog } from "../../debug/debug";
-import { type GameRoomResponseMessage, type GameRoom, broadcast_exit_message } from "../base";
+import { type GameRoomResponseMessage, type GameRoom, broadcast_exit_message, send_delayed_messages } from "../base";
 import { SSSBoard } from "./gameboard/board";
 
 import { USERS_MAX_NUMBER } from "../../ram/consts";
@@ -155,7 +155,8 @@ export class SSSGameRoom implements GameRoom {
    * with pause 100ms(not super precised, but should be enough)
    */
   collisions_auto_update(){
-    this.board.raw_ships_collider()
+    const msgs = this.board.raw_ships_collider()
+    if (msgs.length) send_delayed_messages(msgs) //msge use hit logic of lazer shot
     
     let timer = this.collisions_auto_update_timer
     if(!timer ) timer = setTimeout(() => {
