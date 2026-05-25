@@ -221,10 +221,9 @@ export class SSSBoard {
     for (let i=1;i<lena;i++){
       if (!p[i] || i === uuid) continue
       /** target ship to check hit */
-      const t = this.read_ship(i) //todo refactor to exclude read_ship
       const b = this.base(i)
 
-      //todo implement the comparison first, otherwise the damage happens in two opposite directions. Some way filter the beam direction(let it be angle between shoter center to beam start and shoter center to target center must be less than 45 degrees. But it is rough of course, since distance). Now it lags, and shoot happens two directions, but lazer beam animated only one. direction.
+      //todo consider to implement the comparison first, otherwise the damage happens in two opposite directions. Some way filter the beam direction(let it be angle between shoter center to beam start and shoter center to target center must be less than 45 degrees. But it is rough of course, since distance). Now it lags(or hidden bonus shot), and shoot happens two directions, but lazer beam animated only one. direction.
       
       /** raw distance from ship center to count damage. //todo implement Ellipsoid. Not implemented */
 
@@ -237,31 +236,26 @@ export class SSSBoard {
       /** max distance from target ship center when target ship affected by beam */
       const dmax = r*Math.SQRT2 // (2*r*r)**0.5 . Was tired probably :) why not r*2**0.5 (pifagor for two/doubled radii)
       
-      /* todo refactor properly, first consider refactor t */
-      const tc = new Float32Array( [t.cx, t.cy, t.cz])
-      // const tcx = tc[0]!
-      // const tcy = tc[1]!
-      // const tcz = tc[2]!
+      const tc = new Float32Array(3)
+      tc[0] = this.ships[b + S.CX]!
+      tc[1] = this.ships[b + S.CY]!
+      tc[2] = this.ships[b + S.CZ]!
 
       /** vertical plane of the cross styled beam */
       const vp = new Float32Array(4)
       gemm.p3_d3v3_mut(bsd,bnv, vp)
       /** horizontal plane of the cross styled beam */
       const hp = new Float32Array(4)
-      gemm.p3_d3v3_mut(bsd,bsv, hp)
+      gemm.p3_d3v3_mut(bsd, bsv, hp)
 
       /** projection of the target ship to the vertical plane of the beam */
       const vp_dot = new Float32Array(3)
       gemm.d3_projection_on_p3_mut(tc, vp, vp_dot)
-      // const vp_dotx = vp_dot[0]!
-      // const vp_doty = vp_dot[1]!
-      // const vp_dotz = vp_dot[2]!
+      
       /** projection of the target ship to the horizontal plane of the beam */
       const hp_dot = new Float32Array(3)
       gemm.d3_projection_on_p3_mut(tc, hp, hp_dot)
-      // const hp_dotx = hp_dot[0]!
-      // const hp_doty = hp_dot[1]!
-      // const hp_dotz = hp_dot[2]!
+      
       /** distance from target ship center to vertical plane of the beam */
       let v = new Float32Array(3)
       v[0] = vp_dot[0]! - tc[0]!
@@ -286,10 +280,6 @@ export class SSSBoard {
         const vp_dot_to_hp = new Float32Array(3)
         gemm.d3_projection_on_p3_mut(vp_dot, hp, vp_dot_to_hp)
         /** distance from vp_dot to hp  */
-        // const
-        // x = vp_dot_to_hp[0]!,
-        // y = vp_dot_to_hp[1]!,
-        // z = vp_dot_to_hp[2]!
         v[0] = vp_dot[0]! - vp_dot_to_hp[0]!
         v[1] = vp_dot[1]! - vp_dot_to_hp[1]!
         v[2] = vp_dot[2]! - vp_dot_to_hp[2]!
@@ -308,10 +298,6 @@ export class SSSBoard {
       if (hd<dmax){
         const hp_dot_to_vp = new Float32Array(3)
         gemm.d3_projection_on_p3_mut(hp_dot, vp, hp_dot_to_vp)
-        // const
-        // x = hp_dot_to_vp[0]!,
-        // y = hp_dot_to_vp[1]!,
-        // z = hp_dot_to_vp[2]!
         v[0] = hp_dot[0]! - hp_dot_to_vp[0]!
         v[1] = hp_dot[1]! - hp_dot_to_vp[1]!
         v[2] = hp_dot[2]! - hp_dot_to_vp[2]!
@@ -356,7 +342,7 @@ export class SSSBoard {
       
       for (let i = 1; i < this.sizeplus; i++) {
         const b = base(i);
-        if (!ships[b + S.HP]) continue; // skip dead
+        if (!ships[b + S.HP]) continue; // skip dead/empty
     
         const vts = ships[b + S.V_TS]!;
         const dt = (now - vts)/1000;
@@ -399,8 +385,9 @@ export class SSSBoard {
   /** all ships collision detection, without 26 zones around etc.
    * Simplified to box, not a asymmetrical ellipsoid etc
    * */
-  raw_ships_collider() {
+  raw_ships_collider():GameRoomResponseMessage[] {
     // console.log("raw_ships_collider() executed")
+    const result:GameRoomResponseMessage[] = []
     const s = this.ships
     const lens = this.players.length
     
@@ -446,22 +433,36 @@ export class SSSBoard {
           const s2hp = s[b2 + S.HP]!
           // rawlog("collision: ",s1.idx, " ", s2.idx)
           if (s1hp > s2hp){
-            s[b1 + S.HP] = s1hp-s2hp
+            const hp = s1hp-s2hp
+            s[b1 + S.HP] = hp
+            result.push({
+              mt:MT.S,
+              msg: {hit:this.ships[b1 + S.SHIP_IDX], hp},
+              ms:0,
+              uuids:[0]
+            })
             gameroom.remove_client(s[b2 + S.SHIP_IDX]!, true)
           } else if (s2hp > s1hp){
-            s[b2 + S.HP] = s2hp-s1hp
+            const hp = s2hp-s1hp
+            s[b2 + S.HP] = hp
+            result.push({
+              mt:MT.S,
+              msg: {hit:this.ships[b2 + S.SHIP_IDX], hp},
+              ms:0,
+              uuids:[0]
+            })
             gameroom.remove_client(s[b1 + S.SHIP_IDX]!, true)
           } else {
             gameroom.remove_client(s[b1 + S.SHIP_IDX]!, true)
             gameroom.remove_client(s[b2 + S.SHIP_IDX]!, true)
           }
-
         }
       }
     }
+    return result
   }
 
-  /** random coordinate for ship spawn between 100 and 200  // todo consider implement check to avoid initial collision */
+  /** random coordinate for ship spawn between 100 and 200  // todo consider implement check to avoid accidental initial collision */
   ship_initial_random_coordinate(){
     const c = 100*(1 + Math.random()) * (Math.random()<0.5?-1:1)
     if(DEVLOG) devlog("new ship random coordinate", c)
